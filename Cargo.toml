@@ -9,8 +9,6 @@ dimensioned = "0.7.0"
 emseries = { git = "https://github.com/luminescent-dreams/emseries", branch = "sol" }
 serde = "1"
 serde_derive = "1"
-serde_json = "1.0"
-structopt = "0.2.10"
 
 # rand = { git = "https://github.com/rust-lang-nursery/rand", branch = "next" }
 # hello_utils = { path = "hello_utils" }
