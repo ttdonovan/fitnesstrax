@@ -1,0 +1,17 @@
+[package]
+name = "fitnesstrax"
+version = "0.1.0"
+authors = ["Savanni D'Gerinel <savanni@luminescent-dreams.com>"]
+
+[dependencies]
+chrono = { version = "0.4", features = ["serde"] }
+dimensioned = "0.7.0"
+emseries = { path = "../emseries" }
+serde = "1"
+serde_derive = "1"
+serde_json = "1.0"
+structopt = "0.2.10"
+
+# rand = { git = "https://github.com/rust-lang-nursery/rand", branch = "next" }
+# hello_utils = { path = "hello_utils" }
+
