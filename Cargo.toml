@@ -6,7 +6,7 @@ authors = ["Savanni D'Gerinel <savanni@luminescent-dreams.com>"]
 [dependencies]
 chrono = { version = "0.4", features = ["serde"] }
 dimensioned = "0.7.0"
-emseries = { path = "../emseries" }
+emseries = { git = "https://github.com/luminescent-dreams/emseries", branch = "sol" }
 serde = "1"
 serde_derive = "1"
 serde_json = "1.0"
