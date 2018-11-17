@@ -1,14 +1,14 @@
 let
-    pkgs = import <stable> {};
+    pkgs = import <nixpkgs> {};
     frameworks = pkgs.darwin.apple_sdk.frameworks;
 in pkgs.stdenv.mkDerivation {
     name = "emseries";
 
-    buildInputs = [ pkgs.rustc
-                    pkgs.cargo
+    buildInputs = [ pkgs.rustup
                     frameworks.Security
                     frameworks.CoreFoundation
-                    frameworks.CoreServices
+                    frameworks.AppKit
+                    frameworks.Cocoa
                   ];
 
     shellHook = ''
