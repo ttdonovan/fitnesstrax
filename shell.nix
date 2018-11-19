@@ -2,7 +2,7 @@ let
     pkgs = import <nixpkgs> {};
     frameworks = pkgs.darwin.apple_sdk.frameworks;
 in pkgs.stdenv.mkDerivation {
-    name = "emseries";
+    name = "fitnesstrax";
 
     buildInputs = [ pkgs.rustup
                     frameworks.Security
