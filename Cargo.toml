@@ -8,7 +8,8 @@ bitflags = "1.0"
 chrono = { version = "0.4", features = ["serde"] }
 cocoa = "0.18.1"
 dimensioned = "0.7.0"
-emseries = { git = "https://github.com/luminescent-dreams/emseries", branch = "sol" }
+# emseries = { git = "https://github.com/luminescent-dreams/emseries", branch = "sol" }
+emseries = { path = "../emseries" }
 libc = "0.2.43"
 objc = "0.2.5"
 objc-foundation = "0.1.1"
@@ -21,9 +22,9 @@ structopt = { version = "0.2", default-features = true }
 name = "weight"
 path = "src/weight.rs"
 
-# [[bin]]
-# name = "time-distance"
-# path = "src/time-distance.rs"
+[[bin]]
+name = "time-distance"
+path = "src/time-distance.rs"
 
 # [[bin]]
 # name = "gui"
