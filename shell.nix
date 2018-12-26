@@ -1,10 +1,13 @@
 let
-    pkgs = import <nixpkgs> {};
+    pkgs = import <nixpkgs-18.09> {};
+    unstable = import <nixpkgs> {};
     frameworks = pkgs.darwin.apple_sdk.frameworks;
 in pkgs.stdenv.mkDerivation {
     name = "fitnesstrax";
 
-    buildInputs = [ pkgs.rustup
+    buildInputs = [ pkgs.rustc
+                    pkgs.cargo
+                    unstable.carnix
                     frameworks.Security
                     frameworks.CoreFoundation
                     frameworks.AppKit
