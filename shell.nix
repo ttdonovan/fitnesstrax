@@ -8,10 +8,6 @@ in pkgs.stdenv.mkDerivation {
     buildInputs = [ pkgs.rustc
                     pkgs.cargo
                     unstable.carnix
-                    frameworks.Security
-                    frameworks.CoreFoundation
-                    frameworks.AppKit
-                    frameworks.Cocoa
                   ];
 
     shellHook = ''
