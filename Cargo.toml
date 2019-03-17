@@ -4,24 +4,32 @@ version = "0.1.0"
 authors = ["Savanni D'Gerinel <savanni@luminescent-dreams.com>"]
 
 [dependencies]
-bitflags = "1.0"
 chrono = { version = "0.4", features = ["serde"] }
-cocoa = "0.18.1"
 dimensioned = "0.7.0"
-# emseries = { git = "https://github.com/luminescent-dreams/emseries", branch = "sol" }
-emseries = "0.1.0"
+emseries = { git = "https://github.com/luminescent-dreams/emseries", branch = "sol" }
+# emseries = { path = "../emseries" }
+# emseries = "0.2.0"
+iron = "0.6"
+params = "0.8.0"
+router = "*"
+iron-cors = "0.8.0"
+percent-encoding = "1.0.1"
 serde = "1"
 serde_derive = "1"
 serde_json = "1.0"
 structopt = { version = "0.2", default-features = true }
 
 [[bin]]
-name = "weight"
-path = "src/weight.rs"
+name = "app"
+path = "src/web.rs"
 
-[[bin]]
-name = "time-distance"
-path = "src/time-distance.rs"
+# [[bin]]
+# name = "weight"
+# path = "src/weight.rs"
+#
+# [[bin]]
+# name = "time-distance"
+# path = "src/time-distance.rs"
 
 # [[bin]]
 # name = "gui"
@@ -29,4 +37,3 @@ path = "src/time-distance.rs"
 
 # rand = { git = "https://github.com/rust-lang-nursery/rand", branch = "next" }
 # hello_utils = { path = "hello_utils" }
-
