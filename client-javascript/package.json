@@ -1,0 +1,47 @@
+{
+  "name": "www",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "setup": "mkdir -p static/css && mkdir -p static/js && cp node_modules/bootstrap/dist/css/bootstrap.min.css static/css/ && cp node_modules/tether/dist/js/tether.min.js node_modules/jquery/dist/jquery.min.js node_modules/bootstrap/dist/js/bootstrap.min.js static/js/",
+    "build": "browserify src/main.js -o index.js -t [ babelify ]",
+    "watch": "watchify src/main.js -t babelify -o index.js -v --poll"
+  },
+  "browserify": {
+    "transform": [
+      [
+        "babelify",
+        {
+          "presets": [
+            "es2015"
+          ]
+        }
+      ]
+    ]
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "bootstrap": "^4.0.0-alpha.6",
+    "browserify": "^14.4.0",
+    "jquery": "^3.2.1",
+    "mathjs": "^3.13.3",
+    "moment": "^2.18.1",
+    "moment-duration-format": "^1.3.0",
+    "query-string": "^4.3.4",
+    "react": "^15.4.2",
+    "react-dom": "^15.4.2",
+    "react-redux": "^5.0.5",
+    "redux": "^3.7.1",
+    "redux-logger": "^3.0.6",
+    "redux-thunk": "^2.2.0",
+    "tether": "^1.4.0",
+    "watchify": "^3.9.0"
+  },
+  "devDependencies": {
+    "babel-preset-es2015": "^6.24.1",
+    "babel-preset-react": "^6.24.1",
+    "babelify": "^7.3.0"
+  }
+}

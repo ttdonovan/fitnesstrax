@@ -1,4 +1,10 @@
-/target/
+.DS_Store
+server/target/
 **/*.rs.bk
 Cargo.lock
 var/
+client/node_modules
+client/static
+client/dist
+client/build
+client/index.js

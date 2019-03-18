@@ -21,6 +21,7 @@ jobs:
     - run:
         name: build
         command: |
+          cd server
           cargo build
 
     - save_cache:
@@ -31,6 +32,7 @@ jobs:
     - run:
         name: test
         command: |
+          cd server
           mkdir var
           RUST_BACKTRACE=1 cargo test
 

@@ -2,6 +2,7 @@ let
     pkgs = import <nixpkgs-18.09> {};
     unstable = import <nixpkgs> {};
     frameworks = pkgs.darwin.apple_sdk.frameworks;
+    node = import ./nixpkgs/node9.nix { pkgs = pkgs; };
 in pkgs.stdenv.mkDerivation {
     name = "fitnesstrax";
 
@@ -10,12 +11,8 @@ in pkgs.stdenv.mkDerivation {
                     pkgs.rustfmt
                     unstable.carnix
                     frameworks.Security
+                    node
                   ];
 
     RUST_BACKTRACE = "full";
-
-    # shellHook = ''
-    #     export PS1="[$name] \[$txtgrn\]\u@\h\[$txtwht\]:\[$bldpur\]\w \[$txtcyn\]\$git_branch\[$txtred\]\$git_dirty \[$bldylw\]\$aws_env\[$txtrst\]\$ "
-    #     export NIX_LDFLAGS="-F${frameworks.CoreFoundation}/Library/Frameworks -framework CoreFoundation $NIX_LDFLAGS";
-    # '';
 }

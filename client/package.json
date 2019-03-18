@@ -1,0 +1,47 @@
+{
+  "name": "www",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "setup": "exit 1",
+    "build": "webpack",
+    "watch": "exit 1"
+  },
+  "author": "Savanni D'Gerinel <savanni@luminescent-dreams.com>",
+  "license": "BSD-3-Clause",
+  "eslintConfig": {
+    "rules": {
+      "semi": [
+        "warn",
+        "never"
+      ]
+    }
+  },
+  "prettier": {
+    "semi": false,
+    "singlequote": true,
+    "trailingComma": "all"
+  },
+  "dependencies": {
+    "mathjs": "^5.7.0",
+    "moment": "^2.24.0",
+    "moment-duration-format": "^2.2.2",
+    "query-string": "^6.4.0",
+    "react": "^16.8.4",
+    "react-dom": "^16.8.4",
+    "react-redux": "^6.0.1",
+    "redux": "^4.0.1",
+    "redux-logger": "^3.0.6",
+    "redux-thunk": "^2.3.0"
+  },
+  "devDependencies": {
+    "@types/mathjs": "^5.0.1",
+    "@types/react": "^16.8.8",
+    "@types/react-dom": "^16.8.2",
+    "ts-loader": "^5.3.3",
+    "typescript": "^3.3.3333",
+    "webpack": "^4.29.6",
+    "webpack-cli": "^3.3.0"
+  }
+}
