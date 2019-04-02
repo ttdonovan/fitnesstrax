@@ -3,6 +3,7 @@ extern crate dimensioned;
 extern crate emseries;
 extern crate iron;
 extern crate iron_cors;
+extern crate orizentic;
 extern crate params;
 extern crate router;
 extern crate serde;
@@ -12,9 +13,10 @@ extern crate fitnesstrax;
 
 use chrono::prelude::*;
 use dimensioned::si::{KG, M, S};
+use iron::headers::{Authorization, Bearer};
+use iron::middleware::{BeforeMiddleware, Handler};
 use iron::prelude::*;
 use iron::status;
-use iron::middleware::Handler;
 //use iron_cors::CorsMiddleware;
 use router::Router;
 use std::fmt;
@@ -23,9 +25,7 @@ use std::result;
 use std::path::Path;
 use std::sync::{Arc, RwLock};
 
-pub fn invert_option_result<A, B>(
-    val: Option<result::Result<A, B>>,
-) -> result::Result<Option<A>, B> {
+fn invert_option_result<A, B>(val: Option<result::Result<A, B>>) -> result::Result<Option<A>, B> {
     match val {
         None => Ok(None),
         Some(Ok(v)) => Ok(Some(v)),
@@ -34,10 +34,11 @@ pub fn invert_option_result<A, B>(
 }
 
 
-pub type Result<A> = result::Result<A, Error>;
+type Result<A> = result::Result<A, Error>;
 #[derive(Debug)]
-pub enum Error {
+enum Error {
     BadParameter,
+    NotAuthorized,
     NotFound,
     RuntimeError(fitnesstrax::Error),
 }
@@ -52,6 +53,7 @@ impl fmt::Display for Error {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
             Error::BadParameter => write!(f, "Bad Parameter"),
+            Error::NotAuthorized => write!(f, "Not Authorized"),
             Error::NotFound => write!(f, "Not Found"),
             Error::RuntimeError(err) => write!(f, "Runtime error: {}", err),
         }
@@ -62,6 +64,7 @@ impl error::Error for Error {
     fn description(&self) -> &str {
         match self {
             Error::BadParameter => "Bad Parameter",
+            Error::NotAuthorized => "Not Authorized",
             Error::NotFound => "Not Found",
             Error::RuntimeError(_) => "Runtime Error",
         }
@@ -70,13 +73,48 @@ impl error::Error for Error {
     fn cause(&self) -> Option<&error::Error> {
         match self {
             Error::BadParameter => None,
+            Error::NotAuthorized => None,
             Error::NotFound => None,
             Error::RuntimeError(ref err) => Some(err),
         }
     }
 }
 
-pub fn date_param(params: &params::Map, field_name: &str) -> Result<Option<DateTime<Utc>>> {
+fn auth_check(rn: &orizentic::ResourceName, perms: &orizentic::Permissions) -> bool {
+    let orizentic::ResourceName(ref name) = rn;
+    if name != "health" { return false; }
+    let orizentic::Permissions(ref perm_vec) = perms;
+    if perm_vec.contains(&String::from("read")) && perm_vec.contains(&String::from("write")) { return true; }
+    return false;
+}
+
+struct AuthMiddleware {
+    ctx: orizentic::OrizenticCtx,
+}
+
+impl BeforeMiddleware for AuthMiddleware {
+    fn before(&self, req: &mut Request) -> IronResult<()> {
+        let auth_str = req.headers.get::<Authorization<Bearer>>();
+        match auth_str {
+            Some(Authorization(bearer)) => {
+                match self.ctx.decode_and_validate_text(&bearer.token) {
+                    Ok(token) => {
+                        println!("Authentication token: {:?}", token);
+                        if token.check_authorizations(auth_check) {
+                            Ok(())
+                        } else {
+                            Err(IronError::new(Error::NotAuthorized, status::Unauthorized))
+                        }
+                    }
+                    Err(err) => Err(IronError::new(err, status::Unauthorized)),
+                }
+            }
+            _ => Err(IronError::new(Error::BadParameter, status::BadRequest)),
+        }
+    }
+}
+
+fn date_param(params: &params::Map, field_name: &str) -> Result<Option<DateTime<Utc>>> {
     match params.find(&[field_name]) {
         Some(&params::Value::String(ref d_str)) => {
             DateTime::parse_from_rfc3339(d_str)
@@ -88,7 +126,7 @@ pub fn date_param(params: &params::Map, field_name: &str) -> Result<Option<DateT
     }
 }
 
-pub fn string_param(params: &params::Map, field_name: &str) -> Result<Option<String>> {
+fn string_param(params: &params::Map, field_name: &str) -> Result<Option<String>> {
     match params.find(&[field_name]) {
         Some(&params::Value::String(ref w_str)) => Ok(Some(w_str.clone())),
         Some(_) => Err(Error::BadParameter),
@@ -96,7 +134,7 @@ pub fn string_param(params: &params::Map, field_name: &str) -> Result<Option<Str
     }
 }
 
-pub fn f64_param(params: &params::Map, field_name: &str) -> Result<Option<f64>> {
+fn f64_param(params: &params::Map, field_name: &str) -> Result<Option<f64>> {
     match params.find(&[field_name]) {
         Some(&params::Value::String(ref w_str)) => {
             w_str.parse::<f64>().map(|val| Some(val)).map_err(|_err| {
@@ -318,7 +356,7 @@ impl Handler for DeleteHandler {
     }
 }
 
-fn router(app_rc: Arc<RwLock<fitnesstrax::App>>) -> Chain {
+fn router(app_rc: Arc<RwLock<fitnesstrax::App>>, orizentic_ctx: orizentic::OrizenticCtx) -> Chain {
     let mut router = Router::new();
     // router.get("/", handler, "index");
 
@@ -376,7 +414,9 @@ fn router(app_rc: Arc<RwLock<fitnesstrax::App>>) -> Chain {
         "delete_time_distance",
     );
 
-    Chain::new(router)
+    let mut chain = Chain::new(router);
+    chain.link_before(AuthMiddleware { ctx: orizentic_ctx });
+    chain
 }
 
 fn main() {
@@ -386,5 +426,15 @@ fn main() {
             weight_path: Some(Path::new("var/weight.series")),
         }).unwrap(),
     ));
-    Iron::new(router(app_rc)).http("localhost:4001").unwrap();
+
+    let claimset = orizentic::filedb::load_claims_from_file(&String::from("./auth.db"))
+        .expect("should open the claims db");
+    let orizentic_ctx = orizentic::OrizenticCtx::new(
+        orizentic::Secret("abcdefg".to_string().into_bytes()),
+        claimset,
+    );
+
+    Iron::new(router(app_rc, orizentic_ctx))
+        .http("localhost:4001")
+        .unwrap();
 }
