@@ -19,10 +19,11 @@ use iron::prelude::*;
 use iron::status;
 //use iron_cors::CorsMiddleware;
 use router::Router;
+use std::env;
 use std::fmt;
 use std::error;
 use std::result;
-use std::path::Path;
+use std::path;
 use std::sync::{Arc, RwLock};
 
 fn invert_option_result<A, B>(val: Option<result::Result<A, B>>) -> result::Result<Option<A>, B> {
@@ -79,6 +80,47 @@ impl error::Error for Error {
         }
     }
 }
+
+
+struct Configuration {
+    host: String,
+    port: i32,
+    authdb_path: path::PathBuf,
+    authdb_secret: String,
+    time_distance_path: Option<path::PathBuf>,
+    weight_path: Option<path::PathBuf>,
+}
+
+impl Configuration {
+    fn load_from_environment() -> Configuration {
+        fn make_optional(err: env::VarError) -> result::Result<Option<String>, env::VarError> {
+            match err {
+                env::VarError::NotPresent => Ok(None),
+                err => Err(err)
+            }
+        }
+        fn optional_var(name: &str) -> result::Result<Option<String>, env::VarError> {
+            env::var(name).map(|v| Some(v)).or_else(make_optional)
+        }
+
+        let host = optional_var("HOST").expect("HOST should be absent or valid");
+        let port = optional_var("PORT").expect("PORT should be absent or valid");
+        let authdb_path = env::var("AUTHDB").expect("AUTHDB to be specified");
+        let authdb_secret = env::var("AUTHDB_SECRET").expect("AUTHDB_SECRET to be specified");
+        let time_distance_path = optional_var("TIME_DISTANCE").expect("TIME_DISTANCE should be absent or valid");
+        let weight_path = optional_var("WEIGHT").expect("WEIGHT should be absent or valid");
+
+        Configuration{
+            host: host.unwrap_or(String::from("localhost")),
+            port: port.and_then(|v| v.parse::<i32>().ok()).unwrap_or(4001),
+            authdb_path: path::PathBuf::from(authdb_path),
+            authdb_secret: String::from(authdb_secret),
+            time_distance_path: time_distance_path.map(|p| path::PathBuf::from(p)),
+            weight_path: weight_path.map(|p| path::PathBuf::from(p)),
+        }
+    }
+}
+
 
 fn auth_check(rn: &orizentic::ResourceName, perms: &orizentic::Permissions) -> bool {
     let orizentic::ResourceName(ref name) = rn;
@@ -201,7 +243,8 @@ impl Handler for GetHandler {
             match (*self.app).read().unwrap().get_record(&unique_id) {
                 Ok(Some(record)) => Ok(record),
                 Ok(None) => Err(Error::NotFound),
-                _ => panic!("request failed"),
+                Err(fitnesstrax::Error::NoSeries) => Err(Error::NotFound),
+                err => panic!(format!("request failed {:?}", err)),
             }
         };
         app_to_iron(run())
@@ -419,22 +462,45 @@ fn router(app_rc: Arc<RwLock<fitnesstrax::App>>, orizentic_ctx: orizentic::Orize
     chain
 }
 
+fn usage() {
+    println!("Fitnesstrax server
+
+    environment variables:
+
+        HOST -- (\"localhost\") the hostname of the server
+        PORT -- (4001) the port to which to bind
+        AUTHDB -- path to the authentication database file
+        AUTHDB_SECRET -- the secret for validating authentication tokens
+        TIME_DISTANCE -- (optional) the path to the time-distance database
+        WEIGHT -- (optional) the path to the weight database
+");
+}
+
 fn main() {
+    for arg in env::args() {
+        if arg == "-h" {
+            usage();
+            return;
+        }
+    }
+
+    let config = Configuration::load_from_environment();
+
     let app_rc = Arc::new(RwLock::new(
         fitnesstrax::App::new(fitnesstrax::Params {
-            time_distance_path: Some(Path::new("var/td.series")),
-            weight_path: Some(Path::new("var/weight.series")),
+            time_distance_path: config.time_distance_path,
+            weight_path: config.weight_path,
         }).unwrap(),
     ));
 
-    let claimset = orizentic::filedb::load_claims_from_file(&String::from("./auth.db"))
+    let claimset = orizentic::filedb::load_claims_from_file(&String::from(config.authdb_path.to_str().unwrap()))
         .expect("should open the claims db");
     let orizentic_ctx = orizentic::OrizenticCtx::new(
-        orizentic::Secret("abcdefg".to_string().into_bytes()),
+        orizentic::Secret(config.authdb_secret.into_bytes()),
         claimset,
     );
-
+    println!("Starting server at http://{}:{}/", config.host, config.port);
     Iron::new(router(app_rc, orizentic_ctx))
-        .http("localhost:4001")
+        .http(format!("{}:{}", config.host, config.port))
         .unwrap();
 }

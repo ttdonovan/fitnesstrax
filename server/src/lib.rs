@@ -7,7 +7,6 @@ extern crate serde_derive;
 
 mod types;
 
-use serde::Serialize;
 use std::error;
 use std::fmt;
 use std::path;
@@ -72,9 +71,9 @@ impl RecordId {
 }
 
 #[derive(Clone, Debug)]
-pub struct Params<'a> {
-    pub time_distance_path: Option<&'a path::Path>,
-    pub weight_path: Option<&'a path::Path>,
+pub struct Params {
+    pub time_distance_path: Option<path::PathBuf>,
+    pub weight_path: Option<path::PathBuf>,
 }
 
 pub struct App {
@@ -84,7 +83,7 @@ pub struct App {
 
 impl App {
     pub fn new(params: Params) -> Result<App> {
-        fn open_series<A>(path: Option<&path::Path>) -> Result<Option<emseries::Series<A>>>
+        fn open_series<A>(path: Option<path::PathBuf>) -> Result<Option<emseries::Series<A>>>
         where
             A: Clone + emseries::Recordable + serde::de::DeserializeOwned + serde::ser::Serialize,
         {
@@ -234,15 +233,15 @@ mod tests {
 
     fn standard_app() -> App {
         App::new(Params {
-            weight_path: Some(&path::Path::new("var/weight_test.series")),
-            time_distance_path: Some(&path::Path::new("var/time_distance_test.series")),
+            weight_path: Some(path::PathBuf::from("var/weight_test.series")),
+            time_distance_path: Some(path::PathBuf::from("var/time_distance_test.series")),
         }).expect("the app to be created")
     }
 
     fn app_without_weight() -> App {
         App::new(Params {
             weight_path: None,
-            time_distance_path: Some(&path::Path::new("var/time_distance_test.series")),
+            time_distance_path: Some(path::PathBuf::from("var/time_distance_test.series")),
         }).expect("the app to be created")
     }
 
