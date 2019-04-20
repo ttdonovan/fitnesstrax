@@ -4,7 +4,10 @@ extern crate emseries;
 extern crate serde;
 #[macro_use]
 extern crate serde_derive;
+#[macro_use] extern crate serde_json;
 
+mod logging;
+mod staticfile;
 mod types;
 
 use std::error;
@@ -12,6 +15,8 @@ use std::fmt;
 use std::path;
 use std::result;
 
+pub use logging::LoggingMiddleware;
+pub use staticfile::StaticHandler;
 pub use types::{ActivityType, TimeDistance, TimeDistanceRecord, Weight, WeightRecord};
 
 #[derive(Debug)]

@@ -11,6 +11,7 @@ emseries = { git = "https://github.com/luminescent-dreams/emseries", branch = "s
 # emseries = { path = "../emseries" }
 iron = "0.6"
 iron-cors = "0.8.0"
+micrologger = { git = "https://github.com/luminescent-dreams/micrologger", branch = "sol", path = "rust" }
 # orizentic = { path = "../../orizentic/rust" }
 orizentic = { git = "https://github.com/luminescent-dreams/orizentic", branch = "sol" }
 params = "0.8.0"
@@ -19,7 +20,12 @@ router = "*"
 serde = "1"
 serde_derive = "1"
 serde_json = "1.0"
+staticfile = "*"
 structopt = { version = "0.2", default-features = true }
+
+[dependencies.mount]
+
+git = "https://github.com/iron/mount.git"
 
 [[bin]]
 name = "app"

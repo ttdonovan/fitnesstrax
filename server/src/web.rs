@@ -1,13 +1,16 @@
+#[macro_use] extern crate serde_json;
+
 extern crate chrono;
 extern crate dimensioned;
 extern crate emseries;
 extern crate iron;
 extern crate iron_cors;
+extern crate micrologger;
+extern crate mount;
 extern crate orizentic;
 extern crate params;
 extern crate router;
 extern crate serde;
-extern crate serde_json;
 
 extern crate fitnesstrax;
 
@@ -19,6 +22,8 @@ use iron::prelude::*;
 use iron::status;
 //use iron_cors::CorsMiddleware;
 use router::Router;
+use serde_json::{ Value };
+use std::collections::HashMap;
 use std::env;
 use std::fmt;
 use std::error;
@@ -27,10 +32,7 @@ use std::path;
 use std::sync::{Arc, RwLock};
 
 fn invert_option_result<A, B>(val: Option<result::Result<A, B>>) -> result::Result<Option<A>, B> {
-    match val {
-        None => Ok(None),
-        Some(Ok(v)) => Ok(Some(v)),
-        Some(Err(err)) => Err(err),
+    match val { None => Ok(None), Some(Ok(v)) => Ok(Some(v)), Some(Err(err)) => Err(err),
     }
 }
 
@@ -82,9 +84,11 @@ impl error::Error for Error {
 }
 
 
+#[derive(Debug)]
 struct Configuration {
     host: String,
     port: i32,
+    webapp_path: path::PathBuf,
     authdb_path: path::PathBuf,
     authdb_secret: String,
     time_distance_path: Option<path::PathBuf>,
@@ -105,6 +109,7 @@ impl Configuration {
 
         let host = optional_var("HOST").expect("HOST should be absent or valid");
         let port = optional_var("PORT").expect("PORT should be absent or valid");
+        let webapp_path = env::var("WEBAPP_PATH").expect("WEBAPP_PATH to be specified");
         let authdb_path = env::var("AUTHDB").expect("AUTHDB to be specified");
         let authdb_secret = env::var("AUTHDB_SECRET").expect("AUTHDB_SECRET to be specified");
         let time_distance_path = optional_var("TIME_DISTANCE").expect("TIME_DISTANCE should be absent or valid");
@@ -113,6 +118,7 @@ impl Configuration {
         Configuration{
             host: host.unwrap_or(String::from("localhost")),
             port: port.and_then(|v| v.parse::<i32>().ok()).unwrap_or(4001),
+            webapp_path: path::PathBuf::from(webapp_path),
             authdb_path: path::PathBuf::from(authdb_path),
             authdb_secret: String::from(authdb_secret),
             time_distance_path: time_distance_path.map(|p| path::PathBuf::from(p)),
@@ -131,7 +137,7 @@ fn auth_check(rn: &orizentic::ResourceName, perms: &orizentic::Permissions) -> b
 }
 
 struct AuthMiddleware {
-    ctx: orizentic::OrizenticCtx,
+    ctx: Arc<orizentic::OrizenticCtx>,
 }
 
 impl BeforeMiddleware for AuthMiddleware {
@@ -141,7 +147,6 @@ impl BeforeMiddleware for AuthMiddleware {
             Some(Authorization(bearer)) => {
                 match self.ctx.decode_and_validate_text(&bearer.token) {
                     Ok(token) => {
-                        println!("Authentication token: {:?}", token);
                         if token.check_authorizations(auth_check) {
                             Ok(())
                         } else {
@@ -151,7 +156,7 @@ impl BeforeMiddleware for AuthMiddleware {
                     Err(err) => Err(IronError::new(err, status::Unauthorized)),
                 }
             }
-            _ => Err(IronError::new(Error::BadParameter, status::BadRequest)),
+            None => Err(IronError::new(Error::NotAuthorized, status::Unauthorized))
         }
     }
 }
@@ -399,18 +404,13 @@ impl Handler for DeleteHandler {
     }
 }
 
-fn router(app_rc: Arc<RwLock<fitnesstrax::App>>, orizentic_ctx: orizentic::OrizenticCtx) -> Chain {
+fn api_routes(app_rc: Arc<RwLock<fitnesstrax::App>>) -> Router {
     let mut router = Router::new();
-    // router.get("/", handler, "index");
 
-    router.get(
-        "/api/weight/:uuid",
-        GetHandler {
-            app: app_rc.clone(),
-            type_: RecordType::WeightRecord,
-        },
-        "get_weight",
-    );
+    router.get("/api/weight/:uuid",
+               GetHandler{ app: app_rc.clone(),
+                           type_: RecordType::WeightRecord },
+               "get_weight");
     router.put(
         "/api/weight/",
         SaveWeightHandler { app: app_rc.clone() },
@@ -457,8 +457,31 @@ fn router(app_rc: Arc<RwLock<fitnesstrax::App>>, orizentic_ctx: orizentic::Orize
         "delete_time_distance",
     );
 
+    router
+}
+
+fn routes(host: &str,
+          static_asset_path: &path::PathBuf,
+          app_name: &str,
+          app_rc: Arc<RwLock<fitnesstrax::App>>,
+          orizentic_ctx: Arc<orizentic::OrizenticCtx>) -> Chain {
+    let mut router = Router::new();
+
+    let mut api_chain = Chain::new(api_routes(app_rc));
+    api_chain.link_before(AuthMiddleware{ ctx: orizentic_ctx });
+    router.any("/api/*", api_chain, "api_routes");
+
+    let mut bundle_path = static_asset_path.clone();
+    bundle_path.push("dist/bundle.js");
+    let mut index_path = static_asset_path.clone();
+    index_path.push("index.html");
+
+    router.get("/static/bundle.js", fitnesstrax::StaticHandler::file(bundle_path, "application/javascript".parse().unwrap()), "webapp");
+    router.get("/", fitnesstrax::StaticHandler::file(index_path, "text/html".parse().unwrap()), "index");
+
     let mut chain = Chain::new(router);
-    chain.link_before(AuthMiddleware { ctx: orizentic_ctx });
+    chain.link_before(fitnesstrax::LoggingMiddleware::new(host, app_name));
+    chain.link_after(fitnesstrax::LoggingMiddleware::new(host, app_name));
     chain
 }
 
@@ -469,6 +492,7 @@ fn usage() {
 
         HOST -- (\"localhost\") the hostname of the server
         PORT -- (4001) the port to which to bind
+        WEBAPP_PATH -- path to the index and static asset directory
         AUTHDB -- path to the authentication database file
         AUTHDB_SECRET -- the secret for validating authentication tokens
         TIME_DISTANCE -- (optional) the path to the time-distance database
@@ -485,6 +509,13 @@ fn main() {
     }
 
     let config = Configuration::load_from_environment();
+    println!("Config: {:?}", config);
+
+    let logger = micrologger::Logger::new(micrologger::json_stdout, &config.host, "fitnesstrax");
+
+    let mut msg: HashMap<String, Value> = HashMap::new();
+    msg.insert(String::from("msg"), json!("Starting Up"));
+    logger.log("status", msg);
 
     let app_rc = Arc::new(RwLock::new(
         fitnesstrax::App::new(fitnesstrax::Params {
@@ -495,12 +526,12 @@ fn main() {
 
     let claimset = orizentic::filedb::load_claims_from_file(&String::from(config.authdb_path.to_str().unwrap()))
         .expect("should open the claims db");
-    let orizentic_ctx = orizentic::OrizenticCtx::new(
+    let orizentic_ctx = Arc::new(orizentic::OrizenticCtx::new(
         orizentic::Secret(config.authdb_secret.into_bytes()),
         claimset,
-    );
+    ));
     println!("Starting server at http://{}:{}/", config.host, config.port);
-    Iron::new(router(app_rc, orizentic_ctx))
+    Iron::new(routes(&config.host, &config.webapp_path, "fitnesstrax", app_rc, orizentic_ctx))
         .http(format!("{}:{}", config.host, config.port))
         .unwrap();
 }
