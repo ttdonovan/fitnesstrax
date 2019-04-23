@@ -14,9 +14,7 @@ jobs:
     - restore_cache:
         keys:
           # This branch if available
-          - dep-{{ .Branch }}-
-          # Default branch if not
-          - dep-sol-
+          - dep-{{ checksum "server/Cargo.toml" }}
 
     - run:
         name: build
@@ -25,7 +23,7 @@ jobs:
           cargo build
 
     - save_cache:
-        key: dep-{{ .Branch }}-{{ epoch }}
+        key: dep-{{ checksum "server/Cargo.toml" }}
         paths:
         - ~/.cargo
 
@@ -37,7 +35,7 @@ jobs:
           RUST_BACKTRACE=1 cargo test
 
     - save_cache:
-        key: dep-{{ .Branch }}-{{ epoch }}
+        key: dep-{{ checksum "server/Cargo.toml" }}
         paths:
         - ~/.cargo
 
@@ -55,9 +53,46 @@ jobs:
         command: |
           nix-build
 
+  test-webapp:
+    working_directory: ~/repo
+    parallelism: 1
+
+    docker:
+      - image: node:10.15.3-alpine
+
+    steps:
+      - checkout
+
+      - restore_cache:
+          key: dep-{{ checksum "client/package-lock.json" }}
+
+      - run:
+          name: install javascript dependencies
+          command: |
+            cd client
+            npm install
+
+      - save_cache:
+          key: dep-{{ checksum "client/package-lock.json" }}
+          paths:
+          - client/node_modules
+
+      - run:
+          name: run tests
+          command: |
+            cd client
+            npm run test
+
+      - run:
+          name: verify a full build
+          command: |
+            cd client
+            npm run build
+
 workflows:
   version: 2
   build_all:
     jobs:
       - build-rust-lfs
         # - build-rust-nix
+      - test-webapp

@@ -1,4 +1,5 @@
 import React from "react"
+import { Action } from "redux"
 import { connect } from "react-redux"
 
 import { runLogout } from "../state/actions"
@@ -10,7 +11,7 @@ import { NewDay } from "./NewDay"
 import { SummaryView } from "./Summary"
 
 export const Home = ({ onLogout }: { onLogout: () => void }) => (
-  <div className="container-fluid">
+  <div id="Home" className="container-fluid">
     <div className="row">
       <nav className="navbar fixed-top navbar-toggleable-sm navbar-light bg-faded">
         <div className="collapse navbar-collapse" id="navbarNav">
@@ -48,5 +49,5 @@ export const Home = ({ onLogout }: { onLogout: () => void }) => (
 
 export const HomeView = connect(
   () => ({}),
-  dispatch => ({ onLogout: () => dispatch(runLogout()) }),
+  (dispatch: any) => ({ onLogout: () => dispatch(runLogout()) }),
 )(Home)

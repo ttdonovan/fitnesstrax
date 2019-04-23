@@ -51,8 +51,4 @@ impl Recordable for WeightRecord {
     fn tags(&self) -> Vec<String> {
         Vec::new()
     }
-
-    fn values(&self) -> Vec<String> {
-        Vec::new()
-    }
 }

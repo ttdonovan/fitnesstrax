@@ -44,12 +44,12 @@ class History extends React.Component<Props, object> {
               isSomething(this.props.currentEdit) &&
               !this.props.currentEdit.isSame(entry.date)
             ) {
-              return <DailyEntryView date={date} data={entry} />
+              return <DailyEntryView entry={entry} />
             } else if (
               isSomething(entry) &&
               !isSomething(this.props.currentEdit)
             ) {
-              return <DailyEntryView date={date} data={entry} />
+              return <DailyEntryView entry={entry} />
             } else if (
               !isSomething(entry) &&
               isSomething(this.props.currentEdit) &&
@@ -62,20 +62,14 @@ class History extends React.Component<Props, object> {
               !this.props.currentEdit.isSame(date)
             ) {
               return (
-                <DailyEntryView
-                  date={date}
-                  data={new HistoryEntry(date, null, [], [])}
-                />
+                <DailyEntryView entry={new HistoryEntry(date, null, [], [])} />
               )
             } else if (
               !isSomething(entry) &&
               !isSomething(this.props.currentEdit)
             ) {
               return (
-                <DailyEntryView
-                  date={date}
-                  data={new HistoryEntry(date, null, [], [])}
-                />
+                <DailyEntryView entry={new HistoryEntry(date, null, [], [])} />
               )
             } else {
               throw new Error(
@@ -111,5 +105,5 @@ export const HistoryView = connect(
     currentEdit: getCurrentlyEditing(state),
     range: getRange(state),
   }),
-  dispatch => ({ fetchData: () => dispatch(runFetchHistory()) }),
+  (dispatch: any) => ({ fetchData: () => dispatch(runFetchHistory()) }),
 )(History)

@@ -9,11 +9,8 @@ import { createStore, applyMiddleware } from "redux"
 import PropTypes from "prop-types"
 
 import { isSomething } from "./common"
-import { getCredentials } from "./state/state"
 import { handleAction } from "./state/reducers"
-
-import { HomeView } from "./components/Home"
-import { LoginView } from "./components/LoginForm"
+import AppView from "./components/App"
 
 /*
  * Knowing very little about the application structure thus far...
@@ -38,14 +35,6 @@ import { LoginView } from "./components/LoginForm"
  *  Set/Rep edit field
  *  Edit widget with validator
  */
-
-const App = ({ creds }: { creds: string }) =>
-  isSomething(creds) ? <HomeView /> : <LoginView />
-
-const AppView = connect(
-  state => ({ creds: getCredentials(state) }),
-  dispatch => ({}),
-)(App)
 
 const main = function main() {
   const store = createStore(

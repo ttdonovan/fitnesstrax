@@ -212,7 +212,7 @@ class DailyEntryEdit extends React.Component<
 
 export const DailyEntryEditView = connect(
   () => ({}),
-  dispatch => ({
+  (dispatch: any) => ({
     onCancel: () => dispatch(cancelEditEntry()),
     onSave: (initialData, currentData) => {
       saveDailyEntryEdit(dispatch, initialData, currentData)

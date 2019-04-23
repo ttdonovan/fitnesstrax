@@ -4,8 +4,10 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "setup": "exit 1",
     "build": "webpack",
+    "setup": "exit 1",
+    "test": "jest",
+    "test:watch": "jest --watch",
     "watch": "exit 1"
   },
   "author": "Savanni D'Gerinel <savanni@luminescent-dreams.com>",
@@ -17,6 +19,25 @@
         "never"
       ]
     }
+  },
+  "jest": {
+    "transform": {
+      ".(ts|tsx)": "ts-jest"
+    },
+    "testPathIgnorePatterns": [
+      "/node_modules/",
+      "/lib/"
+    ],
+    "testRegex": "(/src/.*\\.(test|spec))\\.(ts|tsx)$",
+    "moduleFileExtensions": [
+      "ts",
+      "tsx",
+      "js",
+      "json"
+    ],
+    "setupFilesAfterEnv": [
+      "./setupTests.ts"
+    ]
   },
   "prettier": {
     "semi": false,
@@ -36,9 +57,17 @@
     "redux-thunk": "^2.3.0"
   },
   "devDependencies": {
+    "@types/enzyme": "^3.9.1",
+    "@types/enzyme-adapter-react-16": "^1.0.5",
+    "@types/jest": "^24.0.11",
     "@types/mathjs": "^5.0.1",
     "@types/react": "^16.8.8",
     "@types/react-dom": "^16.8.2",
+    "@types/react-redux": "^7.0.8",
+    "enzyme": "^3.9.0",
+    "enzyme-adapter-react-16": "^1.12.1",
+    "jest": "^24.7.1",
+    "ts-jest": "^24.0.2",
     "ts-loader": "^5.3.3",
     "typescript": "^3.3.3333",
     "webpack": "^4.29.6",

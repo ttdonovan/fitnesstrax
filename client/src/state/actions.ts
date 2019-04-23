@@ -1,9 +1,5 @@
-import {
-  getCredentials,
-  getRange,
-  getUtcOffset,
-  shouldFetchHistory,
-} from "./state"
+import { getCredentials } from "./index"
+import { getRange, getUtcOffset, shouldFetchHistory } from "./state"
 import { authenticate } from "../auth"
 import {
   fetchHistory,

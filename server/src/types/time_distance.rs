@@ -55,10 +55,6 @@ impl Recordable for TimeDistance {
             ActivityType::Running => vec![String::from("Running")],
         }
     }
-
-    fn values(&self) -> Vec<String> {
-        Vec::new()
-    }
 }
 
 impl<'de> Deserialize<'de> for TimeDistance {
