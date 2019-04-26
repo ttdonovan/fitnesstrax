@@ -30,7 +30,6 @@ class History extends React.Component<Props, object> {
       const days = fillInDayRange(start, end).reverse()
       return (
         <div>
-          {" "}
           {days.map(date => {
             var entry = this.props.history.entry(date)
             if (
@@ -44,12 +43,12 @@ class History extends React.Component<Props, object> {
               isSomething(this.props.currentEdit) &&
               !this.props.currentEdit.isSame(entry.date)
             ) {
-              return <DailyEntryView entry={entry} />
+              return <DailyEntryView date={date} data={entry} />
             } else if (
               isSomething(entry) &&
               !isSomething(this.props.currentEdit)
             ) {
-              return <DailyEntryView entry={entry} />
+              return <DailyEntryView date={date} data={entry} />
             } else if (
               !isSomething(entry) &&
               isSomething(this.props.currentEdit) &&
@@ -62,14 +61,20 @@ class History extends React.Component<Props, object> {
               !this.props.currentEdit.isSame(date)
             ) {
               return (
-                <DailyEntryView entry={new HistoryEntry(date, null, [], [])} />
+                <DailyEntryView
+                  date={date}
+                  data={{ weightRecord: null, timeDistanceRecords: [] }}
+                />
               )
             } else if (
               !isSomething(entry) &&
               !isSomething(this.props.currentEdit)
             ) {
               return (
-                <DailyEntryView entry={new HistoryEntry(date, null, [], [])} />
+                <DailyEntryView
+                  date={date}
+                  data={{ weightRecord: null, timeDistanceRecords: [] }}
+                />
               )
             } else {
               throw new Error(

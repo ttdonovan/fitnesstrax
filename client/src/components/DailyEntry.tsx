@@ -1,3 +1,4 @@
+import cns from "classnames"
 import React from "react"
 import math from "mathjs"
 import moment from "moment"
@@ -33,47 +34,50 @@ const distanceFieldStyle = {
 }
 const setsFieldStyle = { display: "inline", padding: 1, margin: 0 }
 
-const DailyEntry = ({
-  entry,
-  onEdit,
-}: {
-  entry: any
-  onEdit: (Moment) => void
-}) => (
-  <div key={renderDate(entry.date)}>
+export interface Props {
+  date: moment.Moment
+  data: {
+    weightRecord: WeightSample | null
+    timeDistanceRecords: Array<TimeDistanceSample>
+  }
+}
+
+export const DailyEntryView: React.SFC<Props> = ({
+  date,
+  data: { weightRecord, timeDistanceRecords },
+}: Props) => (
+  <div key={renderDate(date)}>
     <h2>
-      {" "}
-      {renderDate(entry.date)}
+      <div className={cns("DateDisplay")}>{renderDate(date)}</div>
       <button
         type="button"
         style={{ float: "right" }}
-        className="btn btn-outline-primary"
-        onClick={ev => this.props.onEdit(entry.date)}
+        onClick={ev => this.props.onEdit(date)}
       >
         Edit
       </button>
     </h2>
     <div>
-      <div>
-        <WeightForm value={entry.weight} />{" "}
+      <div className="WeightRecordView">
+        <WeightForm value={weightRecord} />
       </div>
-      <table className="table">
-        <tbody>
-          {isSomething(entry)
-            ? entry.timeDistance.map(e => <TimeDistance data={e} />)
-            : null}
-        </tbody>
+      <table className="TimeDistanceRecordView">
+        {timeDistanceRecords.map(e => (
+          <TimeDistance data={e} />
+        ))}
       </table>
 
-      <DailySummary tdEntries={entry.timeDistance} />
+      <DailySummary tdEntries={timeDistanceRecords} />
     </div>
   </div>
 )
 
-export const DailyEntryView = connect(
+/*
+export const DailyEntryViewR = connect(
   st => ({}),
   dispatch => ({ onEdit: date => dispatch(editEntry(date)) }),
-)(DailyEntry)
+)(DailyEntryView)
+*/
 
 interface DailyEntryEditProps {
   date: moment.Moment
@@ -145,14 +149,13 @@ class DailyEntryEdit extends React.Component<
       <div key={renderDate(this.props.date)}>
         <h2> {renderDate(this.props.date)} </h2>
         <div>
-          {" "}
-          Weight:{" "}
+          Weight:
           <WeightEditForm
             value={this.state.weight}
             onUpdate={w => this.updateWeight(w)}
-          />{" "}
+          />
         </div>
-        <table className="table table-hover">
+        <table>
           <tbody>
             {this.state.timeDistanceRows.map(e => (
               <TimeDistanceEdit
@@ -170,16 +173,11 @@ class DailyEntryEdit extends React.Component<
         {this.state.newRowWidget}
         <button
           type="button"
-          className="btn btn-outline-primary"
           onClick={ev => this.props.onSave(this.props.data, this.state)}
         >
           Save
         </button>
-        <button
-          type="button"
-          className="btn btn-outline-danger"
-          onClick={ev => this.props.onCancel()}
-        >
+        <button type="button" onClick={ev => this.props.onCancel()}>
           Cancel
         </button>
       </div>

@@ -3,6 +3,7 @@ import math from "mathjs"
 
 import { equalDurations, first, firstFn, isSomething } from "./common"
 
+// TODO: probably irrelevant. Figure out what Typescript provides
 export class Result<A, E> {
   ok_: A | null
   err_: E | null
@@ -109,7 +110,7 @@ export class HistoryEntry {
   timeDistance: Array<TimeDistanceSample> | null
   setRep: Array<any> | null
 
-  constructor(date, weight, timeDistance, setRep) {
+  constructor({ date, weight, timeDistance, setRep }) {
     this.date = date
     this.weight = weight
     this.timeDistance = timeDistance

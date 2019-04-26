@@ -93,7 +93,7 @@ export const mapFromTuples = <A>(lst: Array<[string, A]>): object => {
   return m
 }
 
-export const renderDate = d => d.format("YYYY-MM-DD")
+export const renderDate = (d: moment.Moment): string => d.format("YYYY-MM-DD")
 export const parseDate = str =>
   parseDate_(str, "YYYY-MM-DD") || parseDate_(str, "MM-DD-YYYY")
 
