@@ -1,13 +1,13 @@
 extern crate iron;
 
-use self::iron::prelude::{ IronError, IronResult, Request, Response };
 use self::iron::headers;
-use self::iron::mime;
 use self::iron::middleware::Handler;
+use self::iron::mime;
+use self::iron::prelude::{IronError, IronResult, Request, Response};
 use self::iron::status;
-use std::fs::{ File };
+use std::fs::File;
 use std::io;
-use std::io::{ Read };
+use std::io::Read;
 use std::path::PathBuf;
 
 pub enum StaticHandler {
@@ -15,13 +15,18 @@ pub enum StaticHandler {
 }
 
 impl StaticHandler {
-    pub fn file(path: PathBuf, content_type: mime::Mime) -> StaticHandler { StaticHandler::StaticFile(StaticFile{ root: path, content_type }) }
+    pub fn file(path: PathBuf, content_type: mime::Mime) -> StaticHandler {
+        StaticHandler::StaticFile(StaticFile {
+            root: path,
+            content_type,
+        })
+    }
 }
 
 impl Handler for StaticHandler {
     fn handle(&self, req: &mut Request) -> IronResult<Response> {
         match self {
-            StaticHandler::StaticFile(handler) => handler.handle(req)
+            StaticHandler::StaticFile(handler) => handler.handle(req),
         }
     }
 }
@@ -31,13 +36,12 @@ pub struct StaticFile {
     content_type: mime::Mime,
 }
 
-
 impl Handler for StaticFile {
     fn handle(&self, _: &mut Request) -> IronResult<Response> {
         fn throw_io_error(err: io::Error) -> IronError {
-            IronError{
+            IronError {
                 error: Box::new(err),
-                response: Response::new()
+                response: Response::new(),
             }
         }
 

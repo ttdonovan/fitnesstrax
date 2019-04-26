@@ -1,8 +1,8 @@
 extern crate iron;
 extern crate micrologger;
 
-use self::iron::prelude::{ IronError, IronResult, Request, Response };
-use self::iron::middleware::{BeforeMiddleware, AfterMiddleware};
+use self::iron::middleware::{AfterMiddleware, BeforeMiddleware};
+use self::iron::prelude::{IronError, IronResult, Request, Response};
 use std::collections::HashMap;
 
 pub struct LoggingMiddleware {
@@ -11,12 +11,11 @@ pub struct LoggingMiddleware {
 
 impl LoggingMiddleware {
     pub fn new(host: &str, app: &str) -> LoggingMiddleware {
-        LoggingMiddleware{
+        LoggingMiddleware {
             logger: micrologger::Logger::new(micrologger::json_stdout, host, app),
         }
     }
 }
-
 
 impl BeforeMiddleware for LoggingMiddleware {
     fn before(&self, req: &mut Request) -> IronResult<()> {

@@ -4,7 +4,8 @@ extern crate emseries;
 extern crate serde;
 #[macro_use]
 extern crate serde_derive;
-#[macro_use] extern crate serde_json;
+#[macro_use]
+extern crate serde_json;
 
 mod logging;
 mod staticfile;
@@ -94,11 +95,9 @@ impl App {
         {
             match path {
                 None => Ok(None),
-                Some(p) => {
-                    emseries::Series::open(p.to_str().unwrap())
-                        .map(|s| Some(s))
-                        .map_err(|err| Error::SeriesError(err))
-                }
+                Some(p) => emseries::Series::open(p.to_str().unwrap())
+                    .map(|s| Some(s))
+                    .map_err(|err| Error::SeriesError(err)),
             }
         }
 
@@ -126,11 +125,8 @@ impl App {
         }
 
         match record {
-            RecordType::TimeDistanceRecord(r) => {
-                add_record_(&mut self.time_distance_series, r).map(|uid| {
-                    RecordId::TimeDistanceRecordId(uid)
-                })
-            }
+            RecordType::TimeDistanceRecord(r) => add_record_(&mut self.time_distance_series, r)
+                .map(|uid| RecordId::TimeDistanceRecordId(uid)),
             RecordType::WeightRecord(r) => {
                 add_record_(&mut self.weight_series, r).map(|uid| RecordId::WeightRecordId(uid))
             }
@@ -148,14 +144,12 @@ impl App {
         {
             match series {
                 None => Err(Error::NoSeries),
-                Some(series) => {
-                    series
-                        .update(emseries::Record {
-                            id: uid.clone(),
-                            data: r,
-                        })
-                        .map_err(|err| Error::SeriesError(err))
-                }
+                Some(series) => series
+                    .update(emseries::Record {
+                        id: uid.clone(),
+                        data: r,
+                    })
+                    .map_err(|err| Error::SeriesError(err)),
             }
         }
 
@@ -182,27 +176,20 @@ impl App {
         {
             match series {
                 None => Err(Error::NoSeries),
-                Some(series) => {
-                    series.get(uid).map(|mr| mr.map(|r| r.data)).map_err(
-                        |err| {
-                            Error::SeriesError(err)
-                        },
-                    )
-                }
+                Some(series) => series
+                    .get(uid)
+                    .map(|mr| mr.map(|r| r.data))
+                    .map_err(|err| Error::SeriesError(err)),
             }
         }
 
         match rid {
             RecordId::TimeDistanceRecordId(td_uid) => {
-                get_record_(&self.time_distance_series, td_uid).map(|mr| {
-                    mr.map(|r| RecordType::TimeDistanceRecord(r))
-                })
+                get_record_(&self.time_distance_series, td_uid)
+                    .map(|mr| mr.map(|r| RecordType::TimeDistanceRecord(r)))
             }
-            RecordId::WeightRecordId(w_uid) => {
-                get_record_(&self.weight_series, w_uid).map(|mr| {
-                    mr.map(|r| RecordType::WeightRecord(r))
-                })
-            }
+            RecordId::WeightRecordId(w_uid) => get_record_(&self.weight_series, w_uid)
+                .map(|mr| mr.map(|r| RecordType::WeightRecord(r))),
         }
     }
 
@@ -229,7 +216,6 @@ impl App {
     }
 }
 
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -240,14 +226,16 @@ mod tests {
         App::new(Params {
             weight_path: Some(path::PathBuf::from("var/weight_test.series")),
             time_distance_path: Some(path::PathBuf::from("var/time_distance_test.series")),
-        }).expect("the app to be created")
+        })
+        .expect("the app to be created")
     }
 
     fn app_without_weight() -> App {
         App::new(Params {
             weight_path: None,
             time_distance_path: Some(path::PathBuf::from("var/time_distance_test.series")),
-        }).expect("the app to be created")
+        })
+        .expect("the app to be created")
     }
 
     #[test]
@@ -260,11 +248,12 @@ mod tests {
             weight: Weight::new(85.0 * KG),
         };
 
-        let uuid = app.add_record(RecordType::WeightRecord(record.clone()))
+        let uuid = app
+            .add_record(RecordType::WeightRecord(record.clone()))
             .expect("did not create a record");
-        let rec = app.get_record(&uuid).expect(
-            "should be able to retrieve record",
-        );
+        let rec = app
+            .get_record(&uuid)
+            .expect("should be able to retrieve record");
         assert_eq!(rec, Some(RecordType::WeightRecord(record)));
     }
 
@@ -281,11 +270,12 @@ mod tests {
             activity: ActivityType::Running,
         };
 
-        let uuid = app.add_record(RecordType::TimeDistanceRecord(record.clone()))
+        let uuid = app
+            .add_record(RecordType::TimeDistanceRecord(record.clone()))
             .expect("did not create a record");
-        let rec = app.get_record(&uuid).expect(
-            "should be able to retrieve record",
-        );
+        let rec = app
+            .get_record(&uuid)
+            .expect("should be able to retrieve record");
         assert_eq!(rec, Some(RecordType::TimeDistanceRecord(record)));
     }
 
@@ -306,9 +296,11 @@ mod tests {
             weight: Weight::new(85.0 * KG),
         };
 
-        let td_id = app.add_record(RecordType::TimeDistanceRecord(td_record.clone()))
+        let td_id = app
+            .add_record(RecordType::TimeDistanceRecord(td_record.clone()))
             .expect("add_record should succeed");
-        let w_id = app.add_record(RecordType::WeightRecord(w_record.clone()))
+        let w_id = app
+            .add_record(RecordType::WeightRecord(w_record.clone()))
             .expect("add_record should succeed");
 
         let weight_wrap_td_id = RecordId::WeightRecordId(td_id.unwrap());
@@ -319,9 +311,8 @@ mod tests {
             Some(RecordType::WeightRecord(w_record))
         );
         assert_eq!(
-            app.get_record(&weight_wrap_td_id).expect(
-                "no errors on get",
-            ),
+            app.get_record(&weight_wrap_td_id)
+                .expect("no errors on get",),
             None
         );
         assert_eq!(
@@ -329,9 +320,8 @@ mod tests {
             Some(RecordType::TimeDistanceRecord(td_record))
         );
         assert_eq!(
-            app.get_record(&time_distance_wrap_w_id).expect(
-                "no errors on get",
-            ),
+            app.get_record(&time_distance_wrap_w_id)
+                .expect("no errors on get",),
             None
         );
     }
@@ -350,14 +340,15 @@ mod tests {
             weight: Weight::new(87.0 * KG),
         };
 
-        let uuid = app.add_record(RecordType::WeightRecord(record.clone()))
+        let uuid = app
+            .add_record(RecordType::WeightRecord(record.clone()))
             .expect("did not create a record");
         app.replace_record(uuid.clone(), RecordType::WeightRecord(record_.clone()))
             .unwrap();
 
-        let rec = app.get_record(&uuid).expect(
-            "should be able to retrieve record",
-        );
+        let rec = app
+            .get_record(&uuid)
+            .expect("should be able to retrieve record");
         assert_eq!(rec, Some(RecordType::WeightRecord(record_)));
     }
 
@@ -381,16 +372,18 @@ mod tests {
             activity: ActivityType::Running,
         };
 
-        let uuid = app.add_record(RecordType::TimeDistanceRecord(record.clone()))
+        let uuid = app
+            .add_record(RecordType::TimeDistanceRecord(record.clone()))
             .expect("did not create a record");
         app.replace_record(
             uuid.clone(),
             RecordType::TimeDistanceRecord(record_.clone()),
-        ).unwrap();
+        )
+        .unwrap();
 
-        let rec = app.get_record(&uuid).expect(
-            "should be able to retrieve record",
-        );
+        let rec = app
+            .get_record(&uuid)
+            .expect("should be able to retrieve record");
         assert_eq!(rec, Some(RecordType::TimeDistanceRecord(record_)));
     }
 
