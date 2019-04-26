@@ -4,22 +4,24 @@ import { connect } from "react-redux"
 
 import { HistoryEntry } from "../types"
 import { isSomething } from "../common"
-import { runFetchHistory } from "../state/actions"
+//import { runFetchHistory } from "../state/actions"
 import { getCurrentlyEditing, getHistory, getRange } from "../state/state"
 
 import { DailyEntryView, DailyEntryEditView } from "./DailyEntry"
 
 export interface Props {
-  fetchData: () => void
+  //fetchData: () => void
   history: any
   range: any
   currentEdit: any
 }
 
 class History extends React.Component<Props, object> {
+  /*
   componentDidMount() {
     this.props.fetchData()
   }
+  */
 
   render() {
     if (isSomething(this.props.history)) {
@@ -110,5 +112,5 @@ export const HistoryView = connect(
     currentEdit: getCurrentlyEditing(state),
     range: getRange(state),
   }),
-  (dispatch: any) => ({ fetchData: () => dispatch(runFetchHistory()) }),
+  //(dispatch: any) => ({ fetchData: () => dispatch(runFetchHistory()) }),
 )(History)

@@ -2,8 +2,8 @@ import { getCredentials } from "./index"
 import { getRange, getUtcOffset, shouldFetchHistory } from "./state"
 import { authenticate } from "../auth"
 import {
-  fetchHistory,
-  historyFromRecords,
+  //fetchHistory,
+  //historyFromRecords,
   saveTimeDistance,
   saveWeight,
 } from "../client"
@@ -52,9 +52,12 @@ export const runLogout = () => {
   }
 }
 
+/*
 const fetchHistoryAction = (status, val) =>
   asyncAction(HISTORY_FETCH, status, val)
+     */
 
+/*
 export const runFetchHistory = () => {
   return (dispatch, getState) => {
     const st = getState()
@@ -78,6 +81,7 @@ export const runFetchHistory = () => {
     }
   }
 }
+     */
 
 export const cancelEditEntry = () => ({ type: HISTORY_CANCEL_EDIT_ENTRY })
 export const editEntry = date => ({ type: HISTORY_EDIT_ENTRY, date: date })

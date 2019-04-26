@@ -16,7 +16,7 @@ import {
 import {
   cancelEditEntry,
   editEntry,
-  runFetchHistory,
+  //runFetchHistory,
   runSaveTimeDistance,
   runSaveWeight,
 } from "../state/actions"
@@ -215,7 +215,7 @@ export const DailyEntryEditView = connect(
     onSave: (initialData, currentData) => {
       saveDailyEntryEdit(dispatch, initialData, currentData)
       dispatch(cancelEditEntry())
-      dispatch(runFetchHistory())
+      //dispatch(runFetchHistory())
     },
   }),
 )(DailyEntryEdit)

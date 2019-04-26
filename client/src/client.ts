@@ -70,6 +70,7 @@ const recordsFromJS = (
   timeDistance: json.timeDistance.map(j => timeDistanceSampleFromJS(j)),
 })
 
+/*
 export const historyFromRecords = (offset, records) => {
   var weightBuckets: object = indexList(
     w => w.date.format("YYYY-MM-DD"),
@@ -128,6 +129,7 @@ export const fetchHistory = (
     .then(response => response.json())
     .then(js => Result.Ok(recordsFromJS(js)))
 }
+     */
 
 export const saveWeight = async (
   appUrl,
@@ -153,6 +155,24 @@ export const saveWeight = async (
   const response = await fetch(appUrl + url, params)
   const js = await response.json()
   return Result.Ok(weightSampleFromJS(js))
+}
+
+export const fetchWeight = async (
+  appUrl: string,
+  auth: string,
+  startDate: moment.Moment,
+  endDate: moment.Moment,
+): Promise<Result<Array<WeightSample>, string>> => {
+  const response = await fetch(
+    `${appUrl}/api/weight/history/${startDate.format()}/${endDate.format()}`,
+    {
+      method: "GET",
+      mode: "cors",
+      headers: new Headers({ Authorization: auth }),
+    },
+  )
+  const js = await response.json()
+  return Result.Ok(js.map(weightSampleFromJS))
 }
 
 export const saveTimeDistance = (
