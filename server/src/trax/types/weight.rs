@@ -4,7 +4,7 @@ use emseries::Recordable;
 use serde::de::{Deserialize, Deserializer};
 use serde::ser::{Serialize, Serializer};
 
-use types::common::F64Visitor;
+use trax::types::common::F64Visitor;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct Weight(Kilogram<f64>);

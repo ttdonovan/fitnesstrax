@@ -56,7 +56,7 @@ fn main() {
     msg.insert(String::from("msg"), json!("Starting Up"));
     logger.log("status", msg);
 
-    let trax = fitnesstrax::App::new(fitnesstrax::Params {
+    let trax = fitnesstrax::Trax::new(fitnesstrax::Params {
         series_path: config.series_path.clone(),
     })
     .unwrap();

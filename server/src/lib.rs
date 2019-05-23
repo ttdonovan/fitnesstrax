@@ -7,16 +7,14 @@ extern crate serde_derive;
 #[macro_use]
 extern crate serde_json;
 
-mod core;
-mod logging;
+mod middleware;
 mod server;
-mod staticfile;
-mod types;
+mod trax;
 mod utils;
 
-pub use core::{App, Params, Result};
-pub use logging::LoggingMiddleware;
+pub use middleware::logging::LoggingMiddleware;
+pub use middleware::staticfile::StaticHandler;
 pub use server::{start_server, Configuration};
-pub use staticfile::StaticHandler;
-pub use types::{ActivityType, TimeDistance, TimeDistanceRecord, Weight, WeightRecord};
+pub use trax::types::{ActivityType, TimeDistance, TimeDistanceRecord, Weight, WeightRecord};
+pub use trax::{Params, Result, Trax};
 pub use utils::CleanupFile;

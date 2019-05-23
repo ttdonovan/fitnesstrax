@@ -21,22 +21,14 @@ use self::router::Router;
 use std::env;
 use std::error;
 use std::fmt;
+use std::io::Read;
 use std::path;
 use std::result;
 use std::sync::{Arc, RwLock};
 
-use core;
-use logging;
-use staticfile;
-use types;
-
-fn invert_option_result<A, B>(val: Option<result::Result<A, B>>) -> result::Result<Option<A>, B> {
-    match val {
-        None => Ok(None),
-        Some(Ok(v)) => Ok(Some(v)),
-        Some(Err(err)) => Err(err),
-    }
-}
+use middleware::logging;
+use middleware::staticfile;
+use trax;
 
 type Result<A> = result::Result<A, Error>;
 #[derive(Debug)]
@@ -44,11 +36,13 @@ enum Error {
     BadParameter,
     NotAuthorized,
     NotFound,
-    RuntimeError(core::Error),
+    IOError(std::io::Error),
+    SerdeError(serde_json::error::Error),
+    RuntimeError(trax::Error),
 }
 
-impl From<core::Error> for Error {
-    fn from(error: core::Error) -> Self {
+impl From<trax::Error> for Error {
+    fn from(error: trax::Error) -> Self {
         Error::RuntimeError(error)
     }
 }
@@ -59,6 +53,8 @@ impl fmt::Display for Error {
             Error::BadParameter => write!(f, "Bad Parameter"),
             Error::NotAuthorized => write!(f, "Not Authorized"),
             Error::NotFound => write!(f, "Not Found"),
+            Error::IOError(err) => write!(f, "IO Error in operation: {}", err),
+            Error::SerdeError(err) => write!(f, "Deserialization error: {}", err),
             Error::RuntimeError(err) => write!(f, "Runtime error: {}", err),
         }
     }
@@ -70,6 +66,8 @@ impl error::Error for Error {
             Error::BadParameter => "Bad Parameter",
             Error::NotAuthorized => "Not Authorized",
             Error::NotFound => "Not Found",
+            Error::IOError(_) => "IO Error",
+            Error::SerdeError(_) => "Deserialization Error",
             Error::RuntimeError(_) => "Runtime Error",
         }
     }
@@ -79,6 +77,8 @@ impl error::Error for Error {
             Error::BadParameter => None,
             Error::NotAuthorized => None,
             Error::NotFound => None,
+            Error::IOError(ref err) => Some(err),
+            Error::SerdeError(ref err) => Some(err),
             Error::RuntimeError(ref err) => Some(err),
         }
     }
@@ -159,6 +159,11 @@ impl BeforeMiddleware for AuthMiddleware {
     }
 }
 
+enum RecordType {
+    TimeDistance,
+    Weight,
+}
+
 fn date_param(params: &params::Map, field_name: &str) -> Result<Option<DateTime<Utc>>> {
     match params.find(&[field_name]) {
         Some(&params::Value::String(ref d_str)) => DateTime::parse_from_rfc3339(d_str)
@@ -192,21 +197,16 @@ fn f64_param(params: &params::Map, field_name: &str) -> Result<Option<f64>> {
 fn time_distance_activity_param(
     params: &params::Map,
     field_name: &str,
-) -> Result<Option<core::ActivityType>> {
+) -> Result<Option<trax::ActivityType>> {
     match params.find(&[field_name]) {
         Some(&params::Value::String(ref s)) => match s.as_str() {
-            "Cycling" => Ok(Some(core::ActivityType::Cycling)),
-            "Running" => Ok(Some(core::ActivityType::Running)),
+            "Cycling" => Ok(Some(trax::ActivityType::Cycling)),
+            "Running" => Ok(Some(trax::ActivityType::Running)),
             _ => Err(Error::BadParameter),
         },
         Some(_) => Err(Error::BadParameter),
         None => Ok(None),
     }
-}
-
-enum RecordType {
-    WeightRecord,
-    TimeDistanceRecord,
 }
 
 fn app_to_iron<A>(result: Result<A>) -> IronResult<Response>
@@ -224,7 +224,7 @@ where
 }
 
 struct GetHandler {
-    app: Arc<RwLock<core::App>>,
+    app: Arc<RwLock<trax::Trax>>,
 }
 impl Handler for GetHandler {
     fn handle(&self, req: &mut Request) -> IronResult<Response> {
@@ -237,7 +237,7 @@ impl Handler for GetHandler {
             match (*self.app).read().unwrap().get_record(&uuid) {
                 Ok(Some(record)) => Ok(record),
                 Ok(None) => Err(Error::NotFound),
-                Err(core::Error::NoSeries) => Err(Error::NotFound),
+                Err(trax::Error::NoSeries) => Err(Error::NotFound),
                 err => panic!(format!("request failed {:?}", err)),
             }
         };
@@ -245,8 +245,41 @@ impl Handler for GetHandler {
     }
 }
 
+struct NewRecordHandler {
+    app: Arc<RwLock<trax::Trax>>,
+    type_: RecordType,
+}
+impl Handler for NewRecordHandler {
+    fn handle(&self, req: &mut Request) -> IronResult<Response> {
+        let mut run = || {
+            let mut body: Vec<u8> = Vec::new();
+            req.body.read_to_end(&mut body).map_err(Error::IOError)?;
+            let record_result = match self.type_ {
+                RecordType::TimeDistance => {
+                    serde_json::from_slice(&body).map(|v| trax::TraxRecord::TimeDistance(v))
+                }
+                RecordType::Weight => {
+                    serde_json::from_slice(&body).map(|v| trax::TraxRecord::Weight(v))
+                }
+            };
+            match record_result {
+                Ok(rec) => self
+                    .app
+                    .write()
+                    .unwrap()
+                    .add_record(rec)
+                    .map_err(Error::from),
+                Err(err) => Err(Error::SerdeError(err)),
+            }
+        };
+
+        app_to_iron(run())
+    }
+}
+
+/*
 struct SaveWeightHandler {
-    app: Arc<RwLock<core::App>>,
+    app: Arc<RwLock<trax::Trax>>,
 }
 impl Handler for SaveWeightHandler {
     fn handle(&self, req: &mut Request) -> IronResult<Response> {
@@ -254,16 +287,15 @@ impl Handler for SaveWeightHandler {
             let capture = req.extensions.get::<Router>().unwrap().clone();
             let params = req.get_ref::<params::Params>().unwrap().clone();
 
-            let uuid = invert_option_result(
-                capture
-                    .find("uuid")
-                    .map(|s| emseries::UniqueId::from_str(s)),
-            )
-            .map_err(|_| Error::BadParameter)?;
+            let uuid = capture
+                .find("uuid")
+                .map(|s| emseries::UniqueId::from_str(s))
+                .transpose()
+                .map_err(|_| Error::BadParameter)?;
 
             let date = date_param(&params, "date").map_err(|_| Error::BadParameter)?;
-            let weight: Option<types::Weight> = f64_param(&params, "weight")
-                .map(|m_val| m_val.map(|val| types::Weight::new(val * KG)))
+            let weight: Option<trax::WeightRecord> = f64_param(&params, "weight")
+                .map(|m_val| m_val.map(|val| trax::WeightRecord::new(val * KG)))
                 .map_err(|_| Error::BadParameter)?;
 
             match (uuid, date, weight) {
@@ -273,7 +305,7 @@ impl Handler for SaveWeightHandler {
                     .unwrap()
                     .replace_record(
                         uuid_,
-                        core::RecordType::WeightRecord(types::WeightRecord {
+                        trax::TraxRecord::Weight(trax::WeightRecord {
                             date: date_,
                             weight: weight_,
                         }),
@@ -283,7 +315,7 @@ impl Handler for SaveWeightHandler {
                     .app
                     .write()
                     .unwrap()
-                    .add_record(core::RecordType::WeightRecord(types::WeightRecord {
+                    .add_record(trax::TraxRecord::Weight(trax::WeightRecord {
                         date: date_,
                         weight: weight_,
                     }))
@@ -294,9 +326,11 @@ impl Handler for SaveWeightHandler {
         app_to_iron(run())
     }
 }
+*/
 
+/*
 struct SaveTimeDistanceHandler {
-    app: Arc<RwLock<core::App>>,
+    app: Arc<RwLock<trax::Trax>>,
 }
 impl Handler for SaveTimeDistanceHandler {
     fn handle(&self, req: &mut Request) -> IronResult<Response> {
@@ -304,12 +338,11 @@ impl Handler for SaveTimeDistanceHandler {
             let capture = req.extensions.get::<Router>().unwrap().clone();
             let params = req.get_ref::<params::Params>().unwrap().clone();
 
-            let uuid = invert_option_result(
-                capture
-                    .find("uuid")
-                    .map(|s| emseries::UniqueId::from_str(s)),
-            )
-            .map_err(|_| Error::BadParameter)?;
+            let uuid = capture
+                .find("uuid")
+                .map(|s| emseries::UniqueId::from_str(s))
+                .transpose()
+                .map_err(|_| Error::BadParameter)?;
 
             let date = date_param(&params, "date").map_err(|_| Error::BadParameter)?;
             let distance = f64_param(&params, "distance").map(|m_val| m_val.map(|val| val * M))?;
@@ -324,7 +357,7 @@ impl Handler for SaveTimeDistanceHandler {
                     .unwrap()
                     .replace_record(
                         uuid_,
-                        core::RecordType::TimeDistanceRecord(types::TimeDistanceRecord {
+                        trax::TraxRecord::TimeDistance(trax::TimeDistanceRecord {
                             timestamp: date_,
                             activity: activity_,
                             distance,
@@ -337,15 +370,13 @@ impl Handler for SaveTimeDistanceHandler {
                     .app
                     .write()
                     .unwrap()
-                    .add_record(core::RecordType::TimeDistanceRecord(
-                        types::TimeDistanceRecord {
-                            timestamp: date_,
-                            activity: activity_,
-                            distance,
-                            duration,
-                            comments,
-                        },
-                    ))
+                    .add_record(trax::TraxRecord::TimeDistance(trax::TimeDistanceRecord {
+                        timestamp: date_,
+                        activity: activity_,
+                        distance,
+                        duration,
+                        comments,
+                    }))
                     .map_err(Error::from),
                 _ => Err(Error::BadParameter),
             }
@@ -353,20 +384,20 @@ impl Handler for SaveTimeDistanceHandler {
         app_to_iron(run())
     }
 }
+*/
 
 struct DeleteHandler {
-    app: Arc<RwLock<core::App>>,
+    app: Arc<RwLock<trax::Trax>>,
 }
 impl Handler for DeleteHandler {
     fn handle(&self, req: &mut Request) -> IronResult<Response> {
         let capture = req.extensions.get::<Router>().unwrap().clone();
 
-        let uuid = invert_option_result(
-            capture
-                .find("uuid")
-                .map(|s| emseries::UniqueId::from_str(s)),
-        )
-        .map_err(|err| IronError::new(err, status::BadRequest))?;
+        let uuid = capture
+            .find("uuid")
+            .map(|s| emseries::UniqueId::from_str(s))
+            .transpose()
+            .map_err(|err| IronError::new(err, status::BadRequest))?;
 
         match uuid {
             Some(uuid_) => self
@@ -381,9 +412,50 @@ impl Handler for DeleteHandler {
     }
 }
 
-fn api_routes(app_rc: Arc<RwLock<core::App>>) -> Router {
+fn api_routes(app_rc: Arc<RwLock<trax::Trax>>) -> Router {
     let mut router = Router::new();
 
+    router.get(
+        "/api/record/:uuid",
+        GetHandler {
+            app: app_rc.clone(),
+        },
+        "get_record",
+    );
+    router.put(
+        "/api/record/weight",
+        NewRecordHandler {
+            app: app_rc.clone(),
+            type_: RecordType::Weight,
+        },
+        "put_record",
+    );
+    router.put(
+        "/api/record/timedistance",
+        NewRecordHandler {
+            app: app_rc.clone(),
+            type_: RecordType::TimeDistance,
+        },
+        "put_record",
+    );
+    /*
+    router.post(
+        "/api/record/",
+        UpdateRecordHandler {
+            app: app_rc.clone(),
+        },
+        "update_record",
+    );
+    */
+    router.delete(
+        "/api/record/:uuid",
+        DeleteHandler {
+            app: app_rc.clone(),
+        },
+        "delete_record",
+    );
+
+    /*
     router.get(
         "/api/weight/:uuid",
         GetHandler {
@@ -441,6 +513,7 @@ fn api_routes(app_rc: Arc<RwLock<core::App>>) -> Router {
         },
         "delete_time_distance",
     );
+    */
 
     router
 }
@@ -449,7 +522,7 @@ fn routes(
     host: &str,
     static_asset_path: &path::PathBuf,
     app_name: &str,
-    app_rc: Arc<RwLock<core::App>>,
+    app_rc: Arc<RwLock<trax::Trax>>,
     orizentic_ctx: Arc<orizentic::OrizenticCtx>,
 ) -> Chain {
     let mut router = Router::new();
@@ -482,7 +555,7 @@ fn routes(
 
 pub fn start_server(
     config: Configuration,
-    trax: core::App,
+    trax: trax::Trax,
     orizentic_ctx: orizentic::OrizenticCtx,
 ) -> iron::Listening {
     let app_rc = Arc::new(RwLock::new(trax));
