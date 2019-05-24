@@ -164,51 +164,6 @@ enum RecordType {
     Weight,
 }
 
-fn date_param(params: &params::Map, field_name: &str) -> Result<Option<DateTime<Utc>>> {
-    match params.find(&[field_name]) {
-        Some(&params::Value::String(ref d_str)) => DateTime::parse_from_rfc3339(d_str)
-            .map(|val| Some(val.with_timezone(&Utc)))
-            .map_err(|_err| Error::BadParameter),
-        Some(_) => Err(Error::BadParameter),
-        None => Ok(None),
-    }
-}
-
-fn string_param(params: &params::Map, field_name: &str) -> Result<Option<String>> {
-    match params.find(&[field_name]) {
-        Some(&params::Value::String(ref w_str)) => Ok(Some(w_str.clone())),
-        Some(_) => Err(Error::BadParameter),
-        None => Ok(None),
-    }
-}
-
-fn f64_param(params: &params::Map, field_name: &str) -> Result<Option<f64>> {
-    match params.find(&[field_name]) {
-        Some(&params::Value::String(ref w_str)) => w_str
-            .parse::<f64>()
-            .map(|val| Some(val))
-            .map_err(|_err| Error::BadParameter),
-        Some(&params::Value::F64(ref val)) => Ok(Some(val.clone())),
-        Some(_) => Err(Error::BadParameter),
-        None => Ok(None),
-    }
-}
-
-fn time_distance_activity_param(
-    params: &params::Map,
-    field_name: &str,
-) -> Result<Option<trax::ActivityType>> {
-    match params.find(&[field_name]) {
-        Some(&params::Value::String(ref s)) => match s.as_str() {
-            "Cycling" => Ok(Some(trax::ActivityType::Cycling)),
-            "Running" => Ok(Some(trax::ActivityType::Running)),
-            _ => Err(Error::BadParameter),
-        },
-        Some(_) => Err(Error::BadParameter),
-        None => Ok(None),
-    }
-}
-
 fn app_to_iron<A>(result: Result<A>) -> IronResult<Response>
 where
     A: serde::Serialize,
@@ -231,8 +186,11 @@ impl Handler for GetHandler {
         let run = || {
             let capture = req.extensions.get::<Router>().unwrap().clone();
 
-            let uuid = emseries::UniqueId::from_str(capture.find("uuid").unwrap())
-                .map_err(|_| Error::BadParameter)?;
+            let uuid = match capture.find("uuid").map(emseries::UniqueId::from_str) {
+                Some(Ok(uuid)) => Ok(uuid),
+                Some(Err(_)) => Err(Error::BadParameter),
+                None => Err(Error::BadParameter),
+            }?;
 
             match (*self.app).read().unwrap().get_record(&uuid) {
                 Ok(Some(record)) => Ok(record),
@@ -277,114 +235,33 @@ impl Handler for NewRecordHandler {
     }
 }
 
-/*
-struct SaveWeightHandler {
+struct UpdateRecordHandler {
     app: Arc<RwLock<trax::Trax>>,
 }
-impl Handler for SaveWeightHandler {
+impl Handler for UpdateRecordHandler {
     fn handle(&self, req: &mut Request) -> IronResult<Response> {
+        let capture = req.extensions.get::<Router>().unwrap().clone();
+
         let mut run = || {
-            let capture = req.extensions.get::<Router>().unwrap().clone();
-            let params = req.get_ref::<params::Params>().unwrap().clone();
+            let uuid = match capture.find("uuid").map(emseries::UniqueId::from_str) {
+                Some(Ok(uuid)) => Ok(uuid),
+                Some(Err(_)) => Err(Error::BadParameter),
+                None => Err(Error::BadParameter),
+            }?;
 
-            let uuid = capture
-                .find("uuid")
-                .map(|s| emseries::UniqueId::from_str(s))
-                .transpose()
-                .map_err(|_| Error::BadParameter)?;
-
-            let date = date_param(&params, "date").map_err(|_| Error::BadParameter)?;
-            let weight: Option<trax::WeightRecord> = f64_param(&params, "weight")
-                .map(|m_val| m_val.map(|val| trax::WeightRecord::new(val * KG)))
-                .map_err(|_| Error::BadParameter)?;
-
-            match (uuid, date, weight) {
-                (Some(uuid_), Some(date_), Some(weight_)) => self
-                    .app
-                    .write()
-                    .unwrap()
-                    .replace_record(
-                        uuid_,
-                        trax::TraxRecord::Weight(trax::WeightRecord {
-                            date: date_,
-                            weight: weight_,
-                        }),
-                    )
-                    .map_err(Error::from),
-                (None, Some(date_), Some(weight_)) => self
-                    .app
-                    .write()
-                    .unwrap()
-                    .add_record(trax::TraxRecord::Weight(trax::WeightRecord {
-                        date: date_,
-                        weight: weight_,
-                    }))
-                    .map_err(Error::from),
-                _ => Err(Error::BadParameter),
-            }
+            let mut body: Vec<u8> = Vec::new();
+            req.body.read_to_end(&mut body).map_err(Error::IOError)?;
+            let record = serde_json::from_slice(&body).map_err(Error::SerdeError)?;
+            self.app
+                .write()
+                .unwrap()
+                .replace_record(uuid, record)
+                .map_err(Error::from)
         };
+
         app_to_iron(run())
     }
 }
-*/
-
-/*
-struct SaveTimeDistanceHandler {
-    app: Arc<RwLock<trax::Trax>>,
-}
-impl Handler for SaveTimeDistanceHandler {
-    fn handle(&self, req: &mut Request) -> IronResult<Response> {
-        let mut run = || {
-            let capture = req.extensions.get::<Router>().unwrap().clone();
-            let params = req.get_ref::<params::Params>().unwrap().clone();
-
-            let uuid = capture
-                .find("uuid")
-                .map(|s| emseries::UniqueId::from_str(s))
-                .transpose()
-                .map_err(|_| Error::BadParameter)?;
-
-            let date = date_param(&params, "date").map_err(|_| Error::BadParameter)?;
-            let distance = f64_param(&params, "distance").map(|m_val| m_val.map(|val| val * M))?;
-            let activity = time_distance_activity_param(&params, "activity")?;
-            let comments = string_param(&params, "comments")?;
-            let duration = f64_param(&params, "duration").map(|m_val| m_val.map(|val| val * S))?;
-
-            match (uuid, date, activity) {
-                (Some(uuid_), Some(date_), Some(activity_)) => self
-                    .app
-                    .write()
-                    .unwrap()
-                    .replace_record(
-                        uuid_,
-                        trax::TraxRecord::TimeDistance(trax::TimeDistanceRecord {
-                            timestamp: date_,
-                            activity: activity_,
-                            distance,
-                            duration,
-                            comments,
-                        }),
-                    )
-                    .map_err(Error::from),
-                (None, Some(date_), Some(activity_)) => self
-                    .app
-                    .write()
-                    .unwrap()
-                    .add_record(trax::TraxRecord::TimeDistance(trax::TimeDistanceRecord {
-                        timestamp: date_,
-                        activity: activity_,
-                        distance,
-                        duration,
-                        comments,
-                    }))
-                    .map_err(Error::from),
-                _ => Err(Error::BadParameter),
-            }
-        };
-        app_to_iron(run())
-    }
-}
-*/
 
 struct DeleteHandler {
     app: Arc<RwLock<trax::Trax>>,
@@ -428,7 +305,7 @@ fn api_routes(app_rc: Arc<RwLock<trax::Trax>>) -> Router {
             app: app_rc.clone(),
             type_: RecordType::Weight,
         },
-        "put_record",
+        "put_weight_record",
     );
     router.put(
         "/api/record/timedistance",
@@ -436,17 +313,15 @@ fn api_routes(app_rc: Arc<RwLock<trax::Trax>>) -> Router {
             app: app_rc.clone(),
             type_: RecordType::TimeDistance,
         },
-        "put_record",
+        "put_timedistance_record",
     );
-    /*
     router.post(
-        "/api/record/",
+        "/api/record/:uuid",
         UpdateRecordHandler {
             app: app_rc.clone(),
         },
         "update_record",
     );
-    */
     router.delete(
         "/api/record/:uuid",
         DeleteHandler {
@@ -454,66 +329,6 @@ fn api_routes(app_rc: Arc<RwLock<trax::Trax>>) -> Router {
         },
         "delete_record",
     );
-
-    /*
-    router.get(
-        "/api/weight/:uuid",
-        GetHandler {
-            app: app_rc.clone(),
-        },
-        "get_weight",
-    );
-    router.put(
-        "/api/weight/",
-        SaveWeightHandler {
-            app: app_rc.clone(),
-        },
-        "put_weight",
-    );
-    router.post(
-        "/api/weight/:uuid",
-        SaveWeightHandler {
-            app: app_rc.clone(),
-        },
-        "post_weight",
-    );
-    router.delete(
-        "/api/weight/:uuid",
-        DeleteHandler {
-            app: app_rc.clone(),
-        },
-        "delete_weight",
-    );
-
-    router.get(
-        "/api/time_distance/:uuid",
-        GetHandler {
-            app: app_rc.clone(),
-        },
-        "get_time_distance",
-    );
-    router.put(
-        "/api/time_distance/",
-        SaveTimeDistanceHandler {
-            app: app_rc.clone(),
-        },
-        "put_time_distance",
-    );
-    router.post(
-        "/api/time_distance/:uuid",
-        SaveTimeDistanceHandler {
-            app: app_rc.clone(),
-        },
-        "post_time_distance",
-    );
-    router.delete(
-        "/api/time_distance/:uuid",
-        DeleteHandler {
-            app: app_rc.clone(),
-        },
-        "delete_time_distance",
-    );
-    */
 
     router
 }
