@@ -124,12 +124,9 @@ impl Trax {
 mod tests {
     use super::super::utils::CleanupFile;
     use super::*;
-    use chrono::prelude::*;
     use dimensioned::si::{KG, M, S};
-    use emseries::Record;
-    use serde_json;
 
-    use trax::types::{ActivityType, TimeDistance, TimeDistanceRecord, Weight, WeightRecord};
+    use trax::types::{ActivityType, TimeDistance, Weight, WeightRecord};
 
     fn standard_app(filename: &str) -> (Trax, CleanupFile) {
         let series_path = path::PathBuf::from(format!("var/{}", filename));
@@ -264,22 +261,17 @@ mod tests {
             }))
         );
 
-        /*
-        let td_record = trax.get_record(&td_id);
+        let td_record = trax.get_record(&td_id).unwrap();
         assert_eq!(
             td_record,
-            Ok(Some(TimeDistanceRecord {
-                date,
-                time_distance: TimeDistance {
-                    timestamp: date,
-                    comments: Some(String::from("just some notes")),
-                    distance: Some(25.0 * M),
-                    duration: Some(15.0 * S),
-                    activity: ActivityType::Running
-                }
+            Some(TraxRecord::TimeDistance(TimeDistance {
+                timestamp: date,
+                comments: Some(String::from("just some notes")),
+                distance: Some(25.0 * M),
+                duration: Some(15.0 * S),
+                activity: ActivityType::Running
             }))
         );
-        */
     }
 
     #[test]
