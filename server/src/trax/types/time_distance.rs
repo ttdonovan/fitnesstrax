@@ -1,10 +1,9 @@
-
 use chrono::prelude::*;
-use dimensioned::si::{M, Meter, S, Second};
+use dimensioned::si::{Meter, Second, M, S};
 use emseries::Recordable;
 use serde::de;
 use serde::de::{Deserialize, Deserializer, MapAccess, Visitor};
-use serde::ser::{Serialize, Serializer, SerializeStruct};
+use serde::ser::{Serialize, SerializeStruct, Serializer};
 use std::fmt;
 
 #[derive(Clone, Debug, PartialEq, Deserialize, Serialize)]
@@ -13,9 +12,7 @@ pub enum ActivityType {
     Running,
 }
 
-
 pub type TimeDistanceRecord = TimeDistance;
-
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct TimeDistance {
@@ -133,17 +130,19 @@ impl<'de> Deserialize<'de> for TimeDistance {
                             timestamp = Some(map.next_value()?);
                         }
                         Field::Distance => {
-                            distance = map.next_value::<Option<f64>>().map(|v| v.map(|v_| v_ * M))?;
+                            distance = map
+                                .next_value::<Option<f64>>()
+                                .map(|v| v.map(|v_| v_ * M))?;
                         }
                         Field::Duration => {
-                            duration = map.next_value::<Option<f64>>().map(|v| v.map(|v_| v_ * S))?;
+                            duration = map
+                                .next_value::<Option<f64>>()
+                                .map(|v| v.map(|v_| v_ * S))?;
                         }
                     }
                 }
                 let activity = activity.ok_or_else(|| de::Error::missing_field("activity"))?;
-                let timestamp = timestamp.ok_or_else(
-                    || de::Error::missing_field("timestamp"),
-                )?;
+                let timestamp = timestamp.ok_or_else(|| de::Error::missing_field("timestamp"))?;
                 Ok(TimeDistance {
                     activity,
                     comments,
@@ -163,7 +162,6 @@ impl<'de> Deserialize<'de> for TimeDistance {
             "duration",
         ];
         deserializer.deserialize_struct("TimeDistance", FIELDS, TimeDistanceVisitor)
-
     }
 }
 
@@ -176,14 +174,8 @@ impl Serialize for TimeDistance {
         s.serialize_field("activity", &self.activity)?;
         s.serialize_field("comments", &self.comments)?;
         s.serialize_field("date", &self.timestamp)?;
-        s.serialize_field(
-            "distance",
-            &self.distance.map(|v| v.value_unsafe),
-        )?;
-        s.serialize_field(
-            "duration",
-            &self.duration.map(|v| v.value_unsafe),
-        )?;
+        s.serialize_field("distance", &self.distance.map(|v| v.value_unsafe))?;
+        s.serialize_field("duration", &self.duration.map(|v| v.value_unsafe))?;
         s.end()
     }
 }
