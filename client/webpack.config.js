@@ -6,9 +6,20 @@ module.exports = {
   module: {
     rules: [
       {
-        test: /\.tsx?$/,
-        use: "ts-loader",
+        test: path => path.endsWith(".ts") || path.endsWith(".tsx"),
+        loader: "ts-loader",
         exclude: /node_modules/,
+        options: {
+          onlyCompileBundledFiles: true,
+        },
+      },
+      { test: /\.css$/, loaders: ["style-loader", "css-loader"] },
+      {
+        test: /\.html$/,
+        loader: "file-loader",
+        options: {
+          name: "[name].[ext]",
+        },
       },
     ],
   },

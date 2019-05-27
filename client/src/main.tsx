@@ -12,6 +12,8 @@ import { isSomething } from "./common"
 import { handleAction } from "./state/reducers"
 import AppView from "./components/App"
 
+const index = require("./index.html")
+
 /*
  * Knowing very little about the application structure thus far...
  *
