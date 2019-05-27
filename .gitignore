@@ -8,3 +8,4 @@ client/static
 client/dist
 client/build
 client/index.js
+server/db.series
