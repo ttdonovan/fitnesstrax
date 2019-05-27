@@ -344,7 +344,7 @@ fn routes(
     router.any("/api/*", api_chain, "api_routes");
 
     let mut bundle_path = static_asset_path.clone();
-    bundle_path.push("dist/bundle.js");
+    bundle_path.push("bundle.js");
     let mut index_path = static_asset_path.clone();
     index_path.push("index.html");
 
