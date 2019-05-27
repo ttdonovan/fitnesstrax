@@ -6,7 +6,7 @@ jobs:
     shell: /bin/bash --login
 
     docker:
-    - image: savannidgerinel/rust:latest
+      - image: rust:1.33
 
     steps:
     - checkout
@@ -20,7 +20,7 @@ jobs:
         name: build
         command: |
           cd server
-          cargo build
+          /usr/local/cargo/bin/cargo build
 
     - save_cache:
         key: dep-{{ checksum "server/Cargo.toml" }}
@@ -32,7 +32,7 @@ jobs:
         command: |
           cd server
           mkdir var
-          RUST_BACKTRACE=1 cargo test
+          RUST_BACKTRACE=1 /usr/local/cargo/bin/cargo test
 
     - save_cache:
         key: dep-{{ checksum "server/Cargo.toml" }}
@@ -51,6 +51,7 @@ jobs:
     - run:
         name: build
         command: |
+          cd server
           nix-build
 
   test-webapp:
