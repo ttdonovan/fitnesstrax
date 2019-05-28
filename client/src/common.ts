@@ -1,6 +1,8 @@
 import math from "mathjs"
 import moment from "moment"
 
+import { Option } from "./types"
+
 /* pulled this directly from https://stackoverflow.com/questions/35325370/how-to-post-a-x-www-form-urlencoded-request-from-react-native */
 export const encodeFormBody = params =>
   Object.keys(params)
@@ -91,6 +93,13 @@ export const mapFromTuples = <A>(lst: Array<[string, A]>): object => {
     }
   }
   return m
+}
+
+export const toRfc3339 = (d: moment.Moment): string =>
+  `${d.utc().format("YYYY-MM-DDThh:mm:ss")}Z`
+export const parseTimestamp = (str: string): Option<moment.Moment> => {
+  const m = moment(str)
+  return m.isValid() ? Option.Some(m) : Option.None()
 }
 
 export const renderDate = (d: moment.Moment): string => d.format("YYYY-MM-DD")

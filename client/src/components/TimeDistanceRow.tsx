@@ -31,7 +31,7 @@ export const TimeDistance = ({
 }: {
   data: TimeDistanceSample
 }) => (
-  <tr key={record.uuid}>
+  <tr key={record.id}>
     <td> {renderTime(record.date)} </td>
     <td> {record.activity} </td>
     <td> {renderDistance(record.distance)} </td>
@@ -54,7 +54,7 @@ export const TimeDistanceEdit = ({
   onUpdateDistance,
   onUpdateDuration,
 }: TimeDistanceEditProps) => (
-  <tr key={record.uuid ? record.uuid : "new-row"}>
+  <tr key={record.id ? record.id : "new-row"}>
     <td>
       <TextEditForm
         value={record.date ? record.date : moment()}

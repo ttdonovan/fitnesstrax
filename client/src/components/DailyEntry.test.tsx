@@ -6,8 +6,9 @@ import React from "react"
 import { DailyEntryView } from "./DailyEntry"
 import {
   TimeDistanceActivity,
-  TimeDistanceSample,
-  WeightSample,
+  TimeDistanceRecord,
+  WeightRecord,
+  Option,
 } from "../types"
 
 describe("DailyEntryView", () => {
@@ -29,25 +30,25 @@ describe("DailyEntryView", () => {
 
   it("renders an entry with data", () => {
     const date = moment([2019, 0, 1, 0, 0, 0])
-    const weightRecord = new WeightSample(
+    const weightRecord = new WeightRecord(
       "weight-sample-uuid",
       moment([2019, 0, 1, 0, 0, 0]),
       math.unit(15, "kg"),
     )
     const timeDistanceRecords = [
-      new TimeDistanceSample(
+      new TimeDistanceRecord(
         "td-sample-uuid-1",
         moment([2019, 0, 1, 1, 0, 0]),
         TimeDistanceActivity.Running,
-        math.unit(5000, "m"),
-        moment.duration(1800, "s"),
+        Option.Some(math.unit(5000, "m")),
+        Option.Some(moment.duration(1800, "s")),
       ),
-      new TimeDistanceSample(
+      new TimeDistanceRecord(
         "td-sample-uuid-1",
         moment([2019, 0, 1, 2, 0, 0]),
         TimeDistanceActivity.Cycling,
-        math.unit(5000, "m"),
-        moment.duration(1800, "s"),
+        Option.Some(math.unit(5000, "m")),
+        Option.Some(moment.duration(1800, "s")),
       ),
     ]
     const wrapper = shallow(
