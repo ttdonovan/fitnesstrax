@@ -13,9 +13,9 @@ import {
   //midnight,
   //nub,
   //parseDate_,
-  toRfc3339,
-  parseTimestamp,
+  parseRfc3339,
 } from "./common"
+import "./moment-extensions"
 
 import Option from "./option"
 import Result from "./result"
@@ -236,13 +236,13 @@ const parseRecord = (
   if (isWeightJS(js)) {
     return new WeightRecord(
       js.id,
-      parseTimestamp(js.data.Weight.date).unwrap(),
+      parseRfc3339(js.data.Weight.date).unwrap(),
       math.unit(js.data.Weight.weight, "kg"),
     )
   } else if (isTimeDistanceJS(js)) {
     return new TimeDistanceRecord(
       js.id,
-      parseTimestamp(js.data.TimeDistance.date).unwrap(),
+      parseRfc3339(js.data.TimeDistance.date).unwrap(),
       timeDistanceActivityFromString(js.data.TimeDistance.activity).unwrap(),
       js.data.TimeDistance.distance
         ? Option.Some(math.unit(js.data.TimeDistance.distance, "m"))
@@ -265,7 +265,7 @@ export const fetchHistory = (
   endDate: moment.Moment,
 ): Promise<Array<WeightRecord | TimeDistanceRecord>> => {
   return fetch(
-    `${appUrl}/api/history/all/${toRfc3339(startDate)}/${toRfc3339(endDate)}`,
+    `${appUrl}/api/history/all/${startDate.rfc3339()}/${endDate.rfc3339()}`,
     {
       method: "GET",
       mode: "cors",

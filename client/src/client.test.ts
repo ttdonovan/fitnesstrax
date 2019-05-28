@@ -1,7 +1,7 @@
 import math from "mathjs"
 import moment from "moment-timezone"
 
-import { parseTimestamp, toRfc3339 } from "./common"
+import { parseRfc3339 } from "./common"
 import { fetchHistory } from "./client"
 import Option from "./option"
 import { TimeDistanceActivity, TimeDistanceRecord } from "./types"
@@ -54,7 +54,7 @@ describe("fetchHistory", () => {
     )
     expect(weightRecord).toMatchObject({
       id: "ae4bf2c4-9130-43d3-abb4-937c64d0d0f2",
-      date: parseTimestamp("2018-10-10T04:00:00Z").unwrap(),
+      date: parseRfc3339("2018-10-10T04:00:00Z").unwrap(),
       weight: math.unit(86.2, "kg"),
     })
     const tdRecord = result.find(
@@ -68,7 +68,7 @@ describe("fetchHistory", () => {
     )
     expect(
       tdRecord &&
-        tdRecord.date.isSame(parseTimestamp("2018-11-14T17:30:00Z").unwrap()),
+        tdRecord.date.isSame(parseRfc3339("2018-11-14T17:30:00Z").unwrap()),
     ).toEqual(true)
     expect(
       (<TimeDistanceRecord>tdRecord).distance.map(d =>

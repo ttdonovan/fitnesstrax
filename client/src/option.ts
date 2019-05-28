@@ -1,31 +1,38 @@
 import Equals from "./equals"
 
-class Option<A extends Equals> {
+class Option<A> {
   val_: A | null
 
   constructor(val: A | null) {
     this.val_ = val
   }
 
-  static Some<A extends Equals>(val: A): Option<A> {
+  static Some<A>(val: A): Option<A> {
     return new Option(val)
   }
 
-  static None<A extends Equals>(): Option<A> {
+  static None<A>(): Option<A> {
     return new Option<A>(null)
   }
 
-  is_some(): boolean {
+  isSome(): boolean {
     return Boolean(this.val_)
   }
 
-  is_none(): boolean {
+  isNone(): boolean {
     return !Boolean(this.val_)
   }
 
-  map<B extends Equals>(f: (_: A) => B): Option<B> {
+  map<B>(f: (_: A) => B): Option<B> {
     if (this.val_) {
       return Option.Some(f(this.val_))
+    }
+    return Option.None()
+  }
+
+  andThen<B>(f: (_: A) => Option<B>): Option<B> {
+    if (this.val_) {
+      return f(this.val_)
     }
     return Option.None()
   }
@@ -37,10 +44,16 @@ class Option<A extends Equals> {
     throw new Error("forced unwrap of an empty Option")
   }
 
-  equals<A extends Equals>(rside: Option<A>): boolean {
+  equals(rside: Option<A>): boolean {
     if (this.val_ && rside.val_) {
-      return this.val_.equals(rside.val_)
-    } else if (this.is_none() && rside.is_none()) {
+      if ((<Equals>(<unknown>this.val_)).equals) {
+        return (<Equals>(<unknown>this.val_)).equals(<Equals>(
+          (<unknown>rside.val_)
+        ))
+      } else {
+        return this.val_ === rside.val_
+      }
+    } else if (this.isNone() && rside.isNone()) {
       return true
     } else {
       return false

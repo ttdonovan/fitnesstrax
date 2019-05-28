@@ -102,9 +102,7 @@ export const mapFromTuples = <A>(lst: Array<[string, A]>): object => {
 }
      */
 
-export const toRfc3339 = (d: moment.Moment): string =>
-  `${d.utc().format("YYYY-MM-DDThh:mm:ss")}Z`
-export const parseTimestamp = (str: string): Option<moment.Moment> => {
+export const parseRfc3339 = (str: string): Option<moment.Moment> => {
   const m = moment(str)
   return m.isValid() ? Option.Some(m) : Option.None()
 }
