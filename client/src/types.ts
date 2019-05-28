@@ -3,7 +3,7 @@ import math from "mathjs"
 
 import Option from "./option"
 import Result from "./result"
-import { equalDurations } from "./common"
+//import { equalDurations } from "./common"
 
 export class WeightRecord {
   constructor(
@@ -44,26 +44,13 @@ export class TimeDistanceRecord {
   ) {}
 
   equals(other) {
-    if (
-      this.id !== other.id ||
-      this.activity !== other.activity ||
-      this.date.isSame(other.date)
-    ) {
-      return false
-    }
-    if (
-      this.distance.is_some() !== other.distance.is_some() ||
-      !this.distance.unwrap().equals(other.distance.unwrap())
-    ) {
-      return false
-    }
-    if (
-      this.duration.is_some() !== other.duration.is_some() ||
-      !equalDurations(this.duration.unwrap(), other.duration.unwrap())
-    ) {
-      return false
-    }
-    return true
+    return (
+      this.id === other.id &&
+      this.activity === other.activity &&
+      this.date.equals(other.date) &&
+      this.distance.equals(other.distance) &&
+      this.duration.equals(other.duration)
+    )
   }
 
   clone() {

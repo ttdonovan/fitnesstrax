@@ -2,7 +2,9 @@ import math from "mathjs"
 import moment from "moment"
 import _ from "lodash/fp"
 
+import Equals from "./equals"
 import Option from "./option"
+import "./moment-extensions"
 
 /* pulled this directly from https://stackoverflow.com/questions/35325370/how-to-post-a-x-www-form-urlencoded-request-from-react-native */
 export const encodeFormBody = (params: { [_: string]: string }): string =>
@@ -146,6 +148,7 @@ export const parseDuration = str => {
 }
 
 /* TODO: maybe parseDuration should return an object that has had equals hacked in, and I should also provide a general constructor that does it. */
+/*
 export const equalDurations = (
   left: moment.Duration,
   right: moment.Duration,
@@ -153,6 +156,7 @@ export const equalDurations = (
   left.milliseconds() == right.milliseconds() &&
   left.days() == right.days() &&
   left.months() == right.months()
+   */
 
 export const parseUnit = str => {
   try {
