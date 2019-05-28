@@ -1,16 +1,9 @@
 import math from "mathjs"
 import React from "react"
 import { connect } from "react-redux"
+import _ from "lodash/fp"
 
-import {
-  first,
-  isSomething,
-  intercalate,
-  nub,
-  sum,
-  divmod,
-  padStr,
-} from "../common"
+import { first, isSomething, intercalate, sum, divmod, padStr } from "../common"
 import { getHistory } from "../state/state"
 import { TimeDistanceActivity } from "../types"
 import { TimeDistanceSummary } from "./TimeDistanceRow"
@@ -25,7 +18,7 @@ const Summary = ({ history }: { history: any }) => {
     const endWeight = first(weights.slice().reverse())
 
     console.log("Summary: ", history.timeDistanceWorkouts())
-    const timeDistanceActivities: Array<TimeDistanceActivity> = nub(
+    const timeDistanceActivities: Array<TimeDistanceActivity> = _.uniq(
       history
         .timeDistanceWorkouts()
         .filter(td => isSomething(td))

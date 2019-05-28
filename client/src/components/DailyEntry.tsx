@@ -3,12 +3,13 @@ import React from "react"
 import math from "mathjs"
 import moment from "moment"
 import { connect } from "react-redux"
+import _ from "lodash/fp"
 
 import { timeDistanceSample, weightSample } from "../client"
 import {
   isSomething,
   listToMap,
-  nub,
+  //nub,
   renderDate,
   renderDistance,
   renderDuration,
@@ -258,7 +259,7 @@ const saveDailyEntryEdit = (dispatch, initialData, currentData) => {
     isSomething(currentData) && isSomething(currentData.timeDistanceRows)
       ? listToMap(e => e.uuid, currentData.timeDistanceRows)
       : {}
-  const keys = nub([].concat(Object.keys(initialTdrs), Object.keys(tdrs)))
+  const keys = _.uniq([].concat(Object.keys(initialTdrs), Object.keys(tdrs)))
 
   keys.map(k => {
     console.log(k, initialTdrs[k], tdrs[k])

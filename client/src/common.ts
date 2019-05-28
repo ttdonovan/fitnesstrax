@@ -73,8 +73,6 @@ export const firstFn = fn => lst => {
 }
      */
 
-export const nub = <A>(lst: Array<A>): Array<A> => Array.from(new Set(lst))
-
 // TODO: Replace this with a HashMap from my library
 /*
 export const indexList = <A>(f: (A) => string, lst: Array<A>): object =>
