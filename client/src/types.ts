@@ -1,92 +1,9 @@
 import * as moment from "moment"
 import math from "mathjs"
 
-import { equalDurations, first, firstFn, isSomething } from "./common"
-
-export class Option<A> {
-  val_: A | null
-
-  constructor(val: A | null) {
-    this.val_ = val
-  }
-
-  static Some<A>(val: A): Option<A> {
-    return new Option(val)
-  }
-
-  static None<A>(): Option<A> {
-    return new Option(null)
-  }
-
-  is_some(): boolean {
-    return Boolean(this.val_)
-  }
-
-  is_none(): boolean {
-    return !Boolean(this.val_)
-  }
-
-  map<B>(f: (A) => B): Option<B> {
-    if (this.val_) {
-      return Option.Some(f(this.val_))
-    }
-    return Option.None()
-  }
-
-  unwrap(): A {
-    if (this.val_) {
-      return this.val_
-    }
-    throw new Error("forced unwrap of an empty Option")
-  }
-}
-
-// TODO: probably irrelevant. Figure out what Typescript provides
-export class Result<A, E> {
-  ok_: A | null
-  err_: E | null
-
-  constructor(ok: A | null, err: E | null) {
-    if (ok && !err) {
-      this.ok_ = ok
-      this.err_ = null
-    } else if (!ok && err) {
-      this.ok_ = null
-      this.err_ = err
-    } else {
-      throw new Error("cannot create a Result with both ok and err values")
-    }
-  }
-
-  static Ok<A>(val: A): Result<A, any> {
-    return new Result(val, null)
-  }
-
-  static Err<E>(err: E): Result<any, E> {
-    return new Result(null, err)
-  }
-
-  map<B>(f: (A) => B): Result<B, E> {
-    if (this.ok_) {
-      return Result.Ok(f(this.ok_))
-    }
-    return Result.Err(this.err_)
-  }
-
-  map_err<F>(f: (E) => F): Result<A, F> {
-    if (this.err_) {
-      return Result.Err(f(this.err_))
-    }
-    return Result.Ok(this.ok_)
-  }
-
-  unwrap(): A {
-    if (this.ok_) {
-      return this.ok_
-    }
-    throw new Error("forced unwrap of an empty Result")
-  }
-}
+import Option from "./option"
+import Result from "./result"
+import { equalDurations } from "./common"
 
 export class WeightRecord {
   constructor(

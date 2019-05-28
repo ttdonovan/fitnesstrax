@@ -20,7 +20,7 @@ import {
   runSaveTimeDistance,
   runSaveWeight,
 } from "../state/actions"
-import { TimeDistanceSample, WeightSample } from "../types"
+import { TimeDistanceRecord, WeightRecord } from "../types"
 import { TimeDistance, TimeDistanceEdit } from "./TimeDistanceRow"
 import { WeightForm, WeightEditForm } from "./WeightForm"
 import { SetRepRow } from "./SetRepRow"
@@ -37,8 +37,8 @@ const setsFieldStyle = { display: "inline", padding: 1, margin: 0 }
 export interface Props {
   date: moment.Moment
   data: {
-    weightRecord: WeightSample | null
-    timeDistanceRecords: Array<TimeDistanceSample>
+    weightRecord: WeightRecord | null
+    timeDistanceRecords: Array<TimeDistanceRecord>
   }
 }
 
@@ -87,8 +87,8 @@ interface DailyEntryEditProps {
 }
 
 class DailyEntryEditState {
-  weight: WeightSample
-  timeDistanceRows: Array<TimeDistanceSample>
+  weight: WeightRecord
+  timeDistanceRows: Array<TimeDistanceRecord>
   newRow: any
   newRowWidget: any
 }
@@ -128,6 +128,7 @@ class DailyEntryEdit extends React.Component<
     }
   }
 
+  /*
   updateWeight(newVal: math.Unit) {
     if (isSomething(this.state.weight)) {
       const updatedWeight = this.state.weight.clone()
@@ -142,9 +143,11 @@ class DailyEntryEdit extends React.Component<
       })
     }
   }
+  */
 
   render() {
     /* TODO: watch the weight validation field and disable save if the field is currently invalid */
+    /*
     return (
       <div key={renderDate(this.props.date)}>
         <h2> {renderDate(this.props.date)} </h2>
@@ -182,8 +185,11 @@ class DailyEntryEdit extends React.Component<
         </button>
       </div>
     )
+    */
+    return <div />
   }
 
+  /*
   setNewRow(option, evt) {
     if (option == "Cycling" || option == "Running") {
       var newRow = timeDistanceSample(
@@ -206,6 +212,7 @@ class DailyEntryEdit extends React.Component<
       })
     }
   }
+  */
 }
 
 export const DailyEntryEditView = connect(

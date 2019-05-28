@@ -4,11 +4,11 @@ import moment from "moment"
 import React from "react"
 
 import { DailyEntryView } from "./DailyEntry"
+import Option from "../option"
 import {
   TimeDistanceActivity,
   TimeDistanceRecord,
   WeightRecord,
-  Option,
 } from "../types"
 
 describe("DailyEntryView", () => {

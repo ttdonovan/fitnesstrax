@@ -2,7 +2,7 @@ import React from "react"
 import moment from "moment"
 import { connect } from "react-redux"
 
-import { HistoryEntry } from "../types"
+//import { HistoryEntry } from "../types"
 import { isSomething } from "../common"
 //import { runFetchHistory } from "../state/actions"
 import { getCurrentlyEditing, getHistory, getRange } from "../state/state"
@@ -24,6 +24,8 @@ class History extends React.Component<Props, object> {
   */
 
   render() {
+    return <div />
+    /*
     if (isSomething(this.props.history)) {
       const today = moment({ hour: 0, minute: 0, second: 0 })
       const [start, end] = isSomething(this.props.range)
@@ -91,6 +93,7 @@ class History extends React.Component<Props, object> {
     } else {
       return null
     }
+    */
   }
 }
 

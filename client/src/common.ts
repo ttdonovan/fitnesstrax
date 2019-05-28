@@ -1,18 +1,19 @@
 import math from "mathjs"
 import moment from "moment"
+import _ from "lodash/fp"
 
-import { Option } from "./types"
+import Option from "./option"
 
 /* pulled this directly from https://stackoverflow.com/questions/35325370/how-to-post-a-x-www-form-urlencoded-request-from-react-native */
-export const encodeFormBody = params =>
-  Object.keys(params)
+export const encodeFormBody = (params: { [_: string]: string }): string =>
+  _.keys(params)
     .map(key => encodeURIComponent(key) + "=" + encodeURIComponent(params[key]))
     .join("&")
 
 /* And then these functions come from Javascript Allonge */
 
 /* return true if the value isSomething */
-export const isSomething = (value: any | null | undefined) =>
+export const isSomething = (value: any | null | undefined): boolean =>
   value != null && value != void 0
 
 /* maybe(someFunction)(possibly null value)
@@ -58,6 +59,7 @@ export const first = lst => {
   return isSomething(fst) ? fst : first(rest)
 }
 
+/*
 export const firstFn = fn => lst => {
   if (!isSomething(lst)) {
     return null
@@ -69,12 +71,15 @@ export const firstFn = fn => lst => {
   var res = fn(fst)
   return res ? fst : firstFn(fn)(rest)
 }
+     */
 
 export const nub = <A>(lst: Array<A>): Array<A> => Array.from(new Set(lst))
 
 // TODO: Replace this with a HashMap from my library
+/*
 export const indexList = <A>(f: (A) => string, lst: Array<A>): object =>
   mapFromTuples(lst.map((v: A): [string, A] => [f(v), v]))
+ */
 
 export const listToMap = (f, lst) =>
   lst.map(v => [f(v), v]).reduce((m, [k, v]) => {
@@ -82,6 +87,7 @@ export const listToMap = (f, lst) =>
     return m
   }, {})
 
+/*
 export const mapFromTuples = <A>(lst: Array<[string, A]>): object => {
   var m = {}
   for (var i in lst) {
@@ -94,6 +100,7 @@ export const mapFromTuples = <A>(lst: Array<[string, A]>): object => {
   }
   return m
 }
+     */
 
 export const toRfc3339 = (d: moment.Moment): string =>
   `${d.utc().format("YYYY-MM-DDThh:mm:ss")}Z`
@@ -141,10 +148,13 @@ export const parseDuration = str => {
 }
 
 /* TODO: maybe parseDuration should return an object that has had equals hacked in, and I should also provide a general constructor that does it. */
-export const equalDurations = (left, right) =>
-  left._milliseconds == right._milliseconds &&
-  left._days == right._days &&
-  left._months == right._months
+export const equalDurations = (
+  left: moment.Duration,
+  right: moment.Duration,
+): boolean =>
+  left.milliseconds() == right.milliseconds() &&
+  left.days() == right.days() &&
+  left.months() == right.months()
 
 export const parseUnit = str => {
   try {
@@ -158,6 +168,8 @@ export const parseUnit = str => {
   }
 }
 
+/*
 export const toUTC = t => t.clone().utc()
 export const toTz = (t, offset) => t.clone().utcOffset(offset)
 export const midnight = t => t.clone().set({ hour: 0, minute: 0, second: 0 })
+   */

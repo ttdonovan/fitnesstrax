@@ -4,12 +4,12 @@ import moment from "moment"
 
 import { nub, renderDistance, renderDuration } from "../common"
 import { TimeDistanceSummary } from "./TimeDistanceRow"
-import { TimeDistanceActivity, TimeDistanceSample } from "../types"
+import { TimeDistanceActivity, TimeDistanceRecord } from "../types"
 
 export const DailySummary = ({
   tdEntries,
 }: {
-  tdEntries: Array<TimeDistanceSample>
+  tdEntries: Array<TimeDistanceRecord>
 }) => {
   const activities: Array<TimeDistanceActivity> = nub(
     this.props.tdEntries.map(td => td.activity),

@@ -3,7 +3,8 @@ import moment from "moment-timezone"
 
 import { parseTimestamp, toRfc3339 } from "./common"
 import { fetchHistory } from "./client"
-import { Option, TimeDistanceActivity, TimeDistanceRecord } from "./types"
+import Option from "./option"
+import { TimeDistanceActivity, TimeDistanceRecord } from "./types"
 
 describe("fetchHistory", () => {
   beforeEach(() => {
@@ -59,12 +60,15 @@ describe("fetchHistory", () => {
     const tdRecord = result.find(
       r => r.id === "15f9c464-6427-4368-ab88-13875d47865f",
     )
-    expect(tdRecord.id).toEqual("15f9c464-6427-4368-ab88-13875d47865f")
+    expect(tdRecord && tdRecord.id).toEqual(
+      "15f9c464-6427-4368-ab88-13875d47865f",
+    )
     expect((<TimeDistanceRecord>tdRecord).activity).toEqual(
       TimeDistanceActivity.Running,
     )
     expect(
-      tdRecord.date.isSame(parseTimestamp("2018-11-14T17:30:00Z").unwrap()),
+      tdRecord &&
+        tdRecord.date.isSame(parseTimestamp("2018-11-14T17:30:00Z").unwrap()),
     ).toEqual(true)
     expect(
       (<TimeDistanceRecord>tdRecord).distance.map(d =>

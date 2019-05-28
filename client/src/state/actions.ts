@@ -8,7 +8,7 @@ import {
   saveWeight,
 } from "../client"
 import { isSomething } from "../common"
-import { Result } from "../types"
+import Result from "../result"
 
 export const STATUS_OK = "SUCCESS"
 export const STATUS_ERROR = "ERROR"

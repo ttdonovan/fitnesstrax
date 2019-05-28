@@ -4,22 +4,23 @@ import _ from "lodash/fp"
 
 import {
   encodeFormBody,
-  equalDurations,
-  first,
-  firstFn,
-  indexList,
+  //equalDurations,
+  //first,
+  //firstFn,
+  //indexList,
   isSomething,
-  maybe,
-  midnight,
-  nub,
-  parseDate_,
+  //maybe,
+  //midnight,
+  //nub,
+  //parseDate_,
   toRfc3339,
   parseTimestamp,
 } from "./common"
 
+import Option from "./option"
+import Result from "./result"
+
 import {
-  Option,
-  Result,
   //HistoryData,
   //HistoryEntry,
   TimeDistanceRecord,
@@ -31,6 +32,7 @@ import {
 export const weightSample = (uuid, date, weight): WeightRecord =>
   new WeightRecord(uuid, date, weight)
 
+/*
 const weightSampleFromJS = js => {
   // "weight":[{"data":{"weight":84.4,"date":"2017-05-28T05:00:00Z"},"id":"9e4e462b-494d-4784-a380-9e32218e28c7"},84.4]
   return new WeightRecord(
@@ -39,6 +41,7 @@ const weightSampleFromJS = js => {
     math.unit(js.data.weight, "kg"),
   )
 }
+   */
 
 export const timeDistanceSample = (
   uuid,
@@ -49,6 +52,7 @@ export const timeDistanceSample = (
 ): TimeDistanceRecord =>
   new TimeDistanceRecord(uuid, timestamp, activity, distance, duration)
 
+/*
 const timeDistanceSampleFromJS = js => {
   console.log(js)
   return new TimeDistanceRecord(
@@ -59,12 +63,14 @@ const timeDistanceSampleFromJS = js => {
     Option.Some(moment.duration(js.data.duration, "s")),
   )
 }
+   */
 
 //                                           , 'distance': math.unit(js.data.distance, 'm')
 //                                           , 'date': js.data.date
 //                                           , 'activity': js.data.activity
 //                                           , 'duration': js.data.duration
 
+/*
 const recordsFromJS = (
   json: any,
 ): {
@@ -74,6 +80,7 @@ const recordsFromJS = (
   weight: json.weight.map(j => weightSampleFromJS(j)),
   timeDistance: json.timeDistance.map(j => timeDistanceSampleFromJS(j)),
 })
+   */
 
 /*
 export const historyFromRecords = (offset, records) => {
@@ -107,10 +114,12 @@ export const historyFromRecords = (offset, records) => {
      */
 
 export const saveWeight = async (
-  appUrl,
-  auth,
-  weightSample,
+  _appUrl: string,
+  _auth: string,
+  _weightSample: WeightRecord,
 ): Promise<Result<WeightRecord, string>> => {
+  throw new Error("Not Implemented")
+  /*
   const body = {
     date: weightSample.date.format(rfc3339Format),
     weight: weightSample.weight.toNumeric("kg"),
@@ -130,8 +139,10 @@ export const saveWeight = async (
   const response = await fetch(appUrl + url, params)
   const js = await response.json()
   return Result.Ok(weightSampleFromJS(js))
+   */
 }
 
+/*
 export const fetchWeight = async (
   appUrl: string,
   auth: string,
@@ -149,11 +160,12 @@ export const fetchWeight = async (
   const js = await response.json()
   return Result.Ok(js.map(weightSampleFromJS))
 }
+   */
 
 export const saveTimeDistance = (
-  appUrl,
-  auth,
-  timeDistanceSample,
+  appUrl: string,
+  auth: string,
+  timeDistanceSample: TimeDistanceRecord,
 ): Promise<Result<TimeDistanceRecord, string>> => {
   throw new Error("not implemented")
   /*
