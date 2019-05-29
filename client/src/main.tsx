@@ -10,8 +10,8 @@ import PropTypes from "prop-types"
 
 import { isSomething } from "./common"
 import * as redux from "./redux"
-import Client from "./client"
-//import AppView from "./components/App"
+import AppView from "./views/App"
+import Controller from "./controller"
 
 const index = require("./index.html")
 
@@ -39,25 +39,6 @@ const index = require("./index.html")
  *  Edit widget with validator
  */
 
-class Controller {
-  client: Client
-  store: redux.AppStore
-
-  constructor(appUrl: string, store: redux.AppStore) {
-    this.client = new Client(appUrl)
-    this.store = store
-  }
-
-  authenticate = (token: string): Promise<void> =>
-    this.client.authenticate(token).then(ok => {
-      if (ok) {
-        this.store.dispatch(redux.setAuthToken(token))
-      } else {
-        this.store.dispatch(redux.setError("Invalid authentication token"))
-      }
-    })
-}
-
 const main = function main() {
   const store = createStore(redux.rootReducer, applyMiddleware(createLogger()))
 
@@ -65,7 +46,7 @@ const main = function main() {
 
   ReactDOM.render(
     <Provider store={store}>
-      <div />
+      <AppView controller={controller} />
     </Provider>,
     document.getElementById("root"),
   )

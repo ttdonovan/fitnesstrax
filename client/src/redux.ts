@@ -16,6 +16,7 @@ export interface AppState {
   /* TODO: I actually want a real live timezone entry here, but I don't know how to get the current timezone. Figure it out when I have internet again. */
 }
 
+export const getCredentials = (state: AppState): string | null => state.creds
 export const getCurrentlyEditing = (state: AppState): Record | null =>
   state.currentlyEditing
 export const getHistory = (state: AppState): Map<string, Record> =>
@@ -32,12 +33,17 @@ export const clearError = (): ClearErrorAction => ({ type: "CLEAR_ERROR" })
 
 interface SetAuthTokenAction {
   type: "SET_AUTH_TOKEN"
-  token: string
+  token: string | null
 }
 
 export const setAuthToken = (token: string): SetAuthTokenAction => ({
   type: "SET_AUTH_TOKEN",
   token,
+})
+
+export const clearAuthToken = (): SetAuthTokenAction => ({
+  type: "SET_AUTH_TOKEN",
+  token: null,
 })
 
 interface SetErrorAction {
