@@ -6,6 +6,19 @@ import Client from "./client"
 import Option from "./option"
 import { TimeDistanceActivity, TimeDistanceRecord } from "./types"
 
+describe("authenticate", () => {
+  beforeEach(() => {
+    fetchMock.resetMocks()
+  })
+
+  /* how do I set the retun code on a fetchMock? */
+  xit("returns true when the server accepts the token", async () => {})
+
+  xit("returns false when the server rejects the token", async () => {})
+
+  xit("returns false when the there is no token", async () => {})
+})
+
 describe("fetchHistory", () => {
   beforeEach(() => {
     fetchMock.resetMocks()

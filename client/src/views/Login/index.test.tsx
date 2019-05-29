@@ -8,11 +8,11 @@ import LoginView from "./index"
 
 const mockAuthenticate = jest.fn()
 
-beforeEach(() => {
-  mockAuthenticate.mockReset()
-})
-
 describe("LoginView", () => {
+  beforeEach(() => {
+    mockAuthenticate.mockReset()
+  })
+
   it("renders", () => {
     const store = createStore(redux.rootReducer)
     const controller = new Controller("http://nowhere/", store)
