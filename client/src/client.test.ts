@@ -12,11 +12,59 @@ describe("authenticate", () => {
   })
 
   /* how do I set the retun code on a fetchMock? */
-  xit("returns true when the server accepts the token", async () => {})
+  it("returns true when the server accepts the token", async () => {
+    fetchMock.mockResponseOnce("", { status: 204 })
+    const client = new Client("http://localhost:9010")
 
-  xit("returns false when the server rejects the token", async () => {})
+    const result = await client.authenticate("abcdefg")
+    expect(result).toBe(true)
+    expect(fetchMock).toHaveBeenCalledWith(
+      "http://localhost:9010/api/history/all",
+      {
+        method: "OPTIONS",
+        mode: "cors",
+        headers: new Headers({
+          authorization: "Bearer abcdefg",
+        }),
+      },
+    )
+  })
 
-  xit("returns false when the there is no token", async () => {})
+  it("returns false when the server rejects the token", async () => {
+    fetchMock.mockResponseOnce("", { status: 401 })
+    const client = new Client("http://localhost:9010")
+
+    const result = await client.authenticate("abcdefg")
+    expect(result).toBe(false)
+    expect(fetchMock).toHaveBeenCalledWith(
+      "http://localhost:9010/api/history/all",
+      {
+        method: "OPTIONS",
+        mode: "cors",
+        headers: new Headers({
+          authorization: "Bearer abcdefg",
+        }),
+      },
+    )
+  })
+
+  it("returns false when the there is no token", async () => {
+    fetchMock.mockResponseOnce("", { status: 401 })
+    const client = new Client("http://localhost:9010")
+
+    const result = await client.authenticate("")
+    expect(result).toBe(false)
+    expect(fetchMock).toHaveBeenCalledWith(
+      "http://localhost:9010/api/history/all",
+      {
+        method: "OPTIONS",
+        mode: "cors",
+        headers: new Headers({
+          authorization: "Bearer ",
+        }),
+      },
+    )
+  })
 })
 
 describe("fetchHistory", () => {
