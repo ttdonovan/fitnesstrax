@@ -98,6 +98,7 @@ class History extends React.Component<Props, object> {
 }
 
 /* *ew* There must be a better way to do this. I'm thinking a generator that successively applies a function to a vaule. */
+/*
 const fillInDayRange = (startDate, endDate) => {
   var current = startDate.clone()
   var lst = [startDate]
@@ -108,6 +109,7 @@ const fillInDayRange = (startDate, endDate) => {
   }
   return lst
 }
+*/
 
 export const HistoryView = connect(
   state => ({

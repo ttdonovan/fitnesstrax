@@ -1,9 +1,12 @@
-import * as moment from "moment"
+import * as moment from "moment-timezone"
 import math from "mathjs"
 
 import Option from "./option"
 import Result from "./result"
-//import { equalDurations } from "./common"
+
+export type Range = { start: moment.Moment; end: moment.Moment }
+
+export type Record = TimeDistanceRecord | WeightRecord
 
 export class WeightRecord {
   constructor(

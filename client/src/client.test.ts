@@ -2,7 +2,7 @@ import math from "mathjs"
 import moment from "moment-timezone"
 
 import { parseRfc3339 } from "./common"
-import { fetchHistory } from "./client"
+import Client from "./client"
 import Option from "./option"
 import { TimeDistanceActivity, TimeDistanceRecord } from "./types"
 
@@ -13,9 +13,9 @@ describe("fetchHistory", () => {
 
   it("works even if there is no data available", async () => {
     fetchMock.mockResponseOnce("[]")
+    const client = new Client("http://localhost:9010")
 
-    const result = await fetchHistory(
-      "http://localhost:9010",
+    const result = await client.fetchHistory(
       "auth-data",
       moment("2018-10-10T04:00:00Z"),
       moment("2018-10-16T04:00:00Z"),
@@ -40,8 +40,9 @@ describe("fetchHistory", () => {
       '[{"id":"ae4bf2c4-9130-43d3-abb4-937c64d0d0f2","data":{"Weight":{"date":"2018-10-10T04:00:00Z","weight":86.2}}},{"id":"15f9c464-6427-4368-ab88-13875d47865f","data":{"TimeDistance":{"activity":"Running","comments":null,"date":"2018-11-14T17:30:00Z","distance":3640.0,"duration":1800.0}}}]',
     )
 
-    const result = await fetchHistory(
-      "http://localhost:9010",
+    const client = new Client("http://localhost:9010")
+
+    const result = await client.fetchHistory(
       "auth-data",
       moment("2018-10-10T04:00:00Z"),
       moment("2018-10-16T04:00:00Z"),

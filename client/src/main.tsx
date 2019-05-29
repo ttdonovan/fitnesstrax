@@ -2,15 +2,16 @@ import React from "react"
 import ReactDOM from "react-dom"
 import math from "mathjs"
 import moment from "moment"
-import thunkMiddleware from "redux-thunk"
+//import thunkMiddleware from "redux-thunk"
 import { connect, Provider } from "react-redux"
 import { createLogger } from "redux-logger"
 import { createStore, applyMiddleware } from "redux"
 import PropTypes from "prop-types"
 
 import { isSomething } from "./common"
-import { handleAction } from "./state/reducers"
-import AppView from "./components/App"
+import * as redux from "./redux"
+import Client from "./client"
+//import AppView from "./components/App"
 
 const index = require("./index.html")
 
@@ -38,14 +39,33 @@ const index = require("./index.html")
  *  Edit widget with validator
  */
 
+class Controller {
+  client: Client
+  store: redux.AppStore
+
+  constructor(appUrl: string, store: redux.AppStore) {
+    this.client = new Client(appUrl)
+    this.store = store
+  }
+
+  authenticate = (token: string): Promise<void> =>
+    this.client.authenticate(token).then(ok => {
+      if (ok) {
+        this.store.dispatch(redux.setAuthToken(token))
+      } else {
+        this.store.dispatch(redux.setError("Invalid authentication token"))
+      }
+    })
+}
+
 const main = function main() {
-  const store = createStore(
-    handleAction,
-    applyMiddleware(thunkMiddleware, createLogger()),
-  )
+  const store = createStore(redux.rootReducer, applyMiddleware(createLogger()))
+
+  const controller = new Controller(window.origin, store)
+
   ReactDOM.render(
     <Provider store={store}>
-      <AppView />
+      <div />
     </Provider>,
     document.getElementById("root"),
   )

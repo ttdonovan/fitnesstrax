@@ -1,7 +1,7 @@
 import React from "react"
 import { connect } from "react-redux"
 
-import { runAuthentication } from "../state/actions"
+import { authenticate } from "../state"
 import InputField from "./InputField"
 
 export interface Props {

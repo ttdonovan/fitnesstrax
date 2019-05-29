@@ -258,27 +258,48 @@ const parseRecord = (
   }
 }
 
-export const fetchHistory = (
-  appUrl: string,
-  auth: string,
-  startDate: moment.Moment,
-  endDate: moment.Moment,
-): Promise<Array<WeightRecord | TimeDistanceRecord>> => {
-  return fetch(
-    `${appUrl}/api/history/all/${startDate.rfc3339()}/${endDate.rfc3339()}`,
-    {
-      method: "GET",
+class Client {
+  appUrl: string
+
+  constructor(appUrl: string) {
+    this.appUrl = appUrl
+  }
+
+  fetchHistory = (
+    auth: string,
+    startDate: moment.Moment,
+    endDate: moment.Moment,
+  ): Promise<Array<WeightRecord | TimeDistanceRecord>> => {
+    return fetch(
+      `${
+        this.appUrl
+      }/api/history/all/${startDate.rfc3339()}/${endDate.rfc3339()}`,
+      {
+        method: "GET",
+        mode: "cors",
+        headers: new Headers({
+          accept: "application/json",
+          authorization: `Bearer ${auth}`,
+        }),
+      },
+    )
+      .then(r => r.json())
+      .then(js => {
+        return _.map(parseRecord)(js)
+      })
+  }
+
+  rfc3339Format: string = "YYYY-MM-DDTHH:mm:ssZ"
+
+  authenticate = (auth: string): Promise<boolean> => {
+    return fetch(`${this.appUrl}/api/history/all`, {
+      method: "OPTIONS",
       mode: "cors",
       headers: new Headers({
-        accept: "application/json",
         authorization: `Bearer ${auth}`,
       }),
-    },
-  )
-    .then(r => r.json())
-    .then(js => {
-      return _.map(parseRecord)(js)
-    })
+    }).then(r => r.ok)
+  }
 }
 
-const rfc3339Format: string = "YYYY-MM-DDTHH:mm:ssZ"
+export default Client
