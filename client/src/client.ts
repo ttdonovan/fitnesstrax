@@ -23,6 +23,7 @@ import Result from "./result"
 import {
   //HistoryData,
   //HistoryEntry,
+  Record,
   TimeDistanceRecord,
   WeightRecord,
   timeDistanceActivityFromString,
@@ -269,7 +270,7 @@ class Client {
     auth: string,
     startDate: moment.Moment,
     endDate: moment.Moment,
-  ): Promise<Array<WeightRecord | TimeDistanceRecord>> => {
+  ): Promise<Array<Record>> => {
     return fetch(
       `${
         this.appUrl

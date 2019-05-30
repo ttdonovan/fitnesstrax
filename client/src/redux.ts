@@ -1,6 +1,7 @@
 import moment from "moment-timezone"
 import queryString from "query-string"
 import { Store } from "redux"
+import _ from "lodash/fp"
 
 import * as client from "./client"
 import { isSomething, parseDate } from "./common"
@@ -16,7 +17,7 @@ export interface AppState {
   /* TODO: I actually want a real live timezone entry here, but I don't know how to get the current timezone. Figure it out when I have internet again. */
 }
 
-export const getCredentials = (state: AppState): string | null => state.creds
+export const getAuthToken = (state: AppState): string | null => state.creds
 export const getCurrentlyEditing = (state: AppState): Record | null =>
   state.currentlyEditing
 export const getHistory = (state: AppState): Map<string, Record> =>
@@ -30,6 +31,16 @@ interface ClearErrorAction {
 }
 
 export const clearError = (): ClearErrorAction => ({ type: "CLEAR_ERROR" })
+
+interface SaveRecordsAction {
+  type: "SAVE_RECORDS"
+  records: Array<Record>
+}
+
+export const saveRecords = (records: Array<Record>): SaveRecordsAction => ({
+  type: "SAVE_RECORDS",
+  records,
+})
 
 interface SetAuthTokenAction {
   type: "SET_AUTH_TOKEN"
@@ -56,7 +67,11 @@ export const setError = (msg: string): SetErrorAction => ({
   msg,
 })
 
-export type Actions = ClearErrorAction | SetAuthTokenAction | SetErrorAction
+export type Actions =
+  | ClearErrorAction
+  | SaveRecordsAction
+  | SetAuthTokenAction
+  | SetErrorAction
 
 export const initialState = (): AppState => {
   const params = queryString.parse(location.search)
@@ -69,7 +84,6 @@ export const initialState = (): AppState => {
     const start = parseDate(params.start)
     const end = parseDate(params.end)
     if (isSomething(start) && isSomething(end) && start.isBefore(end)) {
-      console.log("dates detected: ", start, end)
       range = [start, end]
     }
   }
@@ -95,7 +109,14 @@ export const rootReducer = (
 
   if (action.type === "CLEAR_ERROR") {
     state_ = { ...state_, error: null }
+  } else if (action.type === "SAVE_RECORDS") {
+    const history = new Map(state.history)
+    _.forEach((record: Record) => history.set(record.id, record))(
+      action.records,
+    )
+    state_ = { ...state, history }
   } else if (action.type === "SET_AUTH_TOKEN") {
+    localStorage.setItem("credentials", action.token)
     state_ = { ...state, creds: action.token }
   } else if (action.type === "SET_ERROR") {
     state_ = {
@@ -108,6 +129,8 @@ export const rootReducer = (
       },
     }
   }
+
+  return state_
 }
 
 export type AppStore = Store<AppState, Actions>
