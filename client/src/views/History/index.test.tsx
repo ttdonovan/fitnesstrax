@@ -1,0 +1,42 @@
+import { mount } from "enzyme"
+import React from "react"
+import { Provider } from "react-redux"
+
+import { setupEnv } from "../../testSetup"
+import HistoryView from "./index"
+
+describe("HistoryView", () => {
+  it("renders when there is no history", () => {
+    const { store, controller } = setupEnv()
+
+    const wrapper = mount(
+      <Provider store={store}>
+        <HistoryView controller={controller} />
+      </Provider>,
+    )
+
+    console.log(wrapper.debug())
+    expect(wrapper).toMatchSnapshot()
+  })
+
+  it("renders all of the elements of a weights-only history", () => {
+    const { store, controller } = setupEnv()
+    store.dispatch(
+
+    const wrapper = mount(
+      <Provider store={store}>
+        <HistoryView controller={controller} />
+      </Provider>,
+    )
+
+    console.log(wrapper.debug())
+    expect(wrapper).toMatchSnapshot()
+  
+  })
+
+  xit("renders reasonably with duplicate weight entries", () => {})
+
+  xit("renders all of the elements of a timedistance-only history", () => {})
+
+  xit("renders all of the elements of a timedistance-only history", () => {})
+})
