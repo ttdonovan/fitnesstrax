@@ -1,51 +1,56 @@
-class Result<A, E> {
-  ok_: A | null
-  err_: E | null
+type ResultOk<A> = { type_: "OK"; ok: A | null }
+type ResultErr<E> = { type_: "ERR"; err: E | null }
+type ResultRepr<A, E> = ResultOk<A> | ResultErr<E>
 
-  constructor(ok: A | null, err: E | null) {
-    if (ok && !err) {
-      this.ok_ = ok
-      this.err_ = null
-    } else if (!ok && err) {
-      this.ok_ = null
-      this.err_ = err
+const resultReprIsOk = <A, E>(res: ResultRepr<A, E>): res is ResultOk<A> =>
+  (<ResultOk<A>>res).type_ === "OK"
+const resultReprIsErr = <A, E>(res: ResultRepr<A, E>): res is ResultErr<E> =>
+  (<ResultErr<E>>res).type_ === "ERR"
+
+class Result<A, E> {
+  val: ResultRepr<A, E>
+
+  constructor(which: "ok" | "err", ok: A | null, err: E | null) {
+    console.log("Result constructor", ok, err)
+    if (which === "ok") {
+      this.val = { type_: "OK", ok }
     } else {
-      throw new Error("cannot create a Result with both ok and err values")
+      this.val = { type_: "ERR", err }
     }
   }
 
   static Ok<A>(val: A): Result<A, any> {
-    return new Result(val, null)
+    return new Result("ok", val, null)
   }
 
   static Err<E>(err: E): Result<any, E> {
-    return new Result(null, err)
+    return new Result("err", null, err)
   }
 
   map<B>(f: (_: A) => B): Result<B, E> {
-    if (this.ok_) {
-      return Result.Ok(f(this.ok_))
+    if (resultReprIsOk(this.val)) {
+      return Result.Ok(f(this.val.ok))
     }
-    if (this.err_) {
-      return Result.Err(this.err_)
+    if (resultReprIsErr(this.val)) {
+      return Result.Err(this.val.err)
     }
 
     throw new Error("Invalid Result state")
   }
 
   map_err<F>(f: (_: E) => F): Result<A, F> {
-    if (this.err_) {
-      return Result.Err(f(this.err_))
+    if (resultReprIsErr(this.val)) {
+      return Result.Err(f(this.val.err))
     }
-    if (this.ok_) {
-      return Result.Ok(this.ok_)
+    if (resultReprIsOk(this.val)) {
+      return Result.Ok(this.val.ok)
     }
     throw new Error("Invalid Result state")
   }
 
   unwrap(): A {
-    if (this.ok_) {
-      return this.ok_
+    if (resultReprIsOk(this.val)) {
+      return this.val.ok
     }
     throw new Error("forced unwrap of an empty Result")
   }
