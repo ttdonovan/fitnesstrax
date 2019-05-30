@@ -7,7 +7,7 @@ import { isSomething } from "../common"
 //import { runFetchHistory } from "../state/actions"
 import { getCurrentlyEditing, getHistory, getRange } from "../state/state"
 
-import { DailyEntryView, DailyEntryEditView } from "./DailyEntry"
+//import { DailyEntryView, DailyEntryEditView } from "./DailyEntry"
 
 export interface Props {
   //fetchData: () => void

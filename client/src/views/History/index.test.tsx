@@ -19,7 +19,8 @@ describe("HistoryView", () => {
     expect(wrapper).toMatchSnapshot()
   })
 
-  it("renders all of the elements of a weights-only history", () => {
+  xit("renders all of the elements of a weights-only history", () => {
+    /*
     const { store, controller } = setupEnv()
     store.dispatch(
 
@@ -31,7 +32,7 @@ describe("HistoryView", () => {
 
     console.log(wrapper.debug())
     expect(wrapper).toMatchSnapshot()
-  
+  */
   })
 
   xit("renders reasonably with duplicate weight entries", () => {})

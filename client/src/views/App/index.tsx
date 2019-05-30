@@ -3,7 +3,8 @@ import { connect } from "react-redux"
 
 import Controller from "../../controller"
 import * as redux from "../../redux"
-import HomeView from "../Home"
+//import HomeView from "../Home"
+import HistoryView from "../History"
 import LoginView from "../Login"
 
 interface Props {
@@ -12,10 +13,14 @@ interface Props {
 }
 
 const App: React.SFC<Props> = ({ controller, creds }: Props) =>
-  creds ? <HomeView /> : <LoginView controller={controller} token={null} />
+  creds ? (
+    <HistoryView controller={controller} />
+  ) : (
+    <LoginView controller={controller} token={null} />
+  )
 
 const AppView = connect((state: redux.AppState) => ({
-  creds: redux.getCredentials(state),
+  creds: redux.getAuthToken(state),
 }))(App)
 
 export default AppView

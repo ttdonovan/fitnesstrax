@@ -51,7 +51,7 @@ export const Home_ = ({ onLogout }: { onLogout: () => void }) => (
 )
   */
 
-export const Home_ = () => <div>Home Component</div>
+export const Home_ = () => <div id="Home">Home Component</div>
 
 //export const HomeView = connect(() => ({}))(Home)
 export default Home_

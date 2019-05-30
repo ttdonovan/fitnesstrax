@@ -16,7 +16,7 @@ describe("App", () => {
         <AppView controller={controller} />
       </Provider>,
     )
-    expect(wrapper.find('[id="Home"]').exists()).toBe(false)
+    expect(wrapper.find('[id="History"]').exists()).toBe(false)
     expect(wrapper.find('[id="LoginForm"]').exists()).toBe(true)
   })
 
@@ -29,7 +29,7 @@ describe("App", () => {
         <AppView controller={controller} />
       </Provider>,
     )
-    expect(wrapper.find('[id="Home"]').exists()).toBe(true)
+    expect(wrapper.find('[id="History"]').exists()).toBe(true)
     expect(wrapper.find('[id="LoginForm"]').exists()).toBe(false)
   })
 })
