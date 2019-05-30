@@ -1,20 +1,19 @@
 import { mount } from "enzyme"
 import React from "react"
 import { Provider } from "react-redux"
-import { createStore, applyMiddleware } from "redux"
-import thunkMiddleware from "redux-thunk"
+import { createStore } from "redux"
 
-import { App } from "./App"
-import { rootReducer, AppState } from "../state"
-
-const setupStore = () =>
-  createStore(rootReducer, applyMiddleware(thunkMiddleware))
+import { setupEnv } from "../../testSetup"
+import * as redux from "../../redux"
+import AppView from "./index"
 
 describe("App", () => {
   it("renders the login view when no credentials are present", () => {
+    const { store, controller } = setupEnv()
+
     const wrapper = mount(
-      <Provider store={setupStore()}>
-        <App creds={null} />
+      <Provider store={store}>
+        <AppView controller={controller} />
       </Provider>,
     )
     expect(wrapper.find('[id="Home"]').exists()).toBe(false)
@@ -22,9 +21,12 @@ describe("App", () => {
   })
 
   it("renders the home view when credentials are present", () => {
+    const { store, controller } = setupEnv()
+    store.dispatch(redux.setAuthToken("abcdefg"))
+
     const wrapper = mount(
-      <Provider store={setupStore()}>
-        <App creds="some-token" />
+      <Provider store={store}>
+        <AppView controller={controller} />
       </Provider>,
     )
     expect(wrapper.find('[id="Home"]').exists()).toBe(true)
