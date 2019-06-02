@@ -27,3 +27,18 @@ moment.duration.prototype.equals = function(rside: moment.Duration): boolean {
     this.months() == rside.months()
   )
 }
+
+export const dateToDay = (m: moment.Moment): moment.Moment =>
+  m
+    .clone()
+    .hour(0)
+    .minute(0)
+    .second(0)
+    .millisecond(0)
+
+export const withinDay = (day: moment.Moment, target: moment.Moment): boolean =>
+  (day.isBefore(target) || day.equals(target)) &&
+  day
+    .clone()
+    .add(1, "day")
+    .isAfter(target)
