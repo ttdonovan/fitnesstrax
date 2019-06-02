@@ -36,6 +36,9 @@
       "js",
       "json"
     ],
+    "moduleNameMapper": {
+      "\\.(css|less|scss|sss|styl)$": "identity-obj-proxy"
+    },
     "setupFilesAfterEnv": [
       "./setupBeforeEachTest.ts"
     ],
@@ -77,6 +80,7 @@
     "enzyme": "^3.9.0",
     "enzyme-adapter-react-16": "^1.12.1",
     "file-loader": "^3.0.1",
+    "identity-obj-proxy": "^3.0.0",
     "jest": "^24.8.0",
     "jest-fetch-mock": "^2.1.2",
     "ts-jest": "^24.0.2",
