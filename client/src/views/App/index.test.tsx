@@ -22,6 +22,7 @@ describe("App", () => {
 
   it("renders the home view when credentials are present", () => {
     const { store, controller } = setupEnv()
+    controller.fetchRecords = jest.fn()
     store.dispatch(redux.setAuthToken("abcdefg"))
 
     const wrapper = mount(
@@ -31,5 +32,6 @@ describe("App", () => {
     )
     expect(wrapper.find('[id="History"]').exists()).toBe(true)
     expect(wrapper.find('[id="LoginForm"]').exists()).toBe(false)
+    expect(controller.fetchRecords).toHaveBeenCalled()
   })
 })

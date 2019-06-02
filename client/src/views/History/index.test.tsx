@@ -7,8 +7,9 @@ import { setupEnv } from "../../testSetup"
 import HistoryView from "./index"
 
 describe("HistoryView", () => {
-  xit("renders when there is no history", () => {
+  it("renders when there is no history", () => {
     const { store, controller } = setupEnv()
+    controller.fetchRecords = jest.fn()
 
     const wrapper = mount(
       <Provider store={store}>
@@ -21,8 +22,6 @@ describe("HistoryView", () => {
         />
       </Provider>,
     )
-
-    console.log(wrapper.debug())
     expect(wrapper).toMatchSnapshot()
   })
 
