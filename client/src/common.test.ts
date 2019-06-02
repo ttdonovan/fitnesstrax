@@ -45,6 +45,7 @@ describe("bucketByDay", () => {
   ]
 
   const res = bucketByDay(lst)
+  console.log(reference.format())
   console.log(res)
   console.log(res.keys())
   console.log(JSON.stringify(res.get(reference.format())))
