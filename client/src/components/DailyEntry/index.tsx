@@ -1,3 +1,30 @@
+import _ from "lodash/fp"
+import React from "react"
+import moment from "moment-timezone"
+
+import { classnames, ClassNames } from "../../classnames"
+import * as types from "../../types"
+import TimeDistanceRecordView from "./TimeDistance"
+import WeightRecordView from "./Weight"
+
+interface Props {
+  date: string
+  records: Array<types.Record>
+}
+
+const Record: React.SFC<Props> = ({ date, records }: Props) => (
+  <div>
+    <div>{date}</div>
+    {_.map((r: types.Record) => (
+      <div>{r.date.format("YYYY-MM-DD hh:mm:ss ZZ")}</div>
+    ))(records)}
+    <hr />
+  </div>
+)
+
+export default Record
+
+/*
 import cns from "classnames"
 import React from "react"
 import math from "mathjs"
@@ -26,7 +53,9 @@ import { TimeDistance, TimeDistanceEdit } from "./TimeDistanceRow"
 import { WeightForm, WeightEditForm } from "./WeightForm"
 import { SetRepRow } from "./SetRepRow"
 import { DailySummary } from "./DailySummary"
+*/
 
+/*
 const distanceFieldStyle = {
   display: "inline",
   padding: 1,
@@ -72,6 +101,7 @@ export const DailyEntryView: React.SFC<Props> = ({
     </div>
   </div>
 )
+*/
 
 /*
 export const DailyEntryViewR = connect(
@@ -283,6 +313,7 @@ export const DailyEntryEditView = connect(
 //   //     || (isSomething(initialData) && ! isSomething
 // }
 
+/*
 const WorkoutPulldown = props => (
   <div key="workout-pulldown" className="dropdown">
     <button
@@ -313,6 +344,7 @@ const WorkoutPulldown = props => (
     </div>
   </div>
 )
+*/
 
 /*
             <a className="dropdown-item" href="#">Crunches</a>

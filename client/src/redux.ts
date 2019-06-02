@@ -12,7 +12,6 @@ export interface AppState {
   currentlyEditing: Record | null
   error: { msg: string; timeout: Promise<{}> } | null
   history: Map<string, Record>
-  range: Range
   utcOffset: number
   /* TODO: I actually want a real live timezone entry here, but I don't know how to get the current timezone. Figure it out when I have internet again. */
 }
@@ -20,9 +19,12 @@ export interface AppState {
 export const getAuthToken = (state: AppState): string | null => state.creds
 export const getCurrentlyEditing = (state: AppState): Record | null =>
   state.currentlyEditing
-export const getHistory = (state: AppState): Map<string, Record> =>
-  state.history
-export const getRange = (state: AppState) => state.range
+export const getHistory = (state: AppState): Array<Record> =>
+  _.compose(
+    _.map(pair => pair[1]),
+    _.entries,
+  )(state.history)
+//export const getRange = (state: AppState) => state.range
 export const getRecord = (state: AppState): Map<string, Record> => state.history
 export const getUtcOffset = (state: AppState): number => state.utcOffset
 
@@ -79,6 +81,7 @@ export const initialState = (): AppState => {
     localStorage.setItem("credentials", params.token[0])
   }
 
+  /*
   var range = null
   if (isSomething(params.start) && isSomething(params.end)) {
     const start = parseDate(params.start)
@@ -87,6 +90,7 @@ export const initialState = (): AppState => {
       range = [start, end]
     }
   }
+     */
 
   /* TODO: use the timezone in localStorage, defaulting to moment's calculation only if necessary */
   return {
@@ -94,7 +98,7 @@ export const initialState = (): AppState => {
     currentlyEditing: null,
     error: null,
     history: new Map(),
-    range,
+    //range,
     utcOffset: moment().utcOffset(),
   }
 }

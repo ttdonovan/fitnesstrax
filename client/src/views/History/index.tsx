@@ -1,37 +1,55 @@
 import React from "react"
+import _ from "lodash/fp"
 import moment from "moment-timezone"
 import { connect } from "react-redux"
 
 import Controller from "../../controller"
 import * as redux from "../../redux"
 import { Range, Record } from "../../types"
+import RangeView from "../../components/range"
+import DailyEntryView from "../../components/DailyEntry"
+import { dateToDay, withinDay } from "../../moment-extensions"
+import { keyBy } from "../../common"
+
+const bucketByDay = (recs: Array<Record>): Map<string, Array<Record>> =>
+  keyBy((r: Record) => dateToDay(r.date).format("YYYY-MM-DD"))(recs)
 
 interface Props {
   controller: Controller
   currentEdit: Record | null
-  history: Map<string, Record>
+  history: Array<Record>
   range: Range
 }
 
 class History extends React.Component<Props, {}> {
   componentDidMount() {
-    this.props.controller.fetchRecords({
-      start: moment("2017-10-23T22:09:00Z"),
-      end: moment("2018-11-12T18:30:00Z"),
-    })
+    const { range } = this.props
+    this.props.controller.fetchRecords(range)
   }
 
   render() {
     const { controller, currentEdit, history, range } = this.props
-    console.log("HistoryView", history)
-    return <div id="History" />
+
+    const buckets = bucketByDay(history)
+    _.entries(buckets).forEach(pair => console.log(pair[0].toString()))
+    return (
+      <div id="History">
+        <RangeView classes={{}} range={range} />
+        {_.compose(
+          _.map(([k, r]: [string, Array<Record>]) => {
+            return <DailyEntryView key={k} date={k} records={r} />
+          }),
+          _.sortBy(pair => pair[0]),
+          _.entries,
+        )(buckets)}
+      </div>
+    )
   }
 }
 
 const HistoryView = connect((state: redux.AppState) => ({
   currentEdit: redux.getCurrentlyEditing(state),
   history: redux.getHistory(state),
-  range: redux.getRange(state),
 }))(History)
 
 export default HistoryView

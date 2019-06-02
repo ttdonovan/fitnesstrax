@@ -8,6 +8,11 @@ export type Range = { start: moment.Moment; end: moment.Moment }
 
 export type Record = TimeDistanceRecord | WeightRecord
 
+export const recordIsTimeDistance = (rec: Record): rec is TimeDistanceRecord =>
+  (<TimeDistanceRecord>rec).distance !== undefined
+export const recordIsWeightRecord = (rec: Record): rec is WeightRecord =>
+  (<WeightRecord>rec).weight !== undefined
+
 export class WeightRecord {
   constructor(
     readonly id: string,
@@ -26,7 +31,7 @@ export enum TimeDistanceActivity {
 }
 
 export const timeDistanceActivityFromString = (
-  str: String,
+  str: string,
 ): Result<TimeDistanceActivity, string> => {
   if (str === "Cycling") {
     return Result.Ok(TimeDistanceActivity.Cycling)
@@ -35,6 +40,13 @@ export const timeDistanceActivityFromString = (
   } else {
     return Result.Err("unrecognized activity type")
   }
+}
+
+export const timeDistanceActivityToString = (
+  activity: TimeDistanceActivity,
+): string => {
+  if (activity === TimeDistanceActivity.Cycling) return "Cycling"
+  else if (activity === TimeDistanceActivity.Running) return "Running"
 }
 
 export class TimeDistanceRecord {
