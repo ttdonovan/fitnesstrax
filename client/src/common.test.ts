@@ -37,9 +37,9 @@ describe("bucketByDay", () => {
   ]
 
   const res = bucketByDay(lst)
-  console.log(reference.utc().format())
+  console.log(reference.rfc3339())
   console.log(res)
   console.log(res.keys())
-  console.log(JSON.stringify(res.get(reference.format())))
+  console.log(JSON.stringify(res.get(reference.rfc3339())))
   expect(res.get(reference.rfc3339())).toHaveLength(3)
 })
