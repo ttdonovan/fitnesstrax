@@ -7,20 +7,34 @@ import * as types from "../../types"
 import TimeDistanceRecordView from "./TimeDistance"
 import WeightRecordView from "./Weight"
 
+import "./style.css"
+
 interface Props {
   date: string
   records: Array<types.Record>
 }
 
-const Record: React.SFC<Props> = ({ date, records }: Props) => (
-  <div>
-    <div>{date}</div>
-    {_.map((r: types.Record) => (
-      <div>{r.date.format("YYYY-MM-DD hh:mm:ss ZZ")}</div>
-    ))(records)}
-    <hr />
-  </div>
-)
+const Record: React.SFC<Props> = ({ date, records }: Props) => {
+  const weights: Array<types.WeightRecord> = _.filter(
+    (r: types.Record): boolean => types.recordIsWeight(r),
+  )(records) as Array<types.WeightRecord>
+
+  const timeDistances: Array<types.TimeDistanceRecord> = _.filter(
+    (r: types.Record): boolean => types.recordIsTimeDistance(r),
+  )(records) as Array<types.TimeDistanceRecord>
+
+  return (
+    <div className="daily-entry">
+      <div>{date}</div>
+      {_.map((r: types.WeightRecord) => <WeightRecordView record={r} />)(
+        weights,
+      )}
+      {_.map((r: types.TimeDistanceRecord) => (
+        <TimeDistanceRecordView record={r} />
+      ))(timeDistances)}
+    </div>
+  )
+}
 
 export default Record
 

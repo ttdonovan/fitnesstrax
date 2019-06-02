@@ -1,6 +1,7 @@
 import * as moment from "moment-timezone"
 import math from "mathjs"
 
+import "./moment-extensions"
 import Option from "./option"
 import Result from "./result"
 
@@ -10,7 +11,7 @@ export type Record = TimeDistanceRecord | WeightRecord
 
 export const recordIsTimeDistance = (rec: Record): rec is TimeDistanceRecord =>
   (<TimeDistanceRecord>rec).distance !== undefined
-export const recordIsWeightRecord = (rec: Record): rec is WeightRecord =>
+export const recordIsWeight = (rec: Record): rec is WeightRecord =>
   (<WeightRecord>rec).weight !== undefined
 
 export class WeightRecord {

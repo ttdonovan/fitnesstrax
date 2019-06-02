@@ -1,0 +1,11 @@
+.daily-entry {
+  margin-bottom: 2em;
+}
+
+.timedistance {
+  display: flex;
+}
+
+.timedistance div {
+  width: 25%;
+}

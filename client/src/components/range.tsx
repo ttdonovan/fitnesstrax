@@ -11,7 +11,7 @@ interface Props {
 
 const Range: React.SFC<Props> = ({ classes, range }: Props) => (
   <div className={classnames(classes)}>
-    {range.start.toString()} - {range.end.toString()}
+    {range.start.format("YY-MM-DD")} - {range.end.format("YY-MM-DD")}
   </div>
 )
 

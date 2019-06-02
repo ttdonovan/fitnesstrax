@@ -138,7 +138,6 @@ export const parseWeight = str => parseUnit(str)
 
 export const renderDistance = d => d.to("km").format()
 
-export const renderDuration = t => t.format("HH:mm:ss")
 export const parseDuration = str => {
   const lst = str.split(":")
   var m = null

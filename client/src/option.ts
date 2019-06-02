@@ -37,6 +37,13 @@ class Option<A> {
     return Option.None()
   }
 
+  or(def: A): A {
+    if (this.val_) {
+      return this.val_
+    }
+    return def
+  }
+
   unwrap(): A {
     if (this.val_) {
       return this.val_

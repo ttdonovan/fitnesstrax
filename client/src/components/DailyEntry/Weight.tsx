@@ -8,8 +8,7 @@ interface Props {
 }
 
 const WeightRecord: React.SFC<Props> = ({ record }) => (
-  <div>
-    <div>{record.date.toString()}</div>
+  <div className="record weight">
     <div>{record.weight.toString()}</div>
   </div>
 )
