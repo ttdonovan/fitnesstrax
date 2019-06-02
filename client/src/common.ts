@@ -1,10 +1,12 @@
 import math from "mathjs"
-import moment from "moment"
+import moment from "moment-timezone"
 import _ from "lodash/fp"
 
 import Equals from "./equals"
 import Option from "./option"
 import "./moment-extensions"
+import { Record } from "./types"
+import trace from "./trace"
 
 /* pulled this directly from https://stackoverflow.com/questions/35325370/how-to-post-a-x-www-form-urlencoded-request-from-react-native */
 export const encodeFormBody = (params: { [_: string]: string }): string =>
@@ -75,11 +77,23 @@ export const firstFn = fn => lst => {
 }
      */
 
-// TODO: Replace this with a HashMap from my library
-/*
-export const indexList = <A>(f: (A) => string, lst: Array<A>): object =>
-  mapFromTuples(lst.map((v: A): [string, A] => [f(v), v]))
- */
+// This keyBy function is much like _.keyBy, except that it returns all of the
+// values that match a key, not just the last one.
+export const keyBy = <K, V>(
+  f: (_: V) => K,
+): ((_: Array<V>) => Map<K, Array<V>>) => lst => {
+  const m: Map<K, Array<V>> = new Map()
+  lst.forEach(elem => {
+    const key = f(elem)
+    const curLst = m.get(key)
+    if (!isSomething(curLst)) {
+      m.set(key, [elem])
+    } else {
+      m.set(key, [...curLst, elem])
+    }
+  })
+  return m
+}
 
 export const listToMap = (f, lst) =>
   lst.map(v => [f(v), v]).reduce((m, [k, v]) => {

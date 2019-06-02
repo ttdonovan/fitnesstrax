@@ -45,4 +45,14 @@ describe("Verify date bounds", () => {
     expect(withinDay(reference, moment("2019-01-01T04:00:00Z"))).toBe(true)
     expect(withinDay(reference, moment("2019-01-01T03:59:59Z"))).toBe(false)
   })
+
+  it("compares some real dates", () => {
+    const reference = moment("2017-10-28T00:00:00Z")
+
+    console.log(reference.rfc3339())
+
+    expect(withinDay(reference, moment("2017-10-28T11:25:00-0500"))).toBe(true)
+    expect(withinDay(reference, moment("2017-10-28T02:27:00-0500"))).toBe(true)
+    expect(withinDay(reference, moment("2017-10-28T05:22:00-0500"))).toBe(true)
+  })
 })
