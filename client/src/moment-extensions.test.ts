@@ -1,5 +1,33 @@
 import moment from "moment-timezone"
-import { withinDay } from "./moment-extensions"
+import { midnight, withinDay } from "./moment-extensions"
+
+describe("date time handling", () => {
+  it("parses timezones reasonably", () => {
+    expect(moment("2018-10-10T04:00:00Z").rfc3339()).toEqual(
+      "2018-10-10T04:00:00Z",
+    )
+  })
+
+  it("formats UTC midnight in UTC", () => {
+    const time = moment("2019-05-15T00:00:00Z")
+    expect(time.rfc3339()).toEqual("2019-05-15T00:00:00Z")
+  })
+
+  it("formats -0400 midnight in UTC", () => {
+    const time = moment("2019-05-15T00:00:00-0400")
+    expect(time.rfc3339()).toEqual("2019-05-15T04:00:00Z")
+  })
+
+  it("formats -0500 midnight in UTC", () => {
+    const time = moment("2019-05-15T00:00:00-0500")
+    expect(time.rfc3339()).toEqual("2019-05-15T05:00:00Z")
+  })
+
+  it("formats -0600 midnight in UTC", () => {
+    const time = moment("2019-05-15T00:00:00-0600")
+    expect(time.rfc3339()).toEqual("2019-05-15T06:00:00Z")
+  })
+})
 
 describe("Verify date bounds", () => {
   it("can determine that noon UTC is within a day", () => {

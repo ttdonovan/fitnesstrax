@@ -1,15 +1,7 @@
 import moment from "moment-timezone"
-import { dateToDay } from "./moment-extensions"
+import { midnight } from "./moment-extensions"
 
 import { keyBy } from "./common"
-
-describe("date time handling", () => {
-  it("parses timezones reasonably", () => {
-    expect(moment("2018-10-10T04:00:00Z").rfc3339()).toEqual(
-      "2018-10-10T04:00:00Z",
-    )
-  })
-})
 
 describe("keyBy", () => {
   it("should group things by the grouping function", () => {
@@ -33,7 +25,7 @@ describe("keyBy", () => {
 const bucketByDay = (
   recs: Array<moment.Moment>,
 ): Map<string, Array<moment.Moment>> =>
-  keyBy((r: moment.Moment) => dateToDay(r).format())(recs)
+  keyBy((r: moment.Moment) => midnight(r).rfc3339())(recs)
 
 describe("bucketByDay", () => {
   const reference = moment("2017-10-28T00:00:00-0500")
@@ -45,9 +37,9 @@ describe("bucketByDay", () => {
   ]
 
   const res = bucketByDay(lst)
-  console.log(reference.format())
+  console.log(reference.utc().format())
   console.log(res)
   console.log(res.keys())
   console.log(JSON.stringify(res.get(reference.format())))
-  expect(res.get(reference.format())).toHaveLength(3)
+  expect(res.get(reference.rfc3339())).toHaveLength(3)
 })

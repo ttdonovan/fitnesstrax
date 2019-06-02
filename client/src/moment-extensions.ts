@@ -12,7 +12,7 @@ moment.fn.equals = function(rside: moment.Moment): boolean {
 }
 
 moment.fn.rfc3339 = function(): string {
-  return `${this.utc().format("YYYY-MM-DDThh:mm:ss")}Z`
+  return `${this.utc().format("YYYY-MM-DDTHH:mm:ss")}Z`
 }
 
 declare module "moment" {
@@ -28,7 +28,7 @@ moment.duration.prototype.equals = function(rside: moment.Duration): boolean {
   )
 }
 
-export const dateToDay = (m: moment.Moment): moment.Moment =>
+export const midnight = (m: moment.Moment): moment.Moment =>
   m
     .clone()
     .hour(0)
