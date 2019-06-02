@@ -48,7 +48,6 @@
     "trailingComma": "all"
   },
   "dependencies": {
-    "classnames": "^2.2.6",
     "mathjs": "^5.7.0",
     "moment": "^2.24.0",
     "moment-duration-format": "^2.2.2",
