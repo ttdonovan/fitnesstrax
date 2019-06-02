@@ -8,11 +8,11 @@ import * as redux from "../../redux"
 import { Range, Record } from "../../types"
 import RangeView from "../../components/range"
 import DailyEntryView from "../../components/DailyEntry"
-import { dateToDay, withinDay } from "../../moment-extensions"
+import { withinDay } from "../../moment-extensions"
 import { keyBy } from "../../common"
 
 const bucketByDay = (recs: Array<Record>): Map<string, Array<Record>> =>
-  keyBy((r: Record) => dateToDay(r.date).format("YYYY-MM-DD"))(recs)
+  keyBy((r: Record) => r.date.format("YYYY-MM-DD"))(recs)
 
 interface Props {
   controller: Controller

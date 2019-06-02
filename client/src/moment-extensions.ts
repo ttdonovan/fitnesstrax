@@ -28,13 +28,22 @@ moment.duration.prototype.equals = function(rside: moment.Duration): boolean {
   )
 }
 
+/* This will always be midnight with respect to the day that the record was
+ * recorded, independent of time zone. */
+/*
 export const midnight = (m: moment.Moment): moment.Moment =>
   m
-    .clone()
     .hour(0)
     .minute(0)
     .second(0)
     .millisecond(0)
+   */
+/*
+    .hour(0)
+    .minute(0)
+    .second(0)
+    .millisecond(0)
+     */
 
 export const withinDay = (day: moment.Moment, target: moment.Moment): boolean =>
   (day.isBefore(target) || day.equals(target)) &&

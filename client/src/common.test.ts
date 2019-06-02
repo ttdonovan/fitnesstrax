@@ -1,7 +1,9 @@
 import moment from "moment-timezone"
-import { midnight } from "./moment-extensions"
+//import { midnight } from "./moment-extensions"
 
 import { keyBy } from "./common"
+
+import trace from "./trace"
 
 describe("keyBy", () => {
   it("should group things by the grouping function", () => {
@@ -20,12 +22,35 @@ describe("keyBy", () => {
   })
 })
 
+describe("midnight", () => {
+  it("works with UTC times", () => {
+    const base = moment("2019-06-02T04:13:00Z")
+    expect(base.format("YYYY-MM-DD")).toEqual("2019-06-02")
+  })
+
+  it("works with reference to the stated time zone", () => {
+    const base = moment("2019-06-02T04:13:00-0600")
+    console.log(
+      "reference time",
+      moment("2019-06-02T04:13:00-0600").format("YYYY-MM-DD"),
+    )
+    console.log(
+      "start of day",
+      moment("2019-06-02T04:13:00-0600").format("YYYY-MM-DD"),
+    )
+    expect(base.format("YYYY-MM-DD")).toEqual("2019-06-02")
+  })
+})
+
 // VERY IMPORTANT: keying by moment.Moment does not work. I assume it is
 // because moment.Moment does not implement any standard equality operator.
 const bucketByDay = (
   recs: Array<moment.Moment>,
 ): Map<string, Array<moment.Moment>> =>
-  keyBy((r: moment.Moment) => midnight(r).rfc3339())(recs)
+  keyBy(
+    (r: moment.Moment): string =>
+      trace<string>("indexing: ")(r.format("YYYY-MM-DD")),
+  )(recs)
 
 describe("bucketByDay", () => {
   const reference = moment("2017-10-28T00:00:00-0500")
@@ -41,5 +66,5 @@ describe("bucketByDay", () => {
   console.log(res)
   console.log(res.keys())
   console.log(JSON.stringify(res.get(reference.rfc3339())))
-  expect(res.get(reference.rfc3339())).toHaveLength(3)
+  expect(res.get(reference.format("YYYY-MM-DD"))).toHaveLength(3)
 })
