@@ -1,62 +1,28 @@
-import * as moment from "moment"
+import * as moment from "moment-timezone"
 import math from "mathjs"
 
-import { equalDurations, first, firstFn, isSomething } from "./common"
+import "./moment-extensions"
+import Option from "./option"
+import Result from "./result"
 
-export class Result<A, E> {
-  ok_: A | null
-  err_: E | null
+export type Range = { start: moment.Moment; end: moment.Moment }
 
-  constructor(ok: A | null, err: E | null) {
-    if (ok && !err) {
-      this.ok_ = ok
-      this.err_ = null
-    } else if (!ok && err) {
-      this.ok_ = null
-      this.err_ = err
-    } else {
-      throw new Error("cannot create a Result with both ok and err values")
-    }
-  }
+export type Record = TimeDistanceRecord | WeightRecord
 
-  static Ok<A>(val: A): Result<A, any> {
-    return new Result(val, null)
-  }
+export const recordIsTimeDistance = (rec: Record): rec is TimeDistanceRecord =>
+  (<TimeDistanceRecord>rec).distance !== undefined
+export const recordIsWeight = (rec: Record): rec is WeightRecord =>
+  (<WeightRecord>rec).weight !== undefined
 
-  static Err<E>(err: E): Result<any, E> {
-    return new Result(null, err)
-  }
-
-  map<B>(f: (A) => B): Result<B, E> {
-    if (this.ok_) {
-      return Result.Ok(f(this.ok_))
-    }
-    return Result.Err(this.err_)
-  }
-
-  map_err<F>(f: (E) => F): Result<A, F> {
-    if (this.err_) {
-      return Result.Err(f(this.err_))
-    }
-    return Result.Ok(this.ok_)
-  }
-
-  unwrap(): A | null {
-    return this.ok_
-  }
-}
-
-export class WeightSample {
-  uuid: string
-  date: moment.Moment
-  weight: math.Unit
-
-  constructor(uuid, date, weight) {
-    ;[this.uuid, this.date, this.weight] = [uuid, date, weight]
-  }
+export class WeightRecord {
+  constructor(
+    readonly id: string,
+    readonly date: moment.Moment,
+    readonly weight: math.Unit,
+  ) {}
 
   clone() {
-    return new WeightSample(this.uuid, this.date.clone(), this.weight.clone())
+    return new WeightRecord(this.id, this.date.clone(), this.weight.clone())
   }
 }
 
@@ -65,51 +31,63 @@ export enum TimeDistanceActivity {
   Running,
 }
 
-export class TimeDistanceSample {
-  uuid: string
-  date: moment.Moment
-  activity: TimeDistanceActivity
-  distance: math.Unit
-  duration: moment.Duration
-
-  constructor(uuid, timestamp, activity, distance, duration) {
-    ;[this.uuid, this.date, this.activity, this.distance, this.duration] = [
-      uuid,
-      timestamp,
-      activity,
-      distance,
-      duration,
-    ]
+export const timeDistanceActivityFromString = (
+  str: string,
+): Result<TimeDistanceActivity, string> => {
+  if (str === "Cycling") {
+    return Result.Ok(TimeDistanceActivity.Cycling)
+  } else if (str === "Running") {
+    return Result.Ok(TimeDistanceActivity.Running)
+  } else {
+    return Result.Err("unrecognized activity type")
   }
+}
+
+export const timeDistanceActivityToString = (
+  activity: TimeDistanceActivity,
+): string => {
+  if (activity === TimeDistanceActivity.Cycling) return "Cycling"
+  else if (activity === TimeDistanceActivity.Running) return "Running"
+}
+
+export class TimeDistanceRecord {
+  constructor(
+    readonly id: string,
+    readonly date: moment.Moment,
+    readonly activity: TimeDistanceActivity,
+    readonly distance: Option<math.Unit>,
+    readonly duration: Option<moment.Duration>,
+  ) {}
 
   equals(other) {
     return (
-      this.uuid == other.uuid &&
-      this.activity == other.activity &&
-      this.date.isSame(other.date) &&
+      this.id === other.id &&
+      this.activity === other.activity &&
+      this.date.equals(other.date) &&
       this.distance.equals(other.distance) &&
-      equalDurations(this.duration, other)
+      this.duration.equals(other.duration)
     )
   }
 
   clone() {
-    return new TimeDistanceSample(
-      this.uuid,
+    return new TimeDistanceRecord(
+      this.id,
       this.date.clone(),
       this.activity,
-      this.distance.clone(),
-      moment.duration(this.duration),
+      this.distance.map(v => v.clone()),
+      this.duration.map(v => moment.duration(v)),
     )
   }
 }
 
+/*
 export class HistoryEntry {
   date: moment.Moment
   weight: WeightSample | null
   timeDistance: Array<TimeDistanceSample> | null
   setRep: Array<any> | null
 
-  constructor(date, weight, timeDistance, setRep) {
+  constructor({ date, weight, timeDistance, setRep }) {
     this.date = date
     this.weight = weight
     this.timeDistance = timeDistance
@@ -161,3 +139,4 @@ export class HistoryData {
     return first(this.entries_).date
   }
 }
+   */

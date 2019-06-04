@@ -16,5 +16,5 @@ pub use middleware::logging::LoggingMiddleware;
 pub use middleware::staticfile::StaticHandler;
 pub use server::{start_server, Configuration};
 pub use trax::types::{ActivityType, TimeDistance, TimeDistanceRecord, Weight, WeightRecord};
-pub use trax::{Params, Result, Trax};
+pub use trax::{Params, Result, Trax, TraxRecord};
 pub use utils::CleanupFile;

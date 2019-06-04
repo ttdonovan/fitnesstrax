@@ -1,17 +1,18 @@
 import React from "react"
 import math from "mathjs"
 import moment from "moment"
+import _ from "lodash/fp"
 
-import { nub, renderDistance, renderDuration } from "../common"
+import { renderDistance, renderDuration } from "../common"
 import { TimeDistanceSummary } from "./TimeDistanceRow"
-import { TimeDistanceActivity, TimeDistanceSample } from "../types"
+import { TimeDistanceActivity, TimeDistanceRecord } from "../types"
 
 export const DailySummary = ({
   tdEntries,
 }: {
-  tdEntries: Array<TimeDistanceSample>
+  tdEntries: Array<TimeDistanceRecord>
 }) => {
-  const activities: Array<TimeDistanceActivity> = nub(
+  const activities: Array<TimeDistanceActivity> = _.uniq(
     this.props.tdEntries.map(td => td.activity),
   )
   return (

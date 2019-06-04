@@ -20,6 +20,12 @@ pub enum Error {
     SeriesError(emseries::Error),
 }
 
+impl From<emseries::Error> for Error {
+    fn from(error: emseries::Error) -> Self {
+        Error::SeriesError(error)
+    }
+}
+
 impl fmt::Display for Error {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
@@ -117,6 +123,25 @@ impl Trax {
         self.series
             .delete(uid)
             .map_err(|err| Error::SeriesError(err))
+    }
+
+    pub fn get_history(
+        &self,
+        start: DateTime<Utc>,
+        end: DateTime<Utc>,
+    ) -> Result<Vec<emseries::Record<TraxRecord>>> {
+        self.series
+            .search(emseries::And {
+                lside: emseries::StartTime {
+                    time: start,
+                    incl: true,
+                },
+                rside: emseries::EndTime {
+                    time: end,
+                    incl: true,
+                },
+            })
+            .map_err(Error::from)
     }
 }
 

@@ -15,7 +15,7 @@ import {
   renderDuration,
 } from "../common"
 import { TextEditForm } from "./ValidatedText"
-import { TimeDistanceActivity, TimeDistanceSample } from "../types"
+import { TimeDistanceActivity, TimeDistanceRecord } from "../types"
 
 const distanceFieldStyle = {
   display: "inline",
@@ -29,9 +29,9 @@ const setsFieldStyle = { display: "inline", padding: 1, margin: 0 }
 export const TimeDistance = ({
   data: record,
 }: {
-  data: TimeDistanceSample
+  data: TimeDistanceRecord
 }) => (
-  <tr key={record.uuid}>
+  <tr key={record.id}>
     <td> {renderTime(record.date)} </td>
     <td> {record.activity} </td>
     <td> {renderDistance(record.distance)} </td>
@@ -42,7 +42,7 @@ export const TimeDistance = ({
 
 export interface TimeDistanceEditProps {
   activity: any
-  record?: TimeDistanceSample
+  record?: TimeDistanceRecord
   onUpdateDate: (moment) => void
   onUpdateDistance: (any) => void
   onUpdateDuration: (any) => void
@@ -54,7 +54,7 @@ export const TimeDistanceEdit = ({
   onUpdateDistance,
   onUpdateDuration,
 }: TimeDistanceEditProps) => (
-  <tr key={record.uuid ? record.uuid : "new-row"}>
+  <tr key={record.id ? record.id : "new-row"}>
     <td>
       <TextEditForm
         value={record.date ? record.date : moment()}
@@ -87,9 +87,10 @@ export const TimeDistanceSummary = ({
   entries,
   activity,
 }: {
-  entries: Array<TimeDistanceSample>
+  entries: Array<TimeDistanceRecord>
   activity: TimeDistanceActivity
 }) => {
+  /*
   const entries_ = entries.filter(td => td.activity == this.props.activity)
   const distance = entries_
     .map(td => td.distance)
@@ -104,4 +105,6 @@ export const TimeDistanceSummary = ({
       <td> {renderDuration(duration)} </td>{" "}
     </tr>
   )
+  */
+  return <div />
 }

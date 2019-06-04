@@ -2,15 +2,18 @@ import React from "react"
 import { Action } from "redux"
 import { connect } from "react-redux"
 
-import { runLogout } from "../state/actions"
+import * as redux from "../../redux"
 
+/*
 import { CalendarView } from "./Calendar"
 import { HistoryView } from "./HistoryView"
 import { LoginView } from "./LoginForm"
 import { NewDay } from "./NewDay"
 import { SummaryView } from "./Summary"
+*/
 
-export const Home = ({ onLogout }: { onLogout: () => void }) => (
+/*
+export const Home_ = ({ onLogout }: { onLogout: () => void }) => (
   <div id="Home" className="container-fluid">
     <div className="row">
       <nav className="navbar fixed-top navbar-toggleable-sm navbar-light bg-faded">
@@ -46,8 +49,9 @@ export const Home = ({ onLogout }: { onLogout: () => void }) => (
     </div>
   </div>
 )
+  */
 
-export const HomeView = connect(
-  () => ({}),
-  (dispatch: any) => ({ onLogout: () => dispatch(runLogout()) }),
-)(Home)
+export const Home_ = () => <div id="Home">Home Component</div>
+
+//export const HomeView = connect(() => ({}))(Home)
+export default Home_

@@ -2,26 +2,30 @@ import React from "react"
 import moment from "moment"
 import { connect } from "react-redux"
 
-import { HistoryEntry } from "../types"
+//import { HistoryEntry } from "../types"
 import { isSomething } from "../common"
-import { runFetchHistory } from "../state/actions"
+//import { runFetchHistory } from "../state/actions"
 import { getCurrentlyEditing, getHistory, getRange } from "../state/state"
 
-import { DailyEntryView, DailyEntryEditView } from "./DailyEntry"
+//import { DailyEntryView, DailyEntryEditView } from "./DailyEntry"
 
 export interface Props {
-  fetchData: () => void
+  //fetchData: () => void
   history: any
   range: any
   currentEdit: any
 }
 
 class History extends React.Component<Props, object> {
+  /*
   componentDidMount() {
     this.props.fetchData()
   }
+  */
 
   render() {
+    return <div />
+    /*
     if (isSomething(this.props.history)) {
       const today = moment({ hour: 0, minute: 0, second: 0 })
       const [start, end] = isSomething(this.props.range)
@@ -30,7 +34,6 @@ class History extends React.Component<Props, object> {
       const days = fillInDayRange(start, end).reverse()
       return (
         <div>
-          {" "}
           {days.map(date => {
             var entry = this.props.history.entry(date)
             if (
@@ -44,12 +47,12 @@ class History extends React.Component<Props, object> {
               isSomething(this.props.currentEdit) &&
               !this.props.currentEdit.isSame(entry.date)
             ) {
-              return <DailyEntryView entry={entry} />
+              return <DailyEntryView date={date} data={entry} />
             } else if (
               isSomething(entry) &&
               !isSomething(this.props.currentEdit)
             ) {
-              return <DailyEntryView entry={entry} />
+              return <DailyEntryView date={date} data={entry} />
             } else if (
               !isSomething(entry) &&
               isSomething(this.props.currentEdit) &&
@@ -62,14 +65,20 @@ class History extends React.Component<Props, object> {
               !this.props.currentEdit.isSame(date)
             ) {
               return (
-                <DailyEntryView entry={new HistoryEntry(date, null, [], [])} />
+                <DailyEntryView
+                  date={date}
+                  data={{ weightRecord: null, timeDistanceRecords: [] }}
+                />
               )
             } else if (
               !isSomething(entry) &&
               !isSomething(this.props.currentEdit)
             ) {
               return (
-                <DailyEntryView entry={new HistoryEntry(date, null, [], [])} />
+                <DailyEntryView
+                  date={date}
+                  data={{ weightRecord: null, timeDistanceRecords: [] }}
+                />
               )
             } else {
               throw new Error(
@@ -84,10 +93,12 @@ class History extends React.Component<Props, object> {
     } else {
       return null
     }
+    */
   }
 }
 
 /* *ew* There must be a better way to do this. I'm thinking a generator that successively applies a function to a vaule. */
+/*
 const fillInDayRange = (startDate, endDate) => {
   var current = startDate.clone()
   var lst = [startDate]
@@ -98,6 +109,7 @@ const fillInDayRange = (startDate, endDate) => {
   }
   return lst
 }
+*/
 
 export const HistoryView = connect(
   state => ({
@@ -105,5 +117,5 @@ export const HistoryView = connect(
     currentEdit: getCurrentlyEditing(state),
     range: getRange(state),
   }),
-  (dispatch: any) => ({ fetchData: () => dispatch(runFetchHistory()) }),
+  //(dispatch: any) => ({ fetchData: () => dispatch(runFetchHistory()) }),
 )(History)

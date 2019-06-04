@@ -1,39 +1,48 @@
 import math from "mathjs"
 import moment from "moment"
+import _ from "lodash/fp"
 
 import {
   encodeFormBody,
-  equalDurations,
-  first,
-  firstFn,
-  indexList,
+  //equalDurations,
+  //first,
+  //firstFn,
+  //indexList,
   isSomething,
-  maybe,
-  midnight,
-  nub,
-  parseDate_,
+  //maybe,
+  //midnight,
+  //nub,
+  //parseDate_,
+  parseRfc3339,
 } from "./common"
+import "./moment-extensions"
+
+import Option from "./option"
+import Result from "./result"
 
 import {
-  Result,
-  HistoryData,
-  HistoryEntry,
-  TimeDistanceSample,
-  WeightSample,
+  //HistoryData,
+  //HistoryEntry,
+  Record,
+  TimeDistanceRecord,
+  WeightRecord,
+  timeDistanceActivityFromString,
 } from "./types"
 
-// TODO: return a WeightSample object, not a simple dictionary
-export const weightSample = (uuid, date, weight): WeightSample =>
-  new WeightSample(uuid, date, weight)
+// TODO: return a WeightRecord object, not a simple dictionary
+export const weightSample = (uuid, date, weight): WeightRecord =>
+  new WeightRecord(uuid, date, weight)
 
+/*
 const weightSampleFromJS = js => {
   // "weight":[{"data":{"weight":84.4,"date":"2017-05-28T05:00:00Z"},"id":"9e4e462b-494d-4784-a380-9e32218e28c7"},84.4]
-  return new WeightSample(
+  return new WeightRecord(
     js.id,
     parseDate_(js.data.date, "YYYY-MM-DDTHH:mm:ssZ"),
     math.unit(js.data.weight, "kg"),
   )
 }
+   */
 
 export const timeDistanceSample = (
   uuid,
@@ -41,35 +50,40 @@ export const timeDistanceSample = (
   activity,
   distance,
   duration,
-): TimeDistanceSample =>
-  new TimeDistanceSample(uuid, timestamp, activity, distance, duration)
+): TimeDistanceRecord =>
+  new TimeDistanceRecord(uuid, timestamp, activity, distance, duration)
 
+/*
 const timeDistanceSampleFromJS = js => {
   console.log(js)
-  return new TimeDistanceSample(
+  return new TimeDistanceRecord(
     js.id,
     parseDate_(js.data.date, "YYYY-MM-DDTHH:mm:ssZ"),
     js.data.activity,
-    math.unit(js.data.distance, "m"),
-    moment.duration(js.data.duration, "s"),
+    Option.Some(math.unit(js.data.distance, "m")),
+    Option.Some(moment.duration(js.data.duration, "s")),
   )
 }
+   */
 
 //                                           , 'distance': math.unit(js.data.distance, 'm')
 //                                           , 'date': js.data.date
 //                                           , 'activity': js.data.activity
 //                                           , 'duration': js.data.duration
 
+/*
 const recordsFromJS = (
   json: any,
 ): {
-  weight: Array<WeightSample>
-  timeDistance: Array<TimeDistanceSample>
+  weight: Array<WeightRecord>
+  timeDistance: Array<TimeDistanceRecord>
 } => ({
   weight: json.weight.map(j => weightSampleFromJS(j)),
   timeDistance: json.timeDistance.map(j => timeDistanceSampleFromJS(j)),
 })
+   */
 
+/*
 export const historyFromRecords = (offset, records) => {
   var weightBuckets: object = indexList(
     w => w.date.format("YYYY-MM-DD"),
@@ -98,44 +112,17 @@ export const historyFromRecords = (offset, records) => {
   return history
 }
 
-export const fetchHistory = (
-  appUrl,
-  auth,
-  startDate,
-  endDate,
-): Promise<
-  Result<
-    { weight: Array<WeightSample>; timeDistance: Array<TimeDistanceSample> },
-    string
-  >
-> => {
-  var params: RequestInit = {
-    method: "GET",
-    mode: "cors",
-    headers: new Headers({ Authorization: auth }),
-  }
-  return (isSomething(startDate) && isSomething(endDate)
-    ? fetch(
-        appUrl +
-          "/api/history/date/" +
-          startDate.format() +
-          "/" +
-          endDate.format(),
-        params,
-      )
-    : fetch(appUrl + "/api/history", params)
-  )
-    .then(response => response.json())
-    .then(js => Result.Ok(recordsFromJS(js)))
-}
+     */
 
 export const saveWeight = async (
-  appUrl,
-  auth,
-  weightSample,
-): Promise<Result<WeightSample, string>> => {
+  _appUrl: string,
+  _auth: string,
+  _weightSample: WeightRecord,
+): Promise<Result<WeightRecord, string>> => {
+  throw new Error("Not Implemented")
+  /*
   const body = {
-    date: weightSample.date.format(standardTimeFormat),
+    date: weightSample.date.format(rfc3339Format),
     weight: weightSample.weight.toNumeric("kg"),
   }
   const url = isSomething(weightSample.uuid)
@@ -153,16 +140,39 @@ export const saveWeight = async (
   const response = await fetch(appUrl + url, params)
   const js = await response.json()
   return Result.Ok(weightSampleFromJS(js))
+   */
 }
 
+/*
+export const fetchWeight = async (
+  appUrl: string,
+  auth: string,
+  startDate: moment.Moment,
+  endDate: moment.Moment,
+): Promise<Result<Array<WeightRecord>, string>> => {
+  const response = await fetch(
+    `${appUrl}/api/weight/history/${startDate.format()}/${endDate.format()}`,
+    {
+      method: "GET",
+      mode: "cors",
+      headers: new Headers({ Authorization: auth }),
+    },
+  )
+  const js = await response.json()
+  return Result.Ok(js.map(weightSampleFromJS))
+}
+   */
+
 export const saveTimeDistance = (
-  appUrl,
-  auth,
-  timeDistanceSample,
-): Promise<Result<TimeDistanceSample, string>> => {
+  appUrl: string,
+  auth: string,
+  timeDistanceSample: TimeDistanceRecord,
+): Promise<Result<TimeDistanceRecord, string>> => {
+  throw new Error("not implemented")
+  /*
   const body = Object.assign({
     activity: timeDistanceSample.activity,
-    date: timeDistanceSample.date.format(standardTimeFormat),
+    date: timeDistanceSample.date.format(rfc3339Format),
     distance: timeDistanceSample.distance.toNumeric("km"),
     duration: timeDistanceSample.duration.asSeconds(),
   })
@@ -187,6 +197,110 @@ export const saveTimeDistance = (
     .then(response => response.json())
     .then(js => Result.Ok(timeDistanceSampleFromJS(js)))
     .catch(err => Result.Err(err))
+   */
 }
 
-const standardTimeFormat = "YYYY-MM-DDTHH:mm:ssZ"
+interface WeightJS {
+  id: string
+  data: {
+    Weight: {
+      date: string
+      weight: number
+    }
+  }
+}
+
+interface TimeDistanceJS {
+  id: string
+  data: {
+    TimeDistance: {
+      activity: string
+      comments: string | null
+      date: string
+      distance: number | null
+      duration: number | null
+    }
+  }
+}
+
+type RecordJS = TimeDistanceJS | WeightJS
+
+const isWeightJS = (val: RecordJS): val is WeightJS =>
+  (<WeightJS>val).data.Weight !== undefined
+
+const isTimeDistanceJS = (val: RecordJS): val is TimeDistanceJS =>
+  (<TimeDistanceJS>val).data.TimeDistance !== undefined
+
+const parseRecord = (
+  js: TimeDistanceJS | WeightJS,
+): TimeDistanceRecord | WeightRecord => {
+  if (isWeightJS(js)) {
+    return new WeightRecord(
+      js.id,
+      parseRfc3339(js.data.Weight.date).unwrap(),
+      math.unit(js.data.Weight.weight, "kg"),
+    )
+  } else if (isTimeDistanceJS(js)) {
+    return new TimeDistanceRecord(
+      js.id,
+      parseRfc3339(js.data.TimeDistance.date).unwrap(),
+      timeDistanceActivityFromString(js.data.TimeDistance.activity).unwrap(),
+      js.data.TimeDistance.distance
+        ? Option.Some(math.unit(js.data.TimeDistance.distance, "m"))
+        : Option.None(),
+      js.data.TimeDistance.duration
+        ? Option.Some(
+            moment.duration({ seconds: js.data.TimeDistance.duration }),
+          )
+        : Option.None(),
+    )
+  } else {
+    throw new Error("Unhandled response")
+  }
+}
+
+class Client {
+  appUrl: string
+
+  constructor(appUrl: string) {
+    this.appUrl = appUrl
+  }
+
+  fetchHistory = (
+    auth: string,
+    startDate: moment.Moment,
+    endDate: moment.Moment,
+  ): Promise<Array<Record>> => {
+    return fetch(
+      `${
+        this.appUrl
+      }/api/history/all/${startDate.rfc3339()}/${endDate.rfc3339()}`,
+      {
+        method: "GET",
+        mode: "cors",
+        headers: new Headers({
+          accept: "application/json",
+          authorization: `Bearer ${auth}`,
+        }),
+      },
+    )
+      .then(r => r.json())
+      .then(js => {
+        return _.map(parseRecord)(js)
+      })
+  }
+
+  rfc3339Format: string = "YYYY-MM-DDTHH:mm:ssZ"
+
+  authenticate = (auth: string): Promise<boolean> => {
+    return fetch(`${this.appUrl}/api/history/all`, {
+      method: "OPTIONS",
+      mode: "cors",
+      headers: new Headers({
+        authorization: `Bearer ${auth}`,
+      }),
+    }).then(r => r.ok)
+  }
+}
+
+export default Client

@@ -31,6 +31,10 @@ git = "https://github.com/iron/mount.git"
 name = "app"
 path = "src/web.rs"
 
+[[bin]]
+name = "load_records"
+path = "src/load_records.rs"
+
 # [[bin]]
 # name = "weight"
 # path = "src/weight.rs"

@@ -10,6 +10,7 @@ extern crate params;
 extern crate router;
 extern crate serde;
 
+use self::chrono::*;
 use self::iron::headers::{Authorization, Bearer};
 use self::iron::middleware::{BeforeMiddleware, Handler};
 use self::iron::prelude::*;
@@ -31,11 +32,13 @@ type Result<A> = result::Result<A, Error>;
 #[derive(Debug)]
 enum Error {
     BadParameter,
+    IOError(std::io::Error),
+    MissingParameter,
     NotAuthorized,
     NotFound,
-    IOError(std::io::Error),
-    SerdeError(serde_json::error::Error),
     RuntimeError(trax::Error),
+    SerdeError(serde_json::error::Error),
+    TimeParseError(chrono::ParseError),
 }
 
 impl From<trax::Error> for Error {
@@ -44,15 +47,23 @@ impl From<trax::Error> for Error {
     }
 }
 
+impl From<chrono::ParseError> for Error {
+    fn from(error: chrono::ParseError) -> Self {
+        Error::TimeParseError(error)
+    }
+}
+
 impl fmt::Display for Error {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
             Error::BadParameter => write!(f, "Bad Parameter"),
+            Error::IOError(err) => write!(f, "IO Error in operation: {}", err),
+            Error::MissingParameter => write!(f, "Required parameter is missing"),
             Error::NotAuthorized => write!(f, "Not Authorized"),
             Error::NotFound => write!(f, "Not Found"),
-            Error::IOError(err) => write!(f, "IO Error in operation: {}", err),
-            Error::SerdeError(err) => write!(f, "Deserialization error: {}", err),
             Error::RuntimeError(err) => write!(f, "Runtime error: {}", err),
+            Error::SerdeError(err) => write!(f, "Deserialization error: {}", err),
+            Error::TimeParseError(err) => write!(f, "Time value did not parse: {}", err),
         }
     }
 }
@@ -61,22 +72,26 @@ impl error::Error for Error {
     fn description(&self) -> &str {
         match self {
             Error::BadParameter => "Bad Parameter",
+            Error::IOError(_) => "IO Error",
+            Error::MissingParameter => "Missing Parameter",
             Error::NotAuthorized => "Not Authorized",
             Error::NotFound => "Not Found",
-            Error::IOError(_) => "IO Error",
-            Error::SerdeError(_) => "Deserialization Error",
             Error::RuntimeError(_) => "Runtime Error",
+            Error::SerdeError(_) => "Deserialization Error",
+            Error::TimeParseError(_) => "Time parse error",
         }
     }
 
     fn cause(&self) -> Option<&error::Error> {
         match self {
             Error::BadParameter => None,
+            Error::IOError(ref err) => Some(err),
+            Error::MissingParameter => None,
             Error::NotAuthorized => None,
             Error::NotFound => None,
-            Error::IOError(ref err) => Some(err),
-            Error::SerdeError(ref err) => Some(err),
             Error::RuntimeError(ref err) => Some(err),
+            Error::SerdeError(ref err) => Some(err),
+            Error::TimeParseError(ref err) => Some(err),
         }
     }
 }
@@ -286,6 +301,37 @@ impl Handler for DeleteHandler {
     }
 }
 
+struct GetHistoryHandler {
+    app: Arc<RwLock<trax::Trax>>,
+}
+impl Handler for GetHistoryHandler {
+    fn handle(&self, req: &mut Request) -> IronResult<Response> {
+        let run = || {
+            let capture = req.extensions.get::<Router>().unwrap().clone();
+
+            let start_date = capture
+                .find("start")
+                .ok_or(Error::MissingParameter)
+                .and_then(|s| DateTime::parse_from_rfc3339(s).map_err(Error::from))
+                .map(|dt| dt.with_timezone(&Utc))?;
+
+            let end_date = capture
+                .find("end")
+                .ok_or(Error::MissingParameter)
+                .and_then(|s| DateTime::parse_from_rfc3339(s).map_err(Error::from))
+                .map(|dt| dt.with_timezone(&Utc))?;
+
+            self.app
+                .read()
+                .unwrap()
+                .get_history(start_date, end_date)
+                .map_err(Error::from)
+        };
+
+        app_to_iron(run())
+    }
+}
+
 fn api_routes(app_rc: Arc<RwLock<trax::Trax>>) -> Router {
     let mut router = Router::new();
 
@@ -325,6 +371,14 @@ fn api_routes(app_rc: Arc<RwLock<trax::Trax>>) -> Router {
             app: app_rc.clone(),
         },
         "delete_record",
+    );
+
+    router.get(
+        "/api/history/all/:start/:end",
+        GetHistoryHandler {
+            app: app_rc.clone(),
+        },
+        "get_history_all",
     );
 
     router

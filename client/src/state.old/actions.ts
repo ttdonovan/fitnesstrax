@@ -2,13 +2,13 @@ import { getCredentials } from "./index"
 import { getRange, getUtcOffset, shouldFetchHistory } from "./state"
 import { authenticate } from "../auth"
 import {
-  fetchHistory,
-  historyFromRecords,
+  //fetchHistory,
+  //historyFromRecords,
   saveTimeDistance,
   saveWeight,
 } from "../client"
 import { isSomething } from "../common"
-import { Result } from "../types"
+import Result from "../result"
 
 export const STATUS_OK = "SUCCESS"
 export const STATUS_ERROR = "ERROR"
@@ -52,9 +52,12 @@ export const runLogout = () => {
   }
 }
 
+/*
 const fetchHistoryAction = (status, val) =>
   asyncAction(HISTORY_FETCH, status, val)
+     */
 
+/*
 export const runFetchHistory = () => {
   return (dispatch, getState) => {
     const st = getState()
@@ -78,6 +81,7 @@ export const runFetchHistory = () => {
     }
   }
 }
+     */
 
 export const cancelEditEntry = () => ({ type: HISTORY_CANCEL_EDIT_ENTRY })
 export const editEntry = date => ({ type: HISTORY_EDIT_ENTRY, date: date })

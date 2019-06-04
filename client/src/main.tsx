@@ -2,15 +2,16 @@ import React from "react"
 import ReactDOM from "react-dom"
 import math from "mathjs"
 import moment from "moment"
-import thunkMiddleware from "redux-thunk"
+//import thunkMiddleware from "redux-thunk"
 import { connect, Provider } from "react-redux"
 import { createLogger } from "redux-logger"
 import { createStore, applyMiddleware } from "redux"
 import PropTypes from "prop-types"
 
 import { isSomething } from "./common"
-import { handleAction } from "./state/reducers"
-import AppView from "./components/App"
+import * as redux from "./redux"
+import AppView from "./views/App"
+import Controller from "./controller"
 
 const index = require("./index.html")
 
@@ -39,13 +40,13 @@ const index = require("./index.html")
  */
 
 const main = function main() {
-  const store = createStore(
-    handleAction,
-    applyMiddleware(thunkMiddleware, createLogger()),
-  )
+  const store = createStore(redux.rootReducer, applyMiddleware(createLogger()))
+
+  const controller = new Controller(window.origin, store)
+
   ReactDOM.render(
     <Provider store={store}>
-      <AppView />
+      <AppView controller={controller} />
     </Provider>,
     document.getElementById("root"),
   )

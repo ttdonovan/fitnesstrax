@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "build": "webpack",
+    "build:watch": "webpack --watch",
     "setup": "exit 1",
     "test": "jest",
     "test:watch": "jest --watch",
@@ -35,8 +36,14 @@
       "js",
       "json"
     ],
+    "moduleNameMapper": {
+      "\\.(css|less|scss|sss|styl)$": "identity-obj-proxy"
+    },
     "setupFilesAfterEnv": [
       "./setupBeforeEachTest.ts"
+    ],
+    "setupFiles": [
+      "./setupOnFileLoad.ts"
     ]
   },
   "prettier": {
@@ -45,11 +52,10 @@
     "trailingComma": "all"
   },
   "dependencies": {
-    "css-loader": "^2.1.1",
-    "file-loader": "^3.0.1",
     "mathjs": "^5.7.0",
     "moment": "^2.24.0",
     "moment-duration-format": "^2.2.2",
+    "moment-timezone": "^0.5.25",
     "query-string": "^6.4.0",
     "react": "^16.8.4",
     "react-dom": "^16.8.4",
@@ -62,14 +68,21 @@
   "devDependencies": {
     "@types/enzyme": "^3.9.1",
     "@types/enzyme-adapter-react-16": "^1.0.5",
-    "@types/jest": "^24.0.11",
+    "@types/jest": "^24.0.13",
+    "@types/lodash": "^4.14.132",
     "@types/mathjs": "^5.0.1",
+    "@types/moment-duration-format": "^2.2.2",
+    "@types/moment-timezone": "^0.5.12",
     "@types/react": "^16.8.8",
     "@types/react-dom": "^16.8.2",
     "@types/react-redux": "^7.0.8",
+    "css-loader": "^2.1.1",
     "enzyme": "^3.9.0",
     "enzyme-adapter-react-16": "^1.12.1",
-    "jest": "^24.7.1",
+    "file-loader": "^3.0.1",
+    "identity-obj-proxy": "^3.0.0",
+    "jest": "^24.8.0",
+    "jest-fetch-mock": "^2.1.2",
     "ts-jest": "^24.0.2",
     "ts-loader": "^5.3.3",
     "typescript": "^3.3.3333",
