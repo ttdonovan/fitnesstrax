@@ -30,6 +30,7 @@ xdescribe("midnight", () => {
 
   it("works with reference to the stated time zone", () => {
     const base = moment("2019-06-02T04:13:00-0600")
+    /*
     console.log(
       "reference time",
       moment("2019-06-02T04:13:00-0600").format("YYYY-MM-DD"),
@@ -38,6 +39,7 @@ xdescribe("midnight", () => {
       "start of day",
       moment("2019-06-02T04:13:00-0600").format("YYYY-MM-DD"),
     )
+       */
     expect(base.format("YYYY-MM-DD")).toEqual("2019-06-02")
   })
 })
@@ -59,9 +61,9 @@ describe("bucketByDay", () => {
   ]
 
   const res = bucketByDay(lst)
-  console.log(reference.rfc3339())
-  console.log(res)
-  console.log(res.keys())
-  console.log(JSON.stringify(res.get(reference.rfc3339())))
+  //console.log(reference.rfc3339())
+  //console.log(res)
+  //console.log(res.keys())
+  //console.log(JSON.stringify(res.get(reference.rfc3339())))
   expect(res.get(reference.format("YYYY-MM-DD"))).toHaveLength(3)
 })

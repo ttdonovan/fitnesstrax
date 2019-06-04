@@ -11,7 +11,6 @@ class Result<A, E> {
   val: ResultRepr<A, E>
 
   constructor(which: "ok" | "err", ok: A | null, err: E | null) {
-    console.log("Result constructor", ok, err)
     if (which === "ok") {
       this.val = { type_: "OK", ok }
     } else {

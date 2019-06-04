@@ -1,5 +1,5 @@
 import moment from "moment-timezone"
-import { midnight, withinDay } from "./moment-extensions"
+import { withinDay } from "./moment-extensions"
 
 describe("date time handling", () => {
   it("parses timezones reasonably", () => {
@@ -77,7 +77,7 @@ describe("Verify date bounds", () => {
   it("compares some real dates", () => {
     const reference = moment("2017-10-28T00:00:00Z")
 
-    console.log(reference.rfc3339())
+    //console.log(reference.rfc3339())
 
     expect(withinDay(reference, moment("2017-10-28T11:25:00-0500"))).toBe(true)
     expect(withinDay(reference, moment("2017-10-28T02:27:00-0500"))).toBe(true)
