@@ -1,11 +1,10 @@
-extern crate chrono;
 extern crate dimensioned;
 extern crate emseries;
 extern crate serde;
 extern crate serde_derive;
 extern crate serde_json;
 
-use chrono::prelude::*;
+use emseries::DateTimeTz;
 use std::error;
 use std::fmt;
 use std::path;
@@ -60,7 +59,7 @@ pub enum TraxRecord {
 }
 
 impl emseries::Recordable for TraxRecord {
-    fn timestamp(&self) -> DateTime<Utc> {
+    fn timestamp(&self) -> DateTimeTz {
         match self {
             TraxRecord::TimeDistance(rec) => rec.timestamp(),
             TraxRecord::Weight(rec) => rec.timestamp(),
@@ -127,8 +126,8 @@ impl Trax {
 
     pub fn get_history(
         &self,
-        start: DateTime<Utc>,
-        end: DateTime<Utc>,
+        start: DateTimeTz,
+        end: DateTimeTz,
     ) -> Result<Vec<emseries::Record<TraxRecord>>> {
         self.series
             .search(emseries::And {
@@ -149,6 +148,8 @@ impl Trax {
 mod tests {
     use super::super::utils::CleanupFile;
     use super::*;
+    use chrono::TimeZone;
+    use chrono_tz::Etc::UTC;
     use dimensioned::si::{KG, M, S};
 
     use trax::types::{ActivityType, TimeDistance, Weight, WeightRecord};
@@ -167,7 +168,7 @@ mod tests {
     fn it_records_and_retrieves_a_new_weight() {
         let (mut app, _cleanup) = standard_app("it_records_and_retrieves_a_new_weight.series");
 
-        let date = Utc::now();
+        let date = DateTimeTz(UTC.ymd(2019, 5, 15).and_hms(12, 0, 0).with_timezone(&UTC));
         let record = WeightRecord {
             date,
             weight: Weight::new(85.0 * KG),
@@ -186,7 +187,7 @@ mod tests {
     fn it_records_and_retrieves_new_time_distance() {
         let (mut app, _cleanup) = standard_app("it_records_and_retrieves_new_time_distance.series");
 
-        let date = Utc::now();
+        let date = DateTimeTz(UTC.ymd(2019, 5, 15).and_hms(12, 0, 0).with_timezone(&UTC));
         let record = TimeDistance {
             timestamp: date,
             comments: Some(String::from("just some notes")),
@@ -208,9 +209,9 @@ mod tests {
     fn it_handles_both_record_types() {
         let (mut app, _cleanup) = standard_app("it_handles_both_record_types.series");
 
-        let date = Utc::now();
+        let date = DateTimeTz(UTC.ymd(2019, 5, 15).and_hms(12, 0, 0).with_timezone(&UTC));
         let td_record = TimeDistance {
-            timestamp: date,
+            timestamp: date.clone(),
             comments: Some(String::from("just some notes")),
             distance: Some(25.0 * M),
             duration: Some(15.0 * S),
@@ -240,7 +241,7 @@ mod tests {
 
     #[test]
     fn it_saves_both_record_types_to_file() {
-        let date = Utc::now();
+        let date = DateTimeTz(UTC.ymd(2019, 5, 15).and_hms(12, 0, 0).with_timezone(&UTC));
         let series_path = path::PathBuf::from("var/it_saves_both_record_types_to_file.series");
         let _cleanup = CleanupFile(series_path.clone());
 
@@ -251,14 +252,14 @@ mod tests {
             .expect("the app to be created");
 
             let td_record = TimeDistance {
-                timestamp: date,
+                timestamp: date.clone(),
                 comments: Some(String::from("just some notes")),
                 distance: Some(25.0 * M),
                 duration: Some(15.0 * S),
                 activity: ActivityType::Running,
             };
             let w_record = WeightRecord {
-                date,
+                date: date.clone(),
                 weight: Weight::new(85.0 * KG),
             };
 
@@ -281,7 +282,7 @@ mod tests {
         assert_eq!(
             w_record,
             Some(TraxRecord::Weight(WeightRecord {
-                date,
+                date: date.clone(),
                 weight: Weight::new(85.0 * KG)
             }))
         );
@@ -303,9 +304,9 @@ mod tests {
     fn it_updates_a_weight() {
         let (mut app, _cleanup) = standard_app("it_updates_a_weight.series");
 
-        let date = Utc::now();
+        let date = DateTimeTz(UTC.ymd(2019, 5, 15).and_hms(12, 0, 0).with_timezone(&UTC));
         let record = WeightRecord {
-            date,
+            date: date.clone(),
             weight: Weight::new(85.0 * KG),
         };
         let record_ = WeightRecord {
@@ -329,9 +330,9 @@ mod tests {
     fn it_updates_a_time_distance() {
         let (mut app, _cleanup) = standard_app("it_updates_a_time_distance.series");
 
-        let date = Utc::now();
+        let date = DateTimeTz(UTC.ymd(2019, 5, 15).and_hms(12, 0, 0).with_timezone(&UTC));
         let record = TimeDistance {
-            timestamp: date,
+            timestamp: date.clone(),
             comments: Some(String::from("just some notes")),
             distance: Some(25.0 * M),
             duration: Some(15.0 * S),

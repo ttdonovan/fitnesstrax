@@ -1,8 +1,8 @@
 import React from "react"
 import { connect } from "react-redux"
-import moment from "moment-timezone"
 
 import Controller from "../../controller"
+import DateTimeTz from "../../datetimetz"
 import * as redux from "../../redux"
 //import HomeView from "../Home"
 import HistoryView from "../History"
@@ -18,8 +18,8 @@ const App: React.SFC<Props> = ({ controller, creds }: Props) =>
     <HistoryView
       controller={controller}
       range={{
-        start: moment("2017-10-27T00:00:00Z"),
-        end: moment("2018-01-01T00:00:00Z"),
+        start: DateTimeTz.fromString("2017-10-27T00:00:00Z").unwrap(),
+        end: DateTimeTz.fromString("2018-01-01T00:00:00Z").unwrap(),
       }}
     />
   ) : (

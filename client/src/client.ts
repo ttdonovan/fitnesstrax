@@ -1,5 +1,6 @@
-import math from "mathjs"
 import moment from "moment"
+import math from "mathjs"
+//import moment from "moment"
 import _ from "lodash/fp"
 
 import {
@@ -13,10 +14,11 @@ import {
   //midnight,
   //nub,
   //parseDate_,
-  parseRfc3339,
+  parseDTZ,
 } from "./common"
-import "./moment-extensions"
+//import "./moment-extensions"
 
+import DateTimeTz from "./datetimetz"
 import Option from "./option"
 import Result from "./result"
 
@@ -237,13 +239,13 @@ const parseRecord = (
   if (isWeightJS(js)) {
     return new WeightRecord(
       js.id,
-      parseRfc3339(js.data.Weight.date).unwrap(),
+      DateTimeTz.fromString(js.data.Weight.date).unwrap(),
       math.unit(js.data.Weight.weight, "kg"),
     )
   } else if (isTimeDistanceJS(js)) {
     return new TimeDistanceRecord(
       js.id,
-      parseRfc3339(js.data.TimeDistance.date).unwrap(),
+      DateTimeTz.fromString(js.data.TimeDistance.date).unwrap(),
       timeDistanceActivityFromString(js.data.TimeDistance.activity).unwrap(),
       js.data.TimeDistance.distance
         ? Option.Some(math.unit(js.data.TimeDistance.distance, "m"))
@@ -268,13 +270,13 @@ class Client {
 
   fetchHistory = (
     auth: string,
-    startDate: moment.Moment,
-    endDate: moment.Moment,
+    startDate: DateTimeTz,
+    endDate: DateTimeTz,
   ): Promise<Array<Record>> => {
     return fetch(
       `${
         this.appUrl
-      }/api/history/all/${startDate.rfc3339()}/${endDate.rfc3339()}`,
+      }/api/history/all/${startDate.toString()}/${endDate.toString()}`,
       {
         method: "GET",
         mode: "cors",

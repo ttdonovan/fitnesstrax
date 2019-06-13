@@ -4,7 +4,7 @@ import _ from "lodash/fp"
 
 import Equals from "./equals"
 import Option from "./option"
-import "./moment-extensions"
+//import "./moment-extensions"
 import { Record } from "./types"
 import trace from "./trace"
 
@@ -116,9 +116,20 @@ export const mapFromTuples = <A>(lst: Array<[string, A]>): object => {
 }
      */
 
-export const parseRfc3339 = (str: string): Option<moment.Moment> => {
+const parseRfc3339 = (str: string): Option<moment.Moment> => {
   const m = moment(str)
   return m.isValid() ? Option.Some(m) : Option.None()
+}
+
+export const parseDTZ = (str: string): Option<moment.Moment> => {
+  const parts = str.split(" @ ")
+  if (parts.length === 2) {
+    const dtz = moment(parts[0]).tz(parts[1])
+    return dtz.isValid() ? Option.Some(dtz) : Option.None()
+  } else {
+    const dtz = moment(parts[0])
+    return dtz.isValid() ? Option.Some(dtz) : Option.None()
+  }
 }
 
 export const renderDate = (d: moment.Moment): string => d.format("YYYY-MM-DD")

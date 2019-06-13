@@ -7,7 +7,7 @@ let
       fetchurl = pkgs.fetchurl;
       stdenv = pkgs.stdenv;
     };
-    node = import ./nixpkgs/node9.nix { pkgs = pkgs; };
+    node = import ./nixpkgs/node10.nix { pkgs = pkgs; };
 in pkgs.stdenv.mkDerivation {
     name = "fitnesstrax";
 

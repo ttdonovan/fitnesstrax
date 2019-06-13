@@ -1,8 +1,8 @@
 import math from "mathjs"
-import moment from "moment-timezone"
+import moment from "moment"
 
-import { parseRfc3339 } from "./common"
 import Client from "./client"
+import DateTimeTz from "./datetimetz"
 import Option from "./option"
 import { TimeDistanceActivity, TimeDistanceRecord } from "./types"
 
@@ -78,8 +78,8 @@ describe("fetchHistory", () => {
 
     const result = await client.fetchHistory(
       "auth-data",
-      moment("2018-10-10T04:00:00Z"),
-      moment("2018-10-16T04:00:00Z"),
+      DateTimeTz.fromString("2018-10-10T04:00:00Z").unwrap(),
+      DateTimeTz.fromString("2018-10-16T04:00:00Z").unwrap(),
     )
 
     expect(fetchMock).toHaveBeenCalledWith(
@@ -98,15 +98,15 @@ describe("fetchHistory", () => {
 
   it("works with a mix of data types", async () => {
     fetchMock.mockResponseOnce(
-      '[{"id":"ae4bf2c4-9130-43d3-abb4-937c64d0d0f2","data":{"Weight":{"date":"2018-10-10T04:00:00Z","weight":86.2}}},{"id":"15f9c464-6427-4368-ab88-13875d47865f","data":{"TimeDistance":{"activity":"Running","comments":null,"date":"2018-11-14T17:30:00Z","distance":3640.0,"duration":1800.0}}}]',
+      '[{"id":"ae4bf2c4-9130-43d3-abb4-937c64d0d0f2","data":{"Weight":{"date":"2018-10-10T04:00:00+00:00 America/New_York","weight":86.2}}},{"id":"15f9c464-6427-4368-ab88-13875d47865f","data":{"TimeDistance":{"activity":"Running","comments":null,"date":"2018-11-14T17:30:00+00:00 America/New_York","distance":3640.0,"duration":1800.0}}}]',
     )
 
     const client = new Client("http://localhost:9010")
 
     const result = await client.fetchHistory(
       "auth-data",
-      moment("2018-10-10T04:00:00Z"),
-      moment("2018-10-16T04:00:00Z"),
+      DateTimeTz.fromString("2018-10-10T04:00:00Z").unwrap(),
+      DateTimeTz.fromString("2018-10-16T04:00:00Z").unwrap(),
     )
 
     expect(result).toHaveLength(2)
@@ -116,7 +116,9 @@ describe("fetchHistory", () => {
     )
     expect(weightRecord).toMatchObject({
       id: "ae4bf2c4-9130-43d3-abb4-937c64d0d0f2",
-      date: parseRfc3339("2018-10-10T04:00:00Z").unwrap(),
+      date: DateTimeTz.fromString(
+        "2018-10-10T04:00:00+00:00 America/New_York",
+      ).unwrap(),
       weight: math.unit(86.2, "kg"),
     })
     const tdRecord = result.find(
@@ -130,7 +132,11 @@ describe("fetchHistory", () => {
     )
     expect(
       tdRecord &&
-        tdRecord.date.isSame(parseRfc3339("2018-11-14T17:30:00Z").unwrap()),
+        tdRecord.date.equals(
+          DateTimeTz.fromString(
+            "2018-11-14T17:30:00+00:00 America/New_York",
+          ).unwrap(),
+        ),
     ).toEqual(true)
     expect(
       (<TimeDistanceRecord>tdRecord).distance.map(d =>

@@ -1,4 +1,5 @@
 extern crate chrono;
+extern crate chrono_tz;
 extern crate dimensioned;
 extern crate emseries;
 extern crate serde;

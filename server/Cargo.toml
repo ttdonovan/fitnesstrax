@@ -5,10 +5,11 @@ authors = ["Savanni D'Gerinel <savanni@luminescent-dreams.com>"]
 
 [dependencies]
 chrono = { version = "0.4", features = ["serde"] }
+chrono-tz = { version = "0.4", features = ["serde"] }
 dimensioned = "0.7.0"
-emseries = "0.3.0"
-# emseries = "0.2.0"
-# emseries = { path = "../emseries" }
+# emseries = "0.3.0"
+# emseries = { path = "../../emseries" }
+emseries = { git = "https://github.com/luminescent-dreams/emseries", branch = "sol" }
 iron = "0.6"
 iron-cors = "0.8.0"
 micrologger = { git = "https://github.com/luminescent-dreams/micrologger", branch = "sol" }

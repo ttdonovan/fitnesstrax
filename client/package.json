@@ -52,10 +52,13 @@
     "trailingComma": "all"
   },
   "dependencies": {
+    "@types/luxon": "^1.15.1",
+    "luxon": "^1.16.0",
     "mathjs": "^5.7.0",
     "moment": "^2.24.0",
     "moment-duration-format": "^2.2.2",
     "moment-timezone": "^0.5.25",
+    "pad-left": "^2.1.0",
     "query-string": "^6.4.0",
     "react": "^16.8.4",
     "react-dom": "^16.8.4",

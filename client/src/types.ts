@@ -1,11 +1,11 @@
 import * as moment from "moment-timezone"
 import math from "mathjs"
 
-import "./moment-extensions"
+import DateTimeTz from "./datetimetz"
 import Option from "./option"
 import Result from "./result"
 
-export type Range = { start: moment.Moment; end: moment.Moment }
+export type Range = { start: DateTimeTz; end: DateTimeTz }
 
 export type Record = TimeDistanceRecord | WeightRecord
 
@@ -17,12 +17,12 @@ export const recordIsWeight = (rec: Record): rec is WeightRecord =>
 export class WeightRecord {
   constructor(
     readonly id: string,
-    readonly date: moment.Moment,
+    readonly date: DateTimeTz,
     readonly weight: math.Unit,
   ) {}
 
   clone() {
-    return new WeightRecord(this.id, this.date.clone(), this.weight.clone())
+    return new WeightRecord(this.id, this.date, this.weight.clone())
   }
 }
 
@@ -53,7 +53,7 @@ export const timeDistanceActivityToString = (
 export class TimeDistanceRecord {
   constructor(
     readonly id: string,
-    readonly date: moment.Moment,
+    readonly date: DateTimeTz,
     readonly activity: TimeDistanceActivity,
     readonly distance: Option<math.Unit>,
     readonly duration: Option<moment.Duration>,
@@ -72,7 +72,7 @@ export class TimeDistanceRecord {
   clone() {
     return new TimeDistanceRecord(
       this.id,
-      this.date.clone(),
+      this.date,
       this.activity,
       this.distance.map(v => v.clone()),
       this.duration.map(v => moment.duration(v)),

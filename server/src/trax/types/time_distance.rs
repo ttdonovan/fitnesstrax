@@ -1,10 +1,5 @@
-use chrono::prelude::*;
-use dimensioned::si::{Meter, Second, M, S};
-use emseries::Recordable;
-use serde::de;
-use serde::de::{Deserialize, Deserializer, MapAccess, Visitor};
-use serde::ser::{Serialize, SerializeStruct, Serializer};
-use std::fmt;
+use dimensioned::si::{Meter, Second};
+use emseries::{DateTimeTz, Recordable};
 
 #[derive(Clone, Debug, PartialEq, Deserialize, Serialize)]
 pub enum ActivityType {
@@ -14,20 +9,21 @@ pub enum ActivityType {
 
 pub type TimeDistanceRecord = TimeDistance;
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct TimeDistance {
     pub activity: ActivityType,
     pub comments: Option<String>,
     pub distance: Option<Meter<f64>>,
     pub duration: Option<Second<f64>>,
-    pub timestamp: DateTime<Utc>,
+    #[serde(rename = "date")]
+    pub timestamp: DateTimeTz,
 }
 
 impl TimeDistance {
     pub fn new(
         activity: ActivityType,
         comments: Option<String>,
-        timestamp: DateTime<Utc>,
+        timestamp: DateTimeTz,
         distance: Option<Meter<f64>>,
         duration: Option<Second<f64>>,
     ) -> TimeDistance {
@@ -42,8 +38,8 @@ impl TimeDistance {
 }
 
 impl Recordable for TimeDistance {
-    fn timestamp(&self) -> DateTime<Utc> {
-        self.timestamp
+    fn timestamp(&self) -> DateTimeTz {
+        self.timestamp.clone()
     }
 
     fn tags(&self) -> Vec<String> {
@@ -54,6 +50,7 @@ impl Recordable for TimeDistance {
     }
 }
 
+/*
 impl<'de> Deserialize<'de> for TimeDistance {
     fn deserialize<D>(deserializer: D) -> Result<TimeDistance, D::Error>
     where
@@ -164,7 +161,9 @@ impl<'de> Deserialize<'de> for TimeDistance {
         deserializer.deserialize_struct("TimeDistance", FIELDS, TimeDistanceVisitor)
     }
 }
+*/
 
+/*
 impl Serialize for TimeDistance {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -177,5 +176,34 @@ impl Serialize for TimeDistance {
         s.serialize_field("distance", &self.distance.map(|v| v.value_unsafe))?;
         s.serialize_field("duration", &self.duration.map(|v| v.value_unsafe))?;
         s.end()
+    }
+}
+*/
+
+#[cfg(test)]
+mod test {
+    use dimensioned::si::{M, S};
+    use trax::types::{ActivityType, TimeDistance};
+
+    #[test]
+    pub fn deserialize_time_distance() {
+        let cycling_track_str = "{\"data\":{\"distance\":12200,\"date\":\"2017-10-28T19:27:00Z\",\"activity\":\"Cycling\",\"comments\":null,\"duration\":3120},\"id\":\"27ca887e-72c7-4d51-b7e4-6dca849a8f72\"}";
+        let cycle_track: emseries::Record<TimeDistance> =
+            serde_json::from_str(cycling_track_str).unwrap();
+        assert_eq!(cycle_track.data.activity, ActivityType::Cycling);
+        assert_eq!(cycle_track.data.distance, Some(12200. * M));
+        assert_eq!(cycle_track.data.duration, Some(3120. * S));
+
+        let running_track_str = "{\"data\":{\"distance\":3630,\"date\":\"2018-11-12T18:30:00Z\",\"activity\":\"Running\",\"comments\":null,\"duration\":1800}, \"id\":\"680c3306-991c-4edf-9635-c9d2fd72686f\"}";
+        let running_track: Result<emseries::Record<TimeDistance>, serde_json::Error> =
+            serde_json::from_str(running_track_str);
+        match running_track {
+            Ok(track) => {
+                assert_eq!(track.data.activity, ActivityType::Running);
+                assert_eq!(track.data.distance, Some(3630. * M));
+                assert_eq!(track.data.duration, Some(1800. * S));
+            }
+            Err(err) => panic!(err),
+        }
     }
 }

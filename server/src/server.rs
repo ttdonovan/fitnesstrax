@@ -1,4 +1,5 @@
 extern crate chrono;
+extern crate chrono_tz;
 extern crate dimensioned;
 extern crate emseries;
 extern crate iron;
@@ -10,12 +11,14 @@ extern crate params;
 extern crate router;
 extern crate serde;
 
-use self::chrono::*;
+//use self::chrono::*;
 use self::iron::headers::{Authorization, Bearer};
 use self::iron::middleware::{BeforeMiddleware, Handler};
 use self::iron::prelude::*;
 use self::iron::status;
 use self::router::Router;
+use chrono_tz::Etc::UTC;
+use emseries::DateTimeTz;
 use std::env;
 use std::error;
 use std::fmt;
@@ -39,6 +42,7 @@ enum Error {
     RuntimeError(trax::Error),
     SerdeError(serde_json::error::Error),
     TimeParseError(chrono::ParseError),
+    TimeSeriesError(emseries::Error),
 }
 
 impl From<trax::Error> for Error {
@@ -53,6 +57,12 @@ impl From<chrono::ParseError> for Error {
     }
 }
 
+impl From<emseries::Error> for Error {
+    fn from(error: emseries::Error) -> Self {
+        Error::TimeSeriesError(error)
+    }
+}
+
 impl fmt::Display for Error {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
@@ -64,6 +74,9 @@ impl fmt::Display for Error {
             Error::RuntimeError(err) => write!(f, "Runtime error: {}", err),
             Error::SerdeError(err) => write!(f, "Deserialization error: {}", err),
             Error::TimeParseError(err) => write!(f, "Time value did not parse: {}", err),
+            Error::TimeSeriesError(err) => {
+                write!(f, "Failure in the underlying time series: {}", err)
+            }
         }
     }
 }
@@ -79,6 +92,7 @@ impl error::Error for Error {
             Error::RuntimeError(_) => "Runtime Error",
             Error::SerdeError(_) => "Deserialization Error",
             Error::TimeParseError(_) => "Time parse error",
+            Error::TimeSeriesError(_) => "Time series error",
         }
     }
 
@@ -92,6 +106,7 @@ impl error::Error for Error {
             Error::RuntimeError(ref err) => Some(err),
             Error::SerdeError(ref err) => Some(err),
             Error::TimeParseError(ref err) => Some(err),
+            Error::TimeSeriesError(ref err) => Some(err),
         }
     }
 }
@@ -312,14 +327,20 @@ impl Handler for GetHistoryHandler {
             let start_date = capture
                 .find("start")
                 .ok_or(Error::MissingParameter)
-                .and_then(|s| DateTime::parse_from_rfc3339(s).map_err(Error::from))
-                .map(|dt| dt.with_timezone(&Utc))?;
+                .and_then(|s| {
+                    DateTimeTz::from_str(s)
+                        .map(|dtz| DateTimeTz(dtz.0.with_timezone(&UTC)))
+                        .map_err(Error::from)
+                })?;
 
             let end_date = capture
                 .find("end")
                 .ok_or(Error::MissingParameter)
-                .and_then(|s| DateTime::parse_from_rfc3339(s).map_err(Error::from))
-                .map(|dt| dt.with_timezone(&Utc))?;
+                .and_then(|s| {
+                    DateTimeTz::from_str(s)
+                        .map(|dtz| DateTimeTz(dtz.0.with_timezone(&UTC)))
+                        .map_err(Error::from)
+                })?;
 
             self.app
                 .read()
@@ -395,6 +416,7 @@ fn routes(
 
     let mut api_chain = Chain::new(api_routes(app_rc));
     api_chain.link_before(AuthMiddleware { ctx: orizentic_ctx });
+    //println!("{}", base.format("YYYY-MM-DD"));
     router.any("/api/*", api_chain, "api_routes");
 
     let mut bundle_path = static_asset_path.clone();

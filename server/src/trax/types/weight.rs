@@ -1,12 +1,8 @@
-use chrono::prelude::*;
-use dimensioned::si::{Kilogram, KG};
-use emseries::Recordable;
-use serde::de::{Deserialize, Deserializer};
-use serde::ser::{Serialize, Serializer};
+//use chrono::prelude::*;
+use dimensioned::si::Kilogram;
+use emseries::{DateTimeTz, Recordable};
 
-use trax::types::common::F64Visitor;
-
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct Weight(Kilogram<f64>);
 
 impl Weight {
@@ -15,34 +11,15 @@ impl Weight {
     }
 }
 
-impl<'de> Deserialize<'de> for Weight {
-    fn deserialize<D>(deserializer: D) -> Result<Weight, D::Error>
-    where
-        D: Deserializer<'de>,
-    {
-        let val = deserializer.deserialize_f64(F64Visitor)?;
-        Ok(Weight(val * KG))
-    }
-}
-
-impl Serialize for Weight {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        serializer.serialize_f64(self.0.value_unsafe)
-    }
-}
-
 #[derive(Clone, Debug, PartialEq, Deserialize, Serialize)]
 pub struct WeightRecord {
-    pub date: DateTime<Utc>,
+    pub date: DateTimeTz,
     pub weight: Weight,
 }
 
 impl Recordable for WeightRecord {
-    fn timestamp(&self) -> DateTime<Utc> {
-        self.date
+    fn timestamp(&self) -> DateTimeTz {
+        self.date.clone()
     }
 
     fn tags(&self) -> Vec<String> {

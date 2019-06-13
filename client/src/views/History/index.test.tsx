@@ -3,6 +3,7 @@ import moment from "moment"
 import React from "react"
 import { Provider } from "react-redux"
 
+import DateTimeTz from "../../datetimetz"
 import { setupEnv } from "../../testSetup"
 import HistoryView from "./index"
 
@@ -16,8 +17,8 @@ describe("HistoryView", () => {
         <HistoryView
           controller={controller}
           range={{
-            start: moment("2017-10-23T22:09:00Z"),
-            end: moment("2018-11-12T18:30:00Z"),
+            start: DateTimeTz.fromString("2017-10-23T22:09:00Z").unwrap(),
+            end: DateTimeTz.fromString("2018-11-12T18:30:00Z").unwrap(),
           }}
         />
       </Provider>,
