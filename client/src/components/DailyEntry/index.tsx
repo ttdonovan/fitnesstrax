@@ -3,6 +3,7 @@ import React from "react"
 import moment from "moment-timezone"
 
 import { classnames, ClassNames } from "../../classnames"
+import Card from "../../components/Card"
 import * as types from "../../types"
 import TimeDistanceRecordView from "./TimeDistance"
 import WeightRecordView from "./Weight"
@@ -24,7 +25,7 @@ const Record: React.SFC<Props> = ({ date, records }: Props) => {
   )(records) as Array<types.TimeDistanceRecord>
 
   return (
-    <div className="daily-entry">
+    <Card>
       <div>{date}</div>
       {_.map((r: types.WeightRecord) => <WeightRecordView record={r} />)(
         weights,
@@ -32,7 +33,7 @@ const Record: React.SFC<Props> = ({ date, records }: Props) => {
       {_.map((r: types.TimeDistanceRecord) => (
         <TimeDistanceRecordView record={r} />
       ))(timeDistances)}
-    </div>
+    </Card>
   )
 }
 

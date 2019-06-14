@@ -1,0 +1,30 @@
+body {
+    background-color: rgb(240, 240, 240);
+    margin: 0px;
+    padding: 0px;
+    font-family: Sans-Serif;
+}
+
+a {
+    color: rgb(64, 64, 196);
+}
+
+.flex {
+    display: flex;
+}
+
+.l-navigation {
+    display: flex;
+}
+
+.l-navigation > div {
+    padding: 1em;
+    cursor: pointer;
+}
+
+.l-card {
+    background-color: rgb(255, 255, 255);
+    border: 1px solid rgb(128, 128, 128);
+    box-shadow: 1px 1px rgb(196, 196, 196);
+    border-radius: 3px;
+}

@@ -7,8 +7,11 @@ import * as client from "./client"
 import { isSomething, parseDate } from "./common"
 import { Range, Record } from "./types"
 
+export type Views = "History" | "Preferences"
+
 export interface AppState {
   creds: string | null
+  currentView: Views
   currentlyEditing: Record | null
   error: { msg: string; timeout: Promise<{}> } | null
   history: Map<string, Record>
@@ -17,6 +20,7 @@ export interface AppState {
 }
 
 export const getAuthToken = (state: AppState): string | null => state.creds
+export const getCurrentView = (state: AppState): Views => state.currentView
 export const getCurrentlyEditing = (state: AppState): Record | null =>
   state.currentlyEditing
 export const getHistory = (state: AppState): Array<Record> =>
@@ -69,11 +73,22 @@ export const setError = (msg: string): SetErrorAction => ({
   msg,
 })
 
+interface SetView {
+  type: "SET_VIEW"
+  view: Views
+}
+
+export const setView = (view: Views): SetView => ({
+  type: "SET_VIEW",
+  view,
+})
+
 export type Actions =
   | ClearErrorAction
   | SaveRecordsAction
   | SetAuthTokenAction
   | SetErrorAction
+  | SetView
 
 export const initialState = (): AppState => {
   const params = queryString.parse(location.search)
@@ -95,6 +110,7 @@ export const initialState = (): AppState => {
   /* TODO: use the timezone in localStorage, defaulting to moment's calculation only if necessary */
   return {
     creds: localStorage.getItem("credentials"),
+    currentView: "History",
     currentlyEditing: null,
     error: null,
     history: new Map(),
@@ -132,6 +148,8 @@ export const rootReducer = (
         ),
       },
     }
+  } else if (action.type === "SET_VIEW") {
+    state_ = { ...state_, currentView: action.view }
   }
 
   return state_

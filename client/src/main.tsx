@@ -13,7 +13,8 @@ import * as redux from "./redux"
 import AppView from "./views/App"
 import Controller from "./controller"
 
-const index = require("./index.html")
+import "./index.html"
+import "./style.css"
 
 /*
  * Knowing very little about the application structure thus far...
