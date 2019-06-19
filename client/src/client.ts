@@ -1,4 +1,4 @@
-import moment from "moment"
+import { Duration } from "luxon"
 import math from "mathjs"
 //import moment from "moment"
 import _ from "lodash/fp"
@@ -32,8 +32,10 @@ import {
 } from "./types"
 
 // TODO: return a WeightRecord object, not a simple dictionary
+/*
 export const weightSample = (uuid, date, weight): WeightRecord =>
   new WeightRecord(uuid, date, weight)
+   */
 
 /*
 const weightSampleFromJS = js => {
@@ -46,14 +48,16 @@ const weightSampleFromJS = js => {
 }
    */
 
+/*
 export const timeDistanceSample = (
-  uuid,
-  timestamp,
-  activity,
-  distance,
-  duration,
+  uuid: string,
+  timestamp: DateTimeTz,
+  activity: TimeDistanceActivity,
+  distance: Option<math.Unit>,
+  duration: Option<moment.Duration>,
 ): TimeDistanceRecord =>
   new TimeDistanceRecord(uuid, timestamp, activity, distance, duration)
+     */
 
 /*
 const timeDistanceSampleFromJS = js => {
@@ -252,7 +256,7 @@ const parseRecord = (
         : Option.None(),
       js.data.TimeDistance.duration
         ? Option.Some(
-            moment.duration({ seconds: js.data.TimeDistance.duration }),
+            Duration.fromObject({ seconds: js.data.TimeDistance.duration }),
           )
         : Option.None(),
     )

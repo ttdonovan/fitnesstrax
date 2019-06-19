@@ -4,7 +4,7 @@ import { Store } from "redux"
 import _ from "lodash/fp"
 
 import * as client from "./client"
-import { isSomething, parseDate } from "./common"
+import { isSomething } from "./common"
 import { Range, Record } from "./types"
 
 export type Views = "History" | "Preferences"
@@ -25,7 +25,7 @@ export const getCurrentlyEditing = (state: AppState): Record | null =>
   state.currentlyEditing
 export const getHistory = (state: AppState): Array<Record> =>
   _.compose(
-    _.map(pair => pair[1]),
+    _.map((pair: [string, Record]): Record => pair[1]),
     _.entries,
   )(state.history)
 //export const getRange = (state: AppState) => state.range
@@ -93,7 +93,9 @@ export type Actions =
 export const initialState = (): AppState => {
   const params = queryString.parse(location.search)
   if (isSomething(params.token)) {
-    localStorage.setItem("credentials", params.token[0])
+    if (isSomething((<Array<string>>params.token)[0])) {
+      localStorage.setItem("credentials", (<Array<string>>params.token)[0])
+    }
   }
 
   /*
@@ -125,27 +127,30 @@ export const rootReducer = (
 ): AppState => {
   let state_ = state ? state : initialState()
 
-  if (!action) return state
+  if (!action) return state_
 
   if (action.type === "CLEAR_ERROR") {
     state_ = { ...state_, error: null }
   } else if (action.type === "SAVE_RECORDS") {
-    const history = new Map(state.history)
+    const history = new Map(state_.history)
     _.forEach((record: Record) => history.set(record.id, record))(
       action.records,
     )
-    state_ = { ...state, history }
+    state_ = { ...state_, history }
   } else if (action.type === "SET_AUTH_TOKEN") {
-    localStorage.setItem("credentials", action.token)
-    state_ = { ...state, creds: action.token }
+    if (action.token) localStorage.setItem("credentials", action.token)
+    else localStorage.deleteItem("credentials")
+    state_ = { ...state_, creds: action.token }
   } else if (action.type === "SET_ERROR") {
     state_ = {
       ...state_,
       error: {
         msg: action.msg,
-        timeout: new Promise(r => setTimeout(r, 5 * 1000)).then(
-          this.store.dispatch(clearError()),
-        ),
+        timeout: new Promise(r => setTimeout(r, 5 * 1000))
+          .then
+          /* I want to set a timeout that clears the error, but I don't know how to write the dispatch here */
+          //this.store.dispatch(clearError()),
+          (),
       },
     }
   } else if (action.type === "SET_VIEW") {

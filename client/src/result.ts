@@ -1,5 +1,5 @@
-type ResultOk<A> = { type_: "OK"; ok: A | null }
-type ResultErr<E> = { type_: "ERR"; err: E | null }
+type ResultOk<A> = { type_: "OK"; ok: A }
+type ResultErr<E> = { type_: "ERR"; err: E }
 type ResultRepr<A, E> = ResultOk<A> | ResultErr<E>
 
 const resultReprIsOk = <A, E>(res: ResultRepr<A, E>): res is ResultOk<A> =>
@@ -12,9 +12,9 @@ class Result<A, E> {
 
   constructor(which: "ok" | "err", ok: A | null, err: E | null) {
     if (which === "ok") {
-      this.val = { type_: "OK", ok }
+      this.val = { type_: "OK", ok: <A>ok }
     } else {
-      this.val = { type_: "ERR", err }
+      this.val = { type_: "ERR", err: <E>err }
     }
   }
 

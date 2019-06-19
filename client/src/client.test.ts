@@ -1,5 +1,5 @@
 import math from "mathjs"
-import moment from "moment"
+import { Duration } from "luxon"
 
 import Client from "./client"
 import DateTimeTz from "./datetimetz"
@@ -144,7 +144,7 @@ describe("fetchHistory", () => {
       ),
     ).toEqual(Option.Some(true))
     expect((<TimeDistanceRecord>tdRecord).duration).toEqual(
-      Option.Some(moment.duration({ seconds: 1800.0 })),
+      Option.Some(Duration.fromObject({ seconds: 1800.0 })),
     )
   })
 })

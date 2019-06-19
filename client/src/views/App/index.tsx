@@ -45,7 +45,7 @@ const AppView = connect(
     view: redux.getCurrentView(state),
   }),
   dispatch => ({
-    setView: view => dispatch(redux.setView(view)),
+    setView: (view: redux.Views) => dispatch(redux.setView(view)),
   }),
 )(App)
 

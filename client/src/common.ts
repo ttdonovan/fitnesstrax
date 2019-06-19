@@ -1,5 +1,6 @@
 import math from "mathjs"
 import moment from "moment-timezone"
+import { Duration } from "luxon"
 import _ from "lodash/fp"
 
 import Equals from "./equals"
@@ -25,6 +26,7 @@ export const isSomething = (value: any | null | undefined): boolean =>
  * This is not exactly like `maybe :: b -> (a -> b) -> Maybe a -> b`, but
  * instead akin to `fmap :: (a -> b) -> f a -> f b`, but less general.
  */
+/*
 export const maybe = fn =>
   function(...args) {
     if (args.length === 0) {
@@ -36,8 +38,10 @@ export const maybe = fn =>
       return fn.apply(this, args)
     }
   }
+     */
 
 /* intercalate `val` in between every element of `lst` */
+/*
 export const intercalate = (lst, val) => {
   if (lst.length <= 1) {
     return lst
@@ -46,21 +50,22 @@ export const intercalate = (lst, val) => {
   let [r, ...rest] = lst
   return r + val + intercalate(rest, val)
 }
+     */
 
-export const sum = s => s.reduce((a, b) => a + b, 0)
-export const divmod = (n, d) => [math.floor(n / d), n % d]
-export const padStr = (str, chr, size) => chr.repeat(size - str.length) + str
+//export const sum = s => s.reduce((a, b) => a + b, 0)
+//export const divmod = (n, d) => [math.floor(n / d), n % d]
+//export const padStr = (str, chr, size) => chr.repeat(size - str.length) + str
 
 /* Given a list of values, return the first not-null value. Return null only if all values are null. */
-export const first = lst => {
+export const first = <A>(lst: Array<A>): Option<A> => {
   if (!isSomething(lst)) {
-    return null
+    return Option.None()
   }
   if (lst.length == 0) {
-    return null
+    return Option.None()
   }
   const [fst, ...rest] = lst
-  return isSomething(fst) ? fst : first(rest)
+  return isSomething(fst) ? Option.Some(fst) : first(rest)
 }
 
 /*
@@ -85,21 +90,23 @@ export const keyBy = <K, V>(
   const m: Map<K, Array<V>> = new Map()
   lst.forEach(elem => {
     const key = f(elem)
-    const curLst = m.get(key)
+    const curLst: Array<V> | null | undefined = m.get(key)
     if (!isSomething(curLst)) {
       m.set(key, [elem])
     } else {
-      m.set(key, [...curLst, elem])
+      m.set(key, [...(<Array<V>>curLst), elem])
     }
   })
   return m
 }
 
+/*
 export const listToMap = (f, lst) =>
   lst.map(v => [f(v), v]).reduce((m, [k, v]) => {
     m[k] = v
     return m
   }, {})
+   */
 
 /*
 export const mapFromTuples = <A>(lst: Array<[string, A]>): object => {
@@ -132,6 +139,7 @@ export const parseDTZ = (str: string): Option<moment.Moment> => {
   }
 }
 
+/*
 export const renderDate = (d: moment.Moment): string => d.format("YYYY-MM-DD")
 export const parseDate = str =>
   parseDate_(str, "YYYY-MM-DD") || parseDate_(str, "MM-DD-YYYY")
@@ -143,30 +151,34 @@ export const parseDate_ = (str, fmt) => {
   var m = moment(str, fmt, true)
   return m.isValid() ? m : null
 }
+   */
 
+/*
 export const renderWeight = w => w.to("kg").format(3)
 export const parseWeight = str => parseUnit(str)
 
 export const renderDistance = d => d.to("km").format()
+   */
 
-export const parseDuration = str => {
+export const parseDuration = (str: string): Option<Duration> => {
+  /* TODO: put in a bunch of code to reject invalid strings */
   const lst = str.split(":")
   var m = null
   if (lst.length == 1) {
-    m = moment.duration({ seconds: lst[0] })
+    m = Duration.fromObject({ seconds: parseInt(lst[0]) })
   } else if (lst.length == 2) {
-    m = moment.duration({
-      minutes: lst[0],
-      seconds: lst[1],
+    m = Duration.fromObject({
+      minutes: parseInt(lst[0]),
+      seconds: parseInt(lst[1]),
     })
   } else if (lst.length == 3) {
-    m = moment.duration({
-      hours: lst[0],
-      minutes: lst[1],
-      seconds: lst[2],
+    m = Duration.fromObject({
+      hours: parseInt(lst[0]),
+      minutes: parseInt(lst[1]),
+      seconds: parseInt(lst[2]),
     })
   }
-  return isSomething(m) && m.isValid() ? m : null
+  return new Option(m)
 }
 
 /* TODO: maybe parseDuration should return an object that has had equals hacked in, and I should also provide a general constructor that does it. */
@@ -180,12 +192,12 @@ export const equalDurations = (
   left.months() == right.months()
    */
 
-export const parseUnit = str => {
+export const parseUnit = (str: string): Option<math.Unit> => {
   try {
-    return math.unit(str)
+    return Option.Some(math.unit(str))
   } catch (e) {
     if (e instanceof SyntaxError) {
-      return null
+      return Option.None()
     } else {
       throw e
     }

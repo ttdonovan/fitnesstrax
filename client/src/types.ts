@@ -1,4 +1,4 @@
-import * as moment from "moment-timezone"
+import { Duration } from "luxon"
 import math from "mathjs"
 
 import DateTimeTz from "./datetimetz"
@@ -48,6 +48,7 @@ export const timeDistanceActivityToString = (
 ): string => {
   if (activity === TimeDistanceActivity.Cycling) return "Cycling"
   else if (activity === TimeDistanceActivity.Running) return "Running"
+  else throw Error("Invalid enumeration value")
 }
 
 export class TimeDistanceRecord {
@@ -56,10 +57,10 @@ export class TimeDistanceRecord {
     readonly date: DateTimeTz,
     readonly activity: TimeDistanceActivity,
     readonly distance: Option<math.Unit>,
-    readonly duration: Option<moment.Duration>,
+    readonly duration: Option<Duration>,
   ) {}
 
-  equals(other) {
+  equals(other: TimeDistanceRecord) {
     return (
       this.id === other.id &&
       this.activity === other.activity &&
@@ -75,7 +76,7 @@ export class TimeDistanceRecord {
       this.date,
       this.activity,
       this.distance.map(v => v.clone()),
-      this.duration.map(v => moment.duration(v)),
+      this.duration,
     )
   }
 }

@@ -1,17 +1,23 @@
-import moment from "moment-timezone"
-import "moment-duration-format"
+import { Duration } from "luxon"
 import React from "react"
 
-import "../moment-extensions"
 import { classnames, ClassNames } from "../classnames"
 import Option from "../option"
 
 interface Props {
-  duration: Option<moment.Duration>
+  duration: Option<Duration>
 }
 
-const Duration: React.SFC<Props> = ({ duration }: Props) => (
-  <React.Fragment>{duration.map(d => d.format()).or("")}</React.Fragment>
+const Duration_: React.SFC<Props> = ({ duration }: Props) => (
+  <React.Fragment>
+    {duration
+      .map(d => {
+        if (d.as("hours") >= 1) return d.toFormat("h:mm:ss")
+        else if (d.as("minutes") >= 1) return d.toFormat("m:ss")
+        else return d.toFormat("s")
+      })
+      .or("")}
+  </React.Fragment>
 )
 
-export default Duration
+export default Duration_
