@@ -4,6 +4,7 @@ import { connect } from "react-redux"
 //import { authenticate } from "../state"
 import Controller from "../../controller"
 import InputField from "../../components/InputField"
+import * as msgs from "../../translations"
 
 export interface Props {
   controller: Controller
@@ -30,12 +31,13 @@ class Login extends React.Component<Props, State> {
         <div className="row" style={{ paddingTop: "80px" }}>
           <div className="col-sm-2"> </div>
           <div className="col-sm-8" style={{ textAlign: "center" }}>
-            <h1> Health Tracker </h1>
+            <h1> {msgs.HealthTracker.tr(msgs.Language.Esperanto)}</h1>
             <p>
               <InputField
                 value={token}
                 classNames={[]}
                 onChange={val => this.setState({ token: val.value })}
+                placeholder={msgs.LoginPlaceholder.tr(msgs.Language.Esperanto)}
               />
             </p>
             <p>
@@ -45,7 +47,7 @@ class Login extends React.Component<Props, State> {
                 className="btn btn-outline-primary"
                 onClick={ev => token && controller.authenticate(token)}
               >
-                Log In
+                {msgs.LogIn.tr(msgs.Language.Esperanto)}
               </button>
             </p>
           </div>
@@ -55,17 +57,5 @@ class Login extends React.Component<Props, State> {
     )
   }
 }
-
-/*
-const mapStateToProps = (state: any) => ({})
-const mapDispatchToProps = (dispatch: any) => ({
-  onSubmit: (st: State) => dispatch(runAuthentication(st.token)),
-})
-
-export const LoginView = connect(
-  mapStateToProps,
-  mapDispatchToProps,
-)(LoginForm)
-*/
 
 export default Login
