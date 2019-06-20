@@ -7,7 +7,7 @@ interface Props {
 }
 
 const Card: React.SFC<Props> = ({ children }: Props) => (
-  <div className="l-card">{children}</div>
+  <div className="l-card card">{children}</div>
 )
 
 export default Card

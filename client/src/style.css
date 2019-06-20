@@ -22,9 +22,20 @@ a {
     cursor: pointer;
 }
 
-.l-card {
+.card {
     background-color: rgb(255, 255, 255);
     border: 1px solid rgb(128, 128, 128);
     box-shadow: 1px 1px rgb(196, 196, 196);
     border-radius: 3px;
+}
+
+@media screen and (min-width: 40em) {
+  .l-2-column {
+    display: flex;
+    width: 100%;
+  }
+
+  .l-2-column > div {
+    width: 50%;
+  }
 }

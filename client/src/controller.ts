@@ -1,6 +1,7 @@
 import Client from "./client"
 import * as redux from "./redux"
 import { Range, Record } from "./types"
+import { UserPreferences } from "./userPrefs"
 
 class Controller {
   client: Client
@@ -14,6 +15,7 @@ class Controller {
   authenticate = (token: string): Promise<void> =>
     this.client.authenticate(token).then(ok => {
       if (ok) {
+        localStorage.setItem("credentials", token)
         this.store.dispatch(redux.setAuthToken(token))
       } else {
         this.store.dispatch(redux.setError("Invalid authentication token"))
@@ -33,6 +35,13 @@ class Controller {
         })
     }
     return new Promise(r => null)
+  }
+
+  setPreferences = (prefs: UserPreferences): void => {
+    localStorage.setItem("timezone", prefs.timezone.name)
+    localStorage.setItem("units", prefs.units.sym)
+    localStorage.setItem("language", prefs.language.sym)
+    this.store.dispatch(redux.setPreferences(prefs))
   }
 }
 

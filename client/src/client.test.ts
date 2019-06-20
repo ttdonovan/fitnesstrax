@@ -4,7 +4,7 @@ import { Duration } from "luxon"
 import Client from "./client"
 import DateTimeTz from "./datetimetz"
 import Option from "./option"
-import { TimeDistanceActivity, TimeDistanceRecord } from "./types"
+import { Running, TimeDistanceRecord } from "./types"
 
 describe("authenticate", () => {
   beforeEach(() => {
@@ -127,9 +127,7 @@ describe("fetchHistory", () => {
     expect(tdRecord && tdRecord.id).toEqual(
       "15f9c464-6427-4368-ab88-13875d47865f",
     )
-    expect((<TimeDistanceRecord>tdRecord).activity).toEqual(
-      TimeDistanceActivity.Running,
-    )
+    expect((<TimeDistanceRecord>tdRecord).activity).toEqual(Running)
     expect(
       tdRecord &&
         tdRecord.date.equals(

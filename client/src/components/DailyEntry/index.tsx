@@ -5,6 +5,7 @@ import moment from "moment-timezone"
 import { classnames, ClassNames } from "../../classnames"
 import Card from "../../components/Card"
 import * as types from "../../types"
+import { UserPreferences } from "../../userPrefs"
 import TimeDistanceRecordView from "./TimeDistance"
 import WeightRecordView from "./Weight"
 
@@ -12,10 +13,11 @@ import "./style.css"
 
 interface Props {
   date: string
+  prefs: UserPreferences
   records: Array<types.Record>
 }
 
-const Record: React.SFC<Props> = ({ date, records }: Props) => {
+const Record: React.SFC<Props> = ({ date, prefs, records }: Props) => {
   const weights: Array<types.WeightRecord> = _.filter(
     (r: types.Record): boolean => types.recordIsWeight(r),
   )(records) as Array<types.WeightRecord>
@@ -27,11 +29,11 @@ const Record: React.SFC<Props> = ({ date, records }: Props) => {
   return (
     <Card>
       <div>{date}</div>
-      {_.map((r: types.WeightRecord) => <WeightRecordView record={r} />)(
-        weights,
-      )}
+      {_.map((r: types.WeightRecord) => (
+        <WeightRecordView prefs={prefs} record={r} />
+      ))(weights)}
       {_.map((r: types.TimeDistanceRecord) => (
-        <TimeDistanceRecordView record={r} />
+        <TimeDistanceRecordView prefs={prefs} record={r} />
       ))(timeDistances)}
     </Card>
   )

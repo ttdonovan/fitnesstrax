@@ -4,6 +4,7 @@ import { createStore } from "redux"
 
 import Controller from "../../controller"
 import * as redux from "../../redux"
+import { standardPreferences } from "../../testSetup"
 import LoginView from "./index"
 
 const mockAuthenticate = jest.fn()
@@ -18,7 +19,13 @@ describe("LoginView", () => {
     const controller = new Controller("http://nowhere/", store)
     controller.authenticate = mockAuthenticate
 
-    const wrapper = shallow(<LoginView controller={controller} token={null} />)
+    const wrapper = shallow(
+      <LoginView
+        controller={controller}
+        token={null}
+        prefs={standardPreferences()}
+      />,
+    )
 
     expect(wrapper).toMatchSnapshot()
     expect(mockAuthenticate).not.toHaveBeenCalled()
@@ -30,7 +37,11 @@ describe("LoginView", () => {
     controller.authenticate = mockAuthenticate
 
     const wrapper = shallow(
-      <LoginView controller={controller} token={"sample-token"} />,
+      <LoginView
+        controller={controller}
+        token={"sample-token"}
+        prefs={standardPreferences()}
+      />,
     )
 
     const inputField = wrapper.find("InputField")

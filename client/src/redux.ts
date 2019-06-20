@@ -1,4 +1,5 @@
 import moment from "moment-timezone"
+import { IANAZone } from "luxon"
 import queryString from "query-string"
 import { Store } from "redux"
 import _ from "lodash/fp"
@@ -6,6 +7,15 @@ import _ from "lodash/fp"
 import * as client from "./client"
 import { isSomething } from "./common"
 import { Range, Record } from "./types"
+import {
+  UnitSystem,
+  unitsystemFromSymbol,
+  English,
+  SI,
+  Language,
+  languageFromSymbol,
+} from "./settings"
+import { UserPreferences } from "./userPrefs"
 
 export type Views = "History" | "Preferences"
 
@@ -15,6 +25,7 @@ export interface AppState {
   currentlyEditing: Record | null
   error: { msg: string; timeout: Promise<{}> } | null
   history: Map<string, Record>
+  preferences: UserPreferences
   utcOffset: number
   /* TODO: I actually want a real live timezone entry here, but I don't know how to get the current timezone. Figure it out when I have internet again. */
 }
@@ -29,6 +40,8 @@ export const getHistory = (state: AppState): Array<Record> =>
     _.entries,
   )(state.history)
 //export const getRange = (state: AppState) => state.range
+export const getPreferences = (state: AppState): UserPreferences =>
+  state.preferences
 export const getRecord = (state: AppState): Map<string, Record> => state.history
 export const getUtcOffset = (state: AppState): number => state.utcOffset
 
@@ -73,12 +86,24 @@ export const setError = (msg: string): SetErrorAction => ({
   msg,
 })
 
-interface SetView {
+interface SetPreferencesAction {
+  type: "SET_PREFERENCES"
+  prefs: UserPreferences
+}
+
+export const setPreferences = (
+  prefs: UserPreferences,
+): SetPreferencesAction => ({
+  type: "SET_PREFERENCES",
+  prefs,
+})
+
+interface SetViewAction {
   type: "SET_VIEW"
   view: Views
 }
 
-export const setView = (view: Views): SetView => ({
+export const setView = (view: Views): SetViewAction => ({
   type: "SET_VIEW",
   view,
 })
@@ -88,7 +113,23 @@ export type Actions =
   | SaveRecordsAction
   | SetAuthTokenAction
   | SetErrorAction
-  | SetView
+  | SetPreferencesAction
+  | SetViewAction
+
+const loadPreferences = (): UserPreferences => {
+  const storedTimezone = localStorage.getItem("timezone")
+    ? IANAZone.create(localStorage.getItem("timezone") || "UTC")
+    : IANAZone.create("UTC")
+  const timezone = storedTimezone.isValid
+    ? storedTimezone
+    : IANAZone.create("UTC")
+  const units = unitsystemFromSymbol(localStorage.getItem("units") || "").or(SI)
+  const language = languageFromSymbol(
+    localStorage.getItem("language") || "",
+  ).or(English)
+
+  return new UserPreferences(timezone, units, language)
+}
 
 export const initialState = (): AppState => {
   const params = queryString.parse(location.search)
@@ -109,13 +150,13 @@ export const initialState = (): AppState => {
   }
      */
 
-  /* TODO: use the timezone in localStorage, defaulting to moment's calculation only if necessary */
   return {
     creds: localStorage.getItem("credentials"),
     currentView: "History",
     currentlyEditing: null,
     error: null,
     history: new Map(),
+    preferences: loadPreferences(),
     //range,
     utcOffset: moment().utcOffset(),
   }
@@ -138,8 +179,6 @@ export const rootReducer = (
     )
     state_ = { ...state_, history }
   } else if (action.type === "SET_AUTH_TOKEN") {
-    if (action.token) localStorage.setItem("credentials", action.token)
-    else localStorage.deleteItem("credentials")
     state_ = { ...state_, creds: action.token }
   } else if (action.type === "SET_ERROR") {
     state_ = {
@@ -153,6 +192,8 @@ export const rootReducer = (
           (),
       },
     }
+  } else if (action.type === "SET_PREFERENCES") {
+    state_ = { ...state_, preferences: action.prefs }
   } else if (action.type === "SET_VIEW") {
     state_ = { ...state_, currentView: action.view }
   }

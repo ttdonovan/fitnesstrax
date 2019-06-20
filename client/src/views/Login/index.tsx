@@ -5,9 +5,11 @@ import { connect } from "react-redux"
 import Controller from "../../controller"
 import InputField from "../../components/InputField"
 import * as msgs from "../../translations"
+import { UserPreferences } from "../../userPrefs"
 
 export interface Props {
   controller: Controller
+  prefs: UserPreferences
   token: string | null
   //onSubmit: (_: { token: string }) => void
 }
@@ -23,7 +25,7 @@ class Login extends React.Component<Props, State> {
   }
 
   render() {
-    const { controller } = this.props
+    const { controller, prefs } = this.props
     const { token } = this.state
 
     return (
@@ -31,13 +33,13 @@ class Login extends React.Component<Props, State> {
         <div className="row" style={{ paddingTop: "80px" }}>
           <div className="col-sm-2"> </div>
           <div className="col-sm-8" style={{ textAlign: "center" }}>
-            <h1> {msgs.HealthTracker.tr(msgs.Language.Esperanto)}</h1>
+            <h1> {msgs.HealthTracker.tr(prefs.language)}</h1>
             <p>
               <InputField
                 value={token}
                 classNames={[]}
                 onChange={val => this.setState({ token: val.value })}
-                placeholder={msgs.LoginPlaceholder.tr(msgs.Language.Esperanto)}
+                placeholder={msgs.LoginPlaceholder.tr(prefs.language)}
               />
             </p>
             <p>
@@ -47,7 +49,7 @@ class Login extends React.Component<Props, State> {
                 className="btn btn-outline-primary"
                 onClick={ev => token && controller.authenticate(token)}
               >
-                {msgs.LogIn.tr(msgs.Language.Esperanto)}
+                {msgs.LogIn.tr(prefs.language)}
               </button>
             </p>
           </div>

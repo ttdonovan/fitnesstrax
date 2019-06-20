@@ -1,6 +1,7 @@
 import { Duration } from "luxon"
 import math from "mathjs"
 
+import * as msgs from "./translations"
 import DateTimeTz from "./datetimetz"
 import Option from "./option"
 import Result from "./result"
@@ -26,23 +27,33 @@ export class WeightRecord {
   }
 }
 
+export class TimeDistanceActivity {
+  constructor(readonly repr: msgs.Message) {}
+}
+
+export const Cycling = new TimeDistanceActivity(msgs.Cycling)
+export const Running = new TimeDistanceActivity(msgs.Running)
+
+/*
 export enum TimeDistanceActivity {
   Cycling,
   Running,
 }
+   */
 
 export const timeDistanceActivityFromString = (
   str: string,
 ): Result<TimeDistanceActivity, string> => {
   if (str === "Cycling") {
-    return Result.Ok(TimeDistanceActivity.Cycling)
+    return Result.Ok(Cycling)
   } else if (str === "Running") {
-    return Result.Ok(TimeDistanceActivity.Running)
+    return Result.Ok(Running)
   } else {
     return Result.Err("unrecognized activity type")
   }
 }
 
+/*
 export const timeDistanceActivityToString = (
   activity: TimeDistanceActivity,
 ): string => {
@@ -50,6 +61,7 @@ export const timeDistanceActivityToString = (
   else if (activity === TimeDistanceActivity.Running) return "Running"
   else throw Error("Invalid enumeration value")
 }
+   */
 
 export class TimeDistanceRecord {
   constructor(
