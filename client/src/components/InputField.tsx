@@ -1,11 +1,17 @@
 import React from "react"
 import * as csn from "../classnames"
 
+import Option from "../option"
+
 export interface Props {
-  value: string | null
-  onChange: (_: { value: string }) => void
+  value: Option<string>
+  onChange: (_: string) => void
   classNames?: csn.ClassNames
   placeholder: string
+}
+
+interface Event {
+  target: HTMLElement
 }
 
 const InputField: React.SFC<Props> = ({
@@ -16,9 +22,9 @@ const InputField: React.SFC<Props> = ({
 }: Props) => (
   <input
     type="text"
-    value={value || undefined}
+    value={value.or("")}
     className={classNames ? csn.classnames(classNames) : ""}
-    onChange={ev => onChange({ value: ev.target.value })}
+    onChange={ev => onChange(ev.target.value)}
     placeholder={placeholder}
   />
 )

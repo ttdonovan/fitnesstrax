@@ -6,6 +6,7 @@ import CenterPanel from "../../components/CenterPanel"
 import Navigation from "../../components/Navigation"
 import Controller from "../../controller"
 import DateTimeTz from "../../datetimetz"
+import Option from "../../option"
 import * as redux from "../../redux"
 import { UserPreferences } from "../../userPrefs"
 import HistoryView from "../History"
@@ -53,7 +54,7 @@ const App: React.SFC<Props> = ({
       </div>
     </CenterPanel>
   ) : (
-    <LoginView controller={controller} prefs={prefs} token={null} />
+    <LoginView controller={controller} prefs={prefs} token={Option.None()} />
   )
 
 const AppView = connect(
