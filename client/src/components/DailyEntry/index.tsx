@@ -12,13 +12,13 @@ import { WeightRecordEdit, WeightRecordView } from "./Weight"
 
 import "./style.css"
 
-interface Props {
+interface ViewProps {
   date: string
   prefs: UserPreferences
   records: Array<types.Record>
 }
 
-const View: React.SFC<Props> = ({ date, prefs, records }: Props) => {
+const View: React.SFC<ViewProps> = ({ date, prefs, records }: ViewProps) => {
   const weights: Array<types.WeightRecord> = _.filter(
     (r: types.Record): boolean => types.recordIsWeight(r),
   )(records) as Array<types.WeightRecord>
@@ -40,7 +40,19 @@ const View: React.SFC<Props> = ({ date, prefs, records }: Props) => {
   )
 }
 
-const Edit: React.SFC<Props> = ({ date, prefs, records }: Props) => {
+interface EditProps {
+  date: string
+  prefs: UserPreferences
+  records: Array<types.Record>
+  updateRecord: (uuid: string, record: types.Record) => void
+}
+
+const Edit: React.SFC<EditProps> = ({
+  date,
+  prefs,
+  records,
+  updateRecord,
+}: EditProps) => {
   const weights: Array<types.WeightRecord> = _.filter(
     (r: types.Record): boolean => types.recordIsWeight(r),
   )(records) as Array<types.WeightRecord>
@@ -53,7 +65,11 @@ const Edit: React.SFC<Props> = ({ date, prefs, records }: Props) => {
     <Card>
       <div>{date}</div>
       <div>Edit Mode</div>
-      <WeightRecordEdit prefs={prefs} record={first(weights)} />
+      <WeightRecordEdit
+        prefs={prefs}
+        record={first(weights)}
+        onUpdate={updateRecord}
+      />
       {_.map((r: types.TimeDistanceRecord) => (
         <TimeDistanceRecordView prefs={prefs} record={r} />
       ))(timeDistances)}
@@ -61,22 +77,33 @@ const Edit: React.SFC<Props> = ({ date, prefs, records }: Props) => {
   )
 }
 
-class State {
-  constructor(readonly editMode: boolean) {}
+interface State {
+  editMode: boolean
+  updatedRecords: { [_: string]: types.Record }
 }
 
-class Record extends React.Component<Props, State> {
-  constructor(props: Props) {
+class Record extends React.Component<ViewProps, State> {
+  constructor(props: ViewProps) {
     super(props)
-    this.state = { editMode: false }
+    this.state = { editMode: false, updatedRecords: {} }
   }
 
-  changeMode = () => this.setState({ editMode: !this.state.editMode })
+  enterEditMode = () => this.setState({ editMode: true })
+
+  updateRecord = (uuid: string, record: types.Record) => {
+    console.log("updated record: ", JSON.stringify(record))
+    this.setState({
+      updatedRecords: { ...this.state.updatedRecords, [uuid]: record },
+    })
+  }
 
   render = () => (
-    <div onClick={() => this.changeMode()}>
+    <div onClick={() => this.enterEditMode()}>
       {this.state.editMode
-        ? React.createElement(Edit, this.props)
+        ? React.createElement(Edit, {
+            ...this.props,
+            updateRecord: this.updateRecord,
+          })
         : React.createElement(View, this.props)}
     </div>
   )

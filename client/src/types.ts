@@ -25,6 +25,10 @@ export class WeightRecord {
   clone() {
     return new WeightRecord(this.id, this.date, this.weight.clone())
   }
+
+  withWeight(weight: math.Unit) {
+    return new WeightRecord(this.id, this.date, weight)
+  }
 }
 
 export class TimeDistanceActivity {
