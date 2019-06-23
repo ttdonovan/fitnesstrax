@@ -3,11 +3,12 @@ import React from "react"
 import moment from "moment-timezone"
 
 import { classnames, ClassNames } from "../../classnames"
+import { first } from "../../common"
 import Card from "../../components/Card"
 import * as types from "../../types"
 import { UserPreferences } from "../../userPrefs"
-import TimeDistanceRecordView from "./TimeDistance"
-import WeightRecordView from "./Weight"
+import { TimeDistanceRecordEdit, TimeDistanceRecordView } from "./TimeDistance"
+import { WeightRecordEdit, WeightRecordView } from "./Weight"
 
 import "./style.css"
 
@@ -17,7 +18,7 @@ interface Props {
   records: Array<types.Record>
 }
 
-const Record: React.SFC<Props> = ({ date, prefs, records }: Props) => {
+const View: React.SFC<Props> = ({ date, prefs, records }: Props) => {
   const weights: Array<types.WeightRecord> = _.filter(
     (r: types.Record): boolean => types.recordIsWeight(r),
   )(records) as Array<types.WeightRecord>
@@ -36,6 +37,48 @@ const Record: React.SFC<Props> = ({ date, prefs, records }: Props) => {
         <TimeDistanceRecordView prefs={prefs} record={r} />
       ))(timeDistances)}
     </Card>
+  )
+}
+
+const Edit: React.SFC<Props> = ({ date, prefs, records }: Props) => {
+  const weights: Array<types.WeightRecord> = _.filter(
+    (r: types.Record): boolean => types.recordIsWeight(r),
+  )(records) as Array<types.WeightRecord>
+
+  const timeDistances: Array<types.TimeDistanceRecord> = _.filter(
+    (r: types.Record): boolean => types.recordIsTimeDistance(r),
+  )(records) as Array<types.TimeDistanceRecord>
+
+  return (
+    <Card>
+      <div>{date}</div>
+      <div>Edit Mode</div>
+      <WeightRecordEdit prefs={prefs} record={first(weights)} />
+      {_.map((r: types.TimeDistanceRecord) => (
+        <TimeDistanceRecordView prefs={prefs} record={r} />
+      ))(timeDistances)}
+    </Card>
+  )
+}
+
+class State {
+  constructor(readonly editMode: boolean) {}
+}
+
+class Record extends React.Component<Props, State> {
+  constructor(props: Props) {
+    super(props)
+    this.state = { editMode: false }
+  }
+
+  changeMode = () => this.setState({ editMode: !this.state.editMode })
+
+  render = () => (
+    <div onClick={() => this.changeMode()}>
+      {this.state.editMode
+        ? React.createElement(Edit, this.props)
+        : React.createElement(View, this.props)}
+    </div>
   )
 }
 

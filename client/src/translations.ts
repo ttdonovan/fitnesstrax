@@ -34,3 +34,6 @@ export const kilometers = new Message("kilometers", { eo: "kilometroj" })
 export const pounds = new Message("pounds", { eo: "funtoj" })
 export const stones = new Message("stones", { eo: "ŝtonoj" })
 export const kilograms = new Message("kilograms", { eo: "kilogramoj" })
+export const WeightEntryPlaceholder = new Message("Enter weight", {
+  eo: "Eniru pezon",
+})
