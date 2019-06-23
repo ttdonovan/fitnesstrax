@@ -7,6 +7,7 @@ import { keyBy } from "../../common"
 import RangeView from "../../components/range"
 import DailyEntryView from "../../components/DailyEntry"
 import Controller from "../../controller"
+import Option from "../../option"
 import * as redux from "../../redux"
 import { Range, Record } from "../../types"
 import { UserPreferences } from "../../userPrefs"
@@ -16,7 +17,6 @@ const bucketByDay = (recs: Array<Record>): Map<string, Array<Record>> =>
 
 interface Props {
   controller: Controller
-  currentEdit: Record | null
   history: Array<Record>
   prefs: UserPreferences
   range: Range
@@ -29,7 +29,7 @@ class History extends React.Component<Props, {}> {
   }
 
   render() {
-    const { controller, currentEdit, history, prefs, range } = this.props
+    const { controller, history, prefs, range } = this.props
 
     const buckets = bucketByDay(history)
     _.entries(buckets).forEach(pair => console.log(pair[0].toString()))
@@ -49,7 +49,6 @@ class History extends React.Component<Props, {}> {
 }
 
 const HistoryView = connect((state: redux.AppState) => ({
-  currentEdit: redux.getCurrentlyEditing(state),
   prefs: redux.getPreferences(state),
   history: redux.getHistory(state),
 }))(History)
