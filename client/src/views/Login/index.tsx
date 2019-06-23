@@ -37,7 +37,6 @@ class Login extends React.Component<Props, State> {
             <p>
               <InputField
                 value={token}
-                classNames={[]}
                 onChange={val => this.setState({ token: val.value })}
                 placeholder={msgs.LoginPlaceholder.tr(prefs.language)}
               />

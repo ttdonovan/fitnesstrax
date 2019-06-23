@@ -1,9 +1,10 @@
 import React from "react"
+import * as csn from "../classnames"
 
 export interface Props {
   value: string | null
   onChange: (_: { value: string }) => void
-  classNames: Array<string>
+  classNames?: csn.ClassNames
   placeholder: string
 }
 
@@ -16,7 +17,7 @@ const InputField: React.SFC<Props> = ({
   <input
     type="text"
     value={value || undefined}
-    className={classNames.join(" ")}
+    className={classNames ? csn.classnames(classNames) : ""}
     onChange={ev => onChange({ value: ev.target.value })}
     placeholder={placeholder}
   />
