@@ -1,3 +1,11 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`InputField renders 1`] = `ShallowWrapper {}`;
+exports[`InputField renders 1`] = `
+<input
+  className=""
+  onChange={[Function]}
+  placeholder="placeholder text"
+  type="text"
+  value="sample-token"
+/>
+`;
