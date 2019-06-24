@@ -1,3 +1,171 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`HistoryView renders when there is no history 1`] = `ReactWrapper {}`;
+exports[`HistoryView renders when there is no history 1`] = `
+<Provider
+  store={
+    Object {
+      "dispatch": [Function],
+      "getState": [Function],
+      "replaceReducer": [Function],
+      "subscribe": [Function],
+      Symbol(observable): [Function],
+    }
+  }
+>
+  <Connect(History)
+    controller={
+      Controller {
+        "authenticate": [Function],
+        "client": Client {
+          "appUrl": "http://nowhere/",
+          "authenticate": [Function],
+          "fetchHistory": [Function],
+          "rfc3339Format": "YYYY-MM-DDTHH:mm:ssZ",
+        },
+        "fetchRecords": [MockFunction] {
+          "calls": Array [
+            Array [
+              Object {
+                "end": DateTimeTz {
+                  "timestamp": "2018-11-12T18:30:00.000Z",
+                },
+                "start": DateTimeTz {
+                  "timestamp": "2017-10-23T22:09:00.000Z",
+                },
+              },
+            ],
+          ],
+          "results": Array [
+            Object {
+              "type": "return",
+              "value": undefined,
+            },
+          ],
+        },
+        "logout": [Function],
+        "setPreferences": [Function],
+        "store": Object {
+          "dispatch": [Function],
+          "getState": [Function],
+          "replaceReducer": [Function],
+          "subscribe": [Function],
+          Symbol(observable): [Function],
+        },
+      }
+    }
+    range={
+      Object {
+        "end": DateTimeTz {
+          "timestamp": "2018-11-12T18:30:00.000Z",
+        },
+        "start": DateTimeTz {
+          "timestamp": "2017-10-23T22:09:00.000Z",
+        },
+      }
+    }
+  >
+    <History
+      controller={
+        Controller {
+          "authenticate": [Function],
+          "client": Client {
+            "appUrl": "http://nowhere/",
+            "authenticate": [Function],
+            "fetchHistory": [Function],
+            "rfc3339Format": "YYYY-MM-DDTHH:mm:ssZ",
+          },
+          "fetchRecords": [MockFunction] {
+            "calls": Array [
+              Array [
+                Object {
+                  "end": DateTimeTz {
+                    "timestamp": "2018-11-12T18:30:00.000Z",
+                  },
+                  "start": DateTimeTz {
+                    "timestamp": "2017-10-23T22:09:00.000Z",
+                  },
+                },
+              ],
+            ],
+            "results": Array [
+              Object {
+                "type": "return",
+                "value": undefined,
+              },
+            ],
+          },
+          "logout": [Function],
+          "setPreferences": [Function],
+          "store": Object {
+            "dispatch": [Function],
+            "getState": [Function],
+            "replaceReducer": [Function],
+            "subscribe": [Function],
+            Symbol(observable): [Function],
+          },
+        }
+      }
+      dispatch={[Function]}
+      history={Array []}
+      prefs={
+        UserPreferences {
+          "language": Language {
+            "name": "English",
+            "sym": "en",
+          },
+          "timezone": IANAZone {
+            "valid": true,
+            "zoneName": "UTC",
+          },
+          "units": UnitSystem {
+            "length": "km",
+            "lengthRepr": undefined,
+            "mass": "kg",
+            "massRepr": undefined,
+            "sym": "SI",
+          },
+          "withLanguage": [Function],
+          "withTimezone": [Function],
+          "withUnits": [Function],
+        }
+      }
+      range={
+        Object {
+          "end": DateTimeTz {
+            "timestamp": "2018-11-12T18:30:00.000Z",
+          },
+          "start": DateTimeTz {
+            "timestamp": "2017-10-23T22:09:00.000Z",
+          },
+        }
+      }
+    >
+      <div
+        id="History"
+      >
+        <Range
+          classes={Object {}}
+          range={
+            Object {
+              "end": DateTimeTz {
+                "timestamp": "2018-11-12T18:30:00.000Z",
+              },
+              "start": DateTimeTz {
+                "timestamp": "2017-10-23T22:09:00.000Z",
+              },
+            }
+          }
+        >
+          <div
+            className=""
+          >
+            2017-10-23
+             - 
+            2018-11-12
+          </div>
+        </Range>
+      </div>
+    </History>
+  </Connect(History)>
+</Provider>
+`;
