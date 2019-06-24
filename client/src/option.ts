@@ -15,6 +15,13 @@ class Option<A> {
     return new Option<A>(null)
   }
 
+  static fromNaN(val: number): Option<number> {
+    if (val === NaN || val === null || val === undefined) {
+      return Option.None()
+    }
+    return Option.Some(val)
+  }
+
   isSome(): boolean {
     return Boolean(this.val_)
   }

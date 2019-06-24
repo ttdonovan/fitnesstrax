@@ -1,0 +1,138 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ValidatedInputField handles invalid updates 1`] = `
+<ValidatedInputField
+  onChange={[MockFunction]}
+  parse={[Function]}
+  placeholder="validated input field"
+  render={[Function]}
+  value={
+    Option {
+      "val_": 15,
+    }
+  }
+>
+  <span
+    className=""
+  >
+    <InputField
+      classNames={
+        Object {
+          "valid": false,
+        }
+      }
+      onChange={[Function]}
+      placeholder="validated input field"
+      value={
+        Option {
+          "val_": "abcdefg",
+        }
+      }
+    >
+      <input
+        className=""
+        onChange={[Function]}
+        placeholder="validated input field"
+        type="text"
+        value="abcdefg"
+      />
+    </InputField>
+  </span>
+</ValidatedInputField>
+`;
+
+exports[`ValidatedInputField handles valid updates 1`] = `
+<ValidatedInputField
+  onChange={
+    [MockFunction] {
+      "calls": Array [
+        Array [
+          16,
+        ],
+      ],
+      "results": Array [
+        Object {
+          "type": "return",
+          "value": undefined,
+        },
+      ],
+    }
+  }
+  parse={[Function]}
+  placeholder="validated input field"
+  render={[Function]}
+  value={
+    Option {
+      "val_": 15,
+    }
+  }
+>
+  <span
+    className="valid"
+  >
+    <InputField
+      classNames={
+        Object {
+          "valid": true,
+        }
+      }
+      onChange={[Function]}
+      placeholder="validated input field"
+      value={
+        Option {
+          "val_": "16",
+        }
+      }
+    >
+      <input
+        className="valid"
+        onChange={[Function]}
+        placeholder="validated input field"
+        type="text"
+        value="16"
+      />
+    </InputField>
+  </span>
+</ValidatedInputField>
+`;
+
+exports[`ValidatedInputField renders 1`] = `
+<ValidatedInputField
+  onChange={[MockFunction]}
+  parse={[Function]}
+  placeholder="validated input field"
+  render={[Function]}
+  value={
+    Option {
+      "val_": 15,
+    }
+  }
+>
+  <span
+    className="valid"
+  >
+    <InputField
+      classNames={
+        Object {
+          "valid": true,
+        }
+      }
+      onChange={[Function]}
+      placeholder="validated input field"
+      value={
+        Option {
+          "val_": "15",
+        }
+      }
+    >
+      <input
+        className="valid"
+        onChange={[Function]}
+        placeholder="validated input field"
+        type="text"
+        value="15"
+      />
+    </InputField>
+  </span>
+</ValidatedInputField>
+`;
