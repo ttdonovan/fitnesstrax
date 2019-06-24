@@ -38,7 +38,17 @@ class History extends React.Component<Props, {}> {
         <RangeView classes={{}} range={range} />
         {_.compose(
           _.map(([k, r]: [string, Array<Record>]) => {
-            return <DailyEntryView key={k} date={k} prefs={prefs} records={r} />
+            return (
+              <DailyEntryView
+                key={k}
+                date={k}
+                prefs={prefs}
+                records={r}
+                saveRecords={records =>
+                  this.props.controller.saveRecords(records)
+                }
+              />
+            )
           }),
           _.sortBy(pair => pair[0]),
           _.entries,

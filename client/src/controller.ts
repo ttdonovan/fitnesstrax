@@ -1,4 +1,5 @@
 import Client from "./client"
+import _ from "lodash/fp"
 import * as redux from "./redux"
 import { Range, Record } from "./types"
 import { UserPreferences } from "./userPrefs"
@@ -34,6 +35,12 @@ class Controller {
           this.store.dispatch(redux.saveRecords(records))
         })
     }
+    return new Promise(r => null)
+  }
+
+  saveRecords = (records: Array<Record>): Promise<void> => {
+    console.log("saveRecords")
+    _.map(r => console.log(JSON.stringify(r)))(records)
     return new Promise(r => null)
   }
 

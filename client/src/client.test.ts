@@ -11,7 +11,6 @@ describe("authenticate", () => {
     fetchMock.resetMocks()
   })
 
-  /* how do I set the retun code on a fetchMock? */
   it("returns true when the server accepts the token", async () => {
     fetchMock.mockResponseOnce("", { status: 204 })
     const client = new Client("http://localhost:9010")

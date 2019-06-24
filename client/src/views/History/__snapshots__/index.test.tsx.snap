@@ -43,6 +43,7 @@ exports[`HistoryView renders when there is no history 1`] = `
           ],
         },
         "logout": [Function],
+        "saveRecords": [Function],
         "setPreferences": [Function],
         "store": Object {
           "dispatch": [Function],
@@ -95,6 +96,7 @@ exports[`HistoryView renders when there is no history 1`] = `
             ],
           },
           "logout": [Function],
+          "saveRecords": [Function],
           "setPreferences": [Function],
           "store": Object {
             "dispatch": [Function],

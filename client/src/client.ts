@@ -120,34 +120,34 @@ export const historyFromRecords = (offset, records) => {
 
      */
 
-export const saveWeight = async (
-  _appUrl: string,
-  _auth: string,
-  _weightSample: WeightRecord,
-): Promise<Result<WeightRecord, string>> => {
-  throw new Error("Not Implemented")
-  /*
-  const body = {
-    date: weightSample.date.format(rfc3339Format),
-    weight: weightSample.weight.toNumeric("kg"),
-  }
-  const url = isSomething(weightSample.uuid)
-    ? "/api/weight/" + weightSample.uuid
-    : "/api/weight"
-  const params: RequestInit = {
-    method: isSomething(weightSample.uuid) ? "PUT" : "POST",
-    mode: "cors",
-    headers: new Headers({
-      Authorization: auth,
-      "Content-Type": "application/x-www-form-urlencoded",
-    }),
-    body: encodeFormBody(body),
-  }
-  const response = await fetch(appUrl + url, params)
-  const js = await response.json()
-  return Result.Ok(weightSampleFromJS(js))
-   */
-}
+//export const saveWeight = async (
+//_appUrl: string,
+//_auth: string,
+//_weightSample: WeightRecord,
+//): Promise<Result<WeightRecord, string>> => {
+//throw new Error("Not Implemented")
+//[>
+//const body = {
+//date: weightSample.date.format(rfc3339Format),
+//weight: weightSample.weight.toNumeric("kg"),
+//}
+//const url = isSomething(weightSample.uuid)
+//? "/api/weight/" + weightSample.uuid
+//: "/api/weight"
+//const params: RequestInit = {
+//method: isSomething(weightSample.uuid) ? "PUT" : "POST",
+//mode: "cors",
+//headers: new Headers({
+//Authorization: auth,
+//"Content-Type": "application/x-www-form-urlencoded",
+//}),
+//body: encodeFormBody(body),
+//}
+//const response = await fetch(appUrl + url, params)
+//const js = await response.json()
+//return Result.Ok(weightSampleFromJS(js))
+//*/
+//}
 
 /*
 export const fetchWeight = async (
@@ -169,42 +169,42 @@ export const fetchWeight = async (
 }
    */
 
-export const saveTimeDistance = (
-  appUrl: string,
-  auth: string,
-  timeDistanceSample: TimeDistanceRecord,
-): Promise<Result<TimeDistanceRecord, string>> => {
-  throw new Error("not implemented")
-  /*
-  const body = Object.assign({
-    activity: timeDistanceSample.activity,
-    date: timeDistanceSample.date.format(rfc3339Format),
-    distance: timeDistanceSample.distance.toNumeric("km"),
-    duration: timeDistanceSample.duration.asSeconds(),
-  })
+//export const saveTimeDistance = (
+//appUrl: string,
+//auth: string,
+//timeDistanceSample: TimeDistanceRecord,
+//): Promise<Result<TimeDistanceRecord, string>> => {
+//throw new Error("not implemented")
+//[>
+//const body = Object.assign({
+//activity: timeDistanceSample.activity,
+//date: timeDistanceSample.date.format(rfc3339Format),
+//distance: timeDistanceSample.distance.toNumeric("km"),
+//duration: timeDistanceSample.duration.asSeconds(),
+//})
 
-  const params: RequestInit = {
-    method: isSomething(timeDistanceSample.uuid) ? "PUT" : "POST",
-    mode: "cors",
-    headers: new Headers({
-      Authorization: auth,
-      "Content-Type": "application/x-www-form-urlencoded",
-    }),
-    body: encodeFormBody(body),
-  }
-  return fetch(
-    appUrl +
-      "/api/time-distance" +
-      (isSomething(timeDistanceSample.uuid)
-        ? "/" + timeDistanceSample.uuid
-        : ""),
-    params,
-  )
-    .then(response => response.json())
-    .then(js => Result.Ok(timeDistanceSampleFromJS(js)))
-    .catch(err => Result.Err(err))
-   */
-}
+//const params: RequestInit = {
+//method: isSomething(timeDistanceSample.uuid) ? "PUT" : "POST",
+//mode: "cors",
+//headers: new Headers({
+//Authorization: auth,
+//"Content-Type": "application/x-www-form-urlencoded",
+//}),
+//body: encodeFormBody(body),
+//}
+//return fetch(
+//appUrl +
+//"/api/time-distance" +
+//(isSomething(timeDistanceSample.uuid)
+//? "/" + timeDistanceSample.uuid
+//: ""),
+//params,
+//)
+//.then(response => response.json())
+//.then(js => Result.Ok(timeDistanceSampleFromJS(js)))
+//.catch(err => Result.Err(err))
+//*/
+//}
 
 interface WeightJS {
   id: string
