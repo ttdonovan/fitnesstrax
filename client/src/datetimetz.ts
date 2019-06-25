@@ -45,7 +45,7 @@ export class DateTimeTz {
     if (this.timestamp.zone.name === "UTC") {
       return `${this.timestamp.toFormat(rfc3339Format)}Z`
     } else {
-      return `${this.timestamp.toFormat(rfc3339Format)}Z ${
+      return `${this.timestamp.setZone("UTC").toFormat(rfc3339Format)}Z ${
         this.timestamp.zone.name
       }`
     }
