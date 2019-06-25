@@ -1,9 +1,9 @@
 import Equals from "./equals"
 
 class Option<A> {
-  val_: A | null
+  val_: A | undefined | null
 
-  constructor(val: A | null) {
+  constructor(val: A | undefined | null) {
     this.val_ = val
   }
 
@@ -72,6 +72,13 @@ class Option<A> {
     } else {
       return false
     }
+  }
+
+  unwrap_(): A | null {
+    if (this.val_) {
+      return this.val_
+    }
+    return null
   }
 }
 

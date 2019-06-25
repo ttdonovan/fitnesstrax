@@ -75,11 +75,11 @@ describe("fetchHistory", () => {
     fetchMock.mockResponseOnce("[]")
     const client = new Client("http://localhost:9010")
 
-    const result = await client.fetchHistory(
+    const result = (await client.fetchHistory(
       "auth-data",
       DateTimeTz.fromString("2018-10-10T04:00:00Z").unwrap(),
       DateTimeTz.fromString("2018-10-16T04:00:00Z").unwrap(),
-    )
+    )).unwrap()
 
     expect(fetchMock).toHaveBeenCalledWith(
       "http://localhost:9010/api/history/all/2018-10-10T04:00:00Z/2018-10-16T04:00:00Z",

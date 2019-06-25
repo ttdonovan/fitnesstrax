@@ -51,7 +51,7 @@ export class DateTimeTz {
     }
   }
 
-  static fromString(s: string): Result<DateTimeTz, String> {
+  static fromString(s: string): Result<DateTimeTz, string> {
     const parts = s.split(" ")
     if (parts.length === 0) return Result.Err("No data to parse")
 
