@@ -45,10 +45,12 @@ class Controller {
         _.map((r: Record<RecordTypes>) => {
           this.client
             .saveRecord(authToken, r)
-            .then((res: Result<string, string>) =>
-              res.mapErr(err => {
-                throw new Error(`save exception ${err}`)
-              }),
+            .then((res: Result<Record<RecordTypes>, string>) =>
+              res
+                .map(rec => this.store.dispatch(redux.saveRecords([rec])))
+                .mapErr(err => {
+                  throw new Error(`save exception ${err}`)
+                }),
             )
         })(records),
       ).then(r => {})

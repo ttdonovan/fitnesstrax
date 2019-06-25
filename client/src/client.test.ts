@@ -184,7 +184,17 @@ describe("saveRecord", () => {
         },
       }),
     })
-    expect(res.unwrap()).toEqual("new-record-id")
+    expect(res.unwrap()).toEqual(
+      new Record(
+        "new-record-id",
+        new WeightRecord(
+          DateTimeTz.fromString(
+            "2019-05-15T15:30:00.000Z America/New_York",
+          ).unwrap(),
+          math.unit(50, "kg"),
+        ),
+      ),
+    )
   })
 
   it("saves an update to a weight record", async () => {
@@ -218,6 +228,16 @@ describe("saveRecord", () => {
         }),
       },
     )
-    expect(res.unwrap()).toEqual("efgh-ijkl")
+    expect(res.unwrap()).toEqual(
+      new Record(
+        "efgh-ijkl",
+        new WeightRecord(
+          DateTimeTz.fromString(
+            "2019-05-15T15:30:00.000Z America/New_York",
+          ).unwrap(),
+          math.unit(50, "kg"),
+        ),
+      ),
+    )
   })
 })

@@ -192,7 +192,7 @@ class Client {
   saveRecord = (
     auth: string,
     record: Record<RecordTypes> | RecordTypes,
-  ): Promise<Result<string, string>> => {
+  ): Promise<Result<Record<RecordTypes>, string>> => {
     const commonOptions = {
       headers: new Headers({
         Accept: "application/json",
@@ -201,7 +201,6 @@ class Client {
       }),
     }
 
-    let promise = null
     if (isRecord(record)) {
       let data = null
       if (isWeightRecord(record.data)) {
@@ -212,37 +211,40 @@ class Client {
         throw new Error("unhandled record type")
       }
 
-      promise = fetch(`${this.appUrl}/api/record/${record.id}`, {
+      return fetch(`${this.appUrl}/api/record/${record.id}`, {
         ...commonOptions,
         mode: "cors",
         method: "POST",
         body: JSON.stringify(data),
       })
+        .then(r => r.json())
+        .then(js => Result.Ok(record))
+        .catch(err => Result.Err(err.toString()))
     } else {
       if (isWeightRecord(record)) {
-        promise = fetch(`${this.appUrl}/api/weight`, {
+        return fetch(`${this.appUrl}/api/weight`, {
           ...commonOptions,
           mode: "cors",
           method: "PUT",
           body: JSON.stringify(toWeightJS(record)),
         })
+          .then(r => r.json())
+          .then(uuid => Result.Ok(new Record(uuid, record)))
+          .catch(err => Result.Err(err.toString()))
       } else if (isTimeDistanceRecord(record)) {
-        promise = fetch(`${this.appUrl}/api/timedistance`, {
+        return fetch(`${this.appUrl}/api/timedistance`, {
           ...commonOptions,
           mode: "cors",
           method: "PUT",
           body: JSON.stringify(toTimeDistanceJS(record)),
         })
+          .then(r => r.json())
+          .then(uuid => Result.Ok(new Record(uuid, record)))
+          .catch(err => Result.Err(err.toString()))
       }
     }
 
-    if (promise === null) {
-      throw new Error("unhandled record type")
-    }
-    return promise
-      .then(r => r.json())
-      .then(js => Result.Ok(js))
-      .catch(err => Result.Err(err.toString()))
+    throw new Error("unhandled record type")
   }
 }
 
