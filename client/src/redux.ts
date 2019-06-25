@@ -7,7 +7,7 @@ import _ from "lodash/fp"
 import * as client from "./client"
 import { isSomething } from "./common"
 import Option from "./option"
-import { Range, Record } from "./types"
+import { Range, Record, RecordTypes } from "./types"
 import {
   UnitSystem,
   unitsystemFromSymbol,
@@ -24,7 +24,7 @@ export interface AppState {
   creds: string | null
   currentView: Views
   error: { msg: string; timeout: Promise<{}> } | null
-  history: Map<string, Record>
+  history: Map<string, Record<RecordTypes>>
   preferences: UserPreferences
   utcOffset: number
   /* TODO: I actually want a real live timezone entry here, but I don't know how to get the current timezone. Figure it out when I have internet again. */
@@ -32,15 +32,18 @@ export interface AppState {
 
 export const getAuthToken = (state: AppState): string | null => state.creds
 export const getCurrentView = (state: AppState): Views => state.currentView
-export const getHistory = (state: AppState): Array<Record> =>
+export const getHistory = (state: AppState): Array<Record<RecordTypes>> =>
   _.compose(
-    _.map((pair: [string, Record]): Record => pair[1]),
+    _.map(
+      (pair: [string, Record<RecordTypes>]): Record<RecordTypes> => pair[1],
+    ),
     _.entries,
   )(state.history)
 //export const getRange = (state: AppState) => state.range
 export const getPreferences = (state: AppState): UserPreferences =>
   state.preferences
-export const getRecord = (state: AppState): Map<string, Record> => state.history
+export const getRecord = (state: AppState): Map<string, Record<RecordTypes>> =>
+  state.history
 export const getUtcOffset = (state: AppState): number => state.utcOffset
 
 interface ClearErrorAction {
@@ -51,10 +54,12 @@ export const clearError = (): ClearErrorAction => ({ type: "CLEAR_ERROR" })
 
 interface SaveRecordsAction {
   type: "SAVE_RECORDS"
-  records: Array<Record>
+  records: Array<Record<RecordTypes>>
 }
 
-export const saveRecords = (records: Array<Record>): SaveRecordsAction => ({
+export const saveRecords = (
+  records: Array<Record<RecordTypes>>,
+): SaveRecordsAction => ({
   type: "SAVE_RECORDS",
   records,
 })
@@ -171,7 +176,7 @@ export const rootReducer = (
     state_ = { ...state_, error: null }
   } else if (action.type === "SAVE_RECORDS") {
     const history = new Map(state_.history)
-    _.forEach((record: Record) => history.set(record.id, record))(
+    _.forEach((record: Record<RecordTypes>) => history.set(record.id, record))(
       action.records,
     )
     state_ = { ...state_, history }

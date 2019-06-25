@@ -9,15 +9,17 @@ import DailyEntryView from "../../components/DailyEntry"
 import Controller from "../../controller"
 import Option from "../../option"
 import * as redux from "../../redux"
-import { Range, Record } from "../../types"
+import { Range, Record, RecordTypes } from "../../types"
 import { UserPreferences } from "../../userPrefs"
 
-const bucketByDay = (recs: Array<Record>): Map<string, Array<Record>> =>
-  keyBy((r: Record) => r.date.toFormat("yyyy-MM-dd"))(recs)
+const bucketByDay = (
+  recs: Array<Record<RecordTypes>>,
+): Map<string, Array<Record<RecordTypes>>> =>
+  keyBy((r: Record<RecordTypes>) => r.data.date.toFormat("yyyy-MM-dd"))(recs)
 
 interface Props {
   controller: Controller
-  history: Array<Record>
+  history: Array<Record<RecordTypes>>
   prefs: UserPreferences
   range: Range
 }
@@ -37,7 +39,7 @@ class History extends React.Component<Props, {}> {
       <div id="History">
         <RangeView classes={{}} range={range} />
         {_.compose(
-          _.map(([k, r]: [string, Array<Record>]) => {
+          _.map(([k, r]: [string, Array<Record<RecordTypes>>]) => {
             return (
               <DailyEntryView
                 key={k}

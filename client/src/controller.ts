@@ -1,7 +1,8 @@
 import Client from "./client"
 import _ from "lodash/fp"
 import * as redux from "./redux"
-import { Range, Record } from "./types"
+import Result from "./result"
+import { Range, Record, RecordTypes } from "./types"
 import { UserPreferences } from "./userPrefs"
 
 class Controller {
@@ -30,15 +31,14 @@ class Controller {
     if (authToken) {
       return this.client
         .fetchHistory(authToken, range.start, range.end)
-        .then((records: Array<Record>) => {
-          console.log("finishing fetchRecords")
-          this.store.dispatch(redux.saveRecords(records))
+        .then((records: Result<Array<Record<RecordTypes>>, string>) => {
+          this.store.dispatch(redux.saveRecords(records.unwrap()))
         })
     }
     return new Promise(r => null)
   }
 
-  saveRecords = (records: Array<Record>): Promise<void> => {
+  saveRecords = (records: Array<Record<RecordTypes>>): Promise<void> => {
     console.log("saveRecords")
     _.map(r => console.log(JSON.stringify(r)))(records)
     return new Promise(r => null)

@@ -8,17 +8,19 @@ import Duration from "../Duration"
 
 interface Props {
   prefs: UserPreferences
-  record: types.TimeDistanceRecord
+  record: types.Record<types.TimeDistanceRecord>
 }
 
 export const TimeDistanceRecordView: React.SFC<Props> = ({ prefs, record }) => (
   <div className="record timedistance">
     <div>
-      {record.date.map(dt => dt.setZone(prefs.timezone)).toFormat("HH:mm:ss")}
+      {record.data.date
+        .map(dt => dt.setZone(prefs.timezone))
+        .toFormat("HH:mm:ss")}
     </div>
-    <div>{record.activity.repr.tr(prefs.language)}</div>
+    <div>{record.data.activity.repr.tr(prefs.language)}</div>
     <div>
-      {record.distance
+      {record.data.distance
         .map(
           d =>
             `${math.format(d.toNumber(prefs.units.length), {
@@ -29,7 +31,7 @@ export const TimeDistanceRecordView: React.SFC<Props> = ({ prefs, record }) => (
         .unwrap()}
     </div>
     <div>
-      <Duration duration={record.duration} />
+      <Duration duration={record.data.duration} />
     </div>
   </div>
 )
@@ -37,11 +39,13 @@ export const TimeDistanceRecordView: React.SFC<Props> = ({ prefs, record }) => (
 export const TimeDistanceRecordEdit: React.SFC<Props> = ({ prefs, record }) => (
   <div className="record timedistance">
     <div>
-      {record.date.map(dt => dt.setZone(prefs.timezone)).toFormat("HH:mm:ss")}
+      {record.data.date
+        .map(dt => dt.setZone(prefs.timezone))
+        .toFormat("HH:mm:ss")}
     </div>
-    <div>{record.activity.repr.tr(prefs.language)}</div>
+    <div>{record.data.activity.repr.tr(prefs.language)}</div>
     <div>
-      {record.distance
+      {record.data.distance
         .map(
           d =>
             `${math.format(d.toNumber(prefs.units.length), {
@@ -52,7 +56,7 @@ export const TimeDistanceRecordEdit: React.SFC<Props> = ({ prefs, record }) => (
         .unwrap()}
     </div>
     <div>
-      <Duration duration={record.duration} />
+      <Duration duration={record.data.duration} />
     </div>
   </div>
 )

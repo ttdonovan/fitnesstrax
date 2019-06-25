@@ -10,13 +10,13 @@ import { UserPreferences } from "../../userPrefs"
 
 interface ViewProps {
   prefs: UserPreferences
-  record: types.WeightRecord
+  record: types.Record<types.WeightRecord>
 }
 
 export const WeightRecordView: React.SFC<ViewProps> = ({ prefs, record }) => (
   <div className="record weight">
     <div>
-      {record.weight
+      {record.data.weight
         .to(prefs.units.mass)
         .format({ notation: "fixed", precision: 2 })}
     </div>
@@ -25,8 +25,8 @@ export const WeightRecordView: React.SFC<ViewProps> = ({ prefs, record }) => (
 
 interface EditProps {
   prefs: UserPreferences
-  record: Option<types.WeightRecord>
-  onUpdate: (uuid: string, record: types.Record) => void
+  record: Option<types.Record<types.WeightRecord>>
+  onUpdate: (record: types.Record<types.WeightRecord>) => void
 }
 
 interface State {
@@ -40,22 +40,24 @@ interface Event {
 export class WeightRecordEdit extends React.Component<EditProps, State> {
   constructor(props: EditProps) {
     super(props)
-    this.state = { weight: this.props.record.map(w => w.weight) }
+    this.state = { weight: this.props.record.map(w => w.data.weight) }
   }
 
-  onUpdate(evt: any) {
-    console.log(evt)
-    const val = parseFloat(evt.value)
-    const newWeight = math.unit(val, this.props.prefs.units.mass)
-    /* Going to need the current date in order to be able to create a new
-         * record. Might also need a special function for creating new records
-         * since IDs get assigned by the database. */
-    this.setState({ weight: Option.Some(newWeight) })
-    this.props.onUpdate(
-      this.props.record.unwrap().id,
-      this.props.record.unwrap().withWeight(newWeight),
-    )
-  }
+  // onUpdate(evt: any) {
+  //   console.log(evt)
+  //   const val = parseFloat(evt.value)
+  //   const newWeight = math.unit(val, this.props.prefs.units.mass)
+  //   /* Going to need the current date in order to be able to create a new
+  //        * record. Might also need a special function for creating new records
+  //        * since IDs get assigned by the database. */
+  //   this.setState({ weight: Option.Some(newWeight) })
+  //   this.props.onUpdate(
+  //     new types.Record(
+  //       this.props.record.unwrap().id,
+  //       this.props.record.unwrap().data.withWeight(newWeight),
+  //     ),
+  //   )
+  // }
 
   render() {
     const { prefs, record, onUpdate } = this.props
@@ -80,8 +82,10 @@ export class WeightRecordEdit extends React.Component<EditProps, State> {
           }}
           onChange={(inp: math.Unit) =>
             this.props.onUpdate(
-              record.unwrap().id,
-              this.props.record.unwrap().withWeight(inp),
+              new types.Record(
+                record.unwrap().id,
+                this.props.record.unwrap().data.withWeight(inp),
+              ),
             )
           }
         />

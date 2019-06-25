@@ -15,7 +15,7 @@ import "./style.css"
 interface ViewProps {
   date: string
   prefs: UserPreferences
-  records: Array<types.Record>
+  records: Array<types.Record<types.RecordTypes>>
   startEdit: () => void
 }
 
@@ -25,22 +25,25 @@ const View: React.SFC<ViewProps> = ({
   records,
   startEdit,
 }: ViewProps) => {
-  const weights: Array<types.WeightRecord> = _.filter(
-    (r: types.Record): boolean => types.recordIsWeight(r),
-  )(records) as Array<types.WeightRecord>
+  const weights = _.filter(
+    (r: types.Record<types.RecordTypes>): boolean =>
+      types.isWeightRecord(r.data),
+  )(records) as Array<types.Record<types.WeightRecord>>
+  const weight = first(weights)
 
-  const timeDistances: Array<types.TimeDistanceRecord> = _.filter(
-    (r: types.Record): boolean => types.recordIsTimeDistance(r),
-  )(records) as Array<types.TimeDistanceRecord>
+  const timeDistances: Array<types.Record<types.TimeDistanceRecord>> = _.filter(
+    (r: types.Record<types.RecordTypes>): boolean =>
+      types.isTimeDistanceRecord(r.data),
+  )(records) as Array<types.Record<types.TimeDistanceRecord>>
 
   return (
     <div onClick={startEdit}>
       <Card>
         <div>{date}</div>
-        {_.map((r: types.WeightRecord) => (
-          <WeightRecordView prefs={prefs} record={r} />
-        ))(weights)}
-        {_.map((r: types.TimeDistanceRecord) => (
+        {weight
+          .map(w => <WeightRecordView prefs={prefs} record={w} />)
+          .unwrap_()}
+        {_.map((r: types.Record<types.TimeDistanceRecord>) => (
           <TimeDistanceRecordView prefs={prefs} record={r} />
         ))(timeDistances)}
       </Card>
@@ -51,15 +54,15 @@ const View: React.SFC<ViewProps> = ({
 interface EditProps {
   date: string
   prefs: UserPreferences
-  records: Array<types.Record>
+  records: Array<types.Record<types.RecordTypes>>
   editFinished: () => void
-  saveRecords: (_: Array<types.Record>) => Promise<void>
+  saveRecords: (_: Array<types.Record<types.RecordTypes>>) => Promise<void>
 }
 //updateRecord: (uuid: string, record: types.Record) => void
 
 interface EditState {
-  newRecords: Array<types.Record>
-  updatedRecords: { [_: string]: types.Record }
+  newRecords: Array<types.Record<types.RecordTypes>>
+  updatedRecords: { [_: string]: types.Record<types.RecordTypes> }
 }
 
 class Edit extends React.Component<EditProps, EditState> {
@@ -68,7 +71,7 @@ class Edit extends React.Component<EditProps, EditState> {
     this.state = { newRecords: [], updatedRecords: {} }
   }
 
-  updateRecord = (uuid: string, record: types.Record) =>
+  updateRecord = (uuid: string, record: types.Record<types.RecordTypes>) =>
     this.setState({
       updatedRecords: { ...this.state.updatedRecords, [uuid]: record },
     })
@@ -82,13 +85,15 @@ class Edit extends React.Component<EditProps, EditState> {
 
   render = () => {
     const { date, prefs, records } = this.props
-    const weights: Array<types.WeightRecord> = _.filter(
-      (r: types.Record): boolean => types.recordIsWeight(r),
-    )(records) as Array<types.WeightRecord>
+    const weights = _.filter(
+      (r: types.Record<types.RecordTypes>): boolean =>
+        types.isWeightRecord(r.data),
+    )(records) as Array<types.Record<types.WeightRecord>>
 
-    const timeDistances: Array<types.TimeDistanceRecord> = _.filter(
-      (r: types.Record): boolean => types.recordIsTimeDistance(r),
-    )(records) as Array<types.TimeDistanceRecord>
+    const timeDistances = _.filter(
+      (r: types.Record<types.RecordTypes>): boolean =>
+        types.isTimeDistanceRecord(r.data),
+    )(records) as Array<types.Record<types.TimeDistanceRecord>>
 
     return (
       <Card>
@@ -97,12 +102,13 @@ class Edit extends React.Component<EditProps, EditState> {
         <WeightRecordEdit
           prefs={prefs}
           record={first(weights)}
-          onUpdate={(uuid, record) => this.updateRecord(uuid, record)}
+          onUpdate={record => this.updateRecord(record.id, record)}
         />
-        {_.map((r: types.TimeDistanceRecord) => (
+        {_.map((r: types.Record<types.TimeDistanceRecord>) => (
           <TimeDistanceRecordView prefs={prefs} record={r} />
         ))(timeDistances)}
         <button onClick={this.saveUpdates}>Save</button>
+        <button onClick={this.props.editFinished}>Cancel</button>
       </Card>
     )
   }
@@ -111,8 +117,8 @@ class Edit extends React.Component<EditProps, EditState> {
 interface RecordProps {
   date: string
   prefs: UserPreferences
-  records: Array<types.Record>
-  saveRecords: (_: Array<types.Record>) => Promise<void>
+  records: Array<types.Record<types.RecordTypes>>
+  saveRecords: (_: Array<types.Record<types.RecordTypes>>) => Promise<void>
 }
 
 interface State {
