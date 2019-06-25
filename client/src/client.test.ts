@@ -4,7 +4,13 @@ import { Duration } from "luxon"
 import Client from "./client"
 import DateTimeTz from "./datetimetz"
 import Option from "./option"
-import { Running, TimeDistanceRecord } from "./types"
+import {
+  Record,
+  RecordTypes,
+  Running,
+  TimeDistanceRecord,
+  WeightRecord,
+} from "./types"
 
 describe("authenticate", () => {
   beforeEach(() => {
@@ -102,46 +108,116 @@ describe("fetchHistory", () => {
 
     const client = new Client("http://localhost:9010")
 
-    const result = await client.fetchHistory(
+    const result = (await client.fetchHistory(
       "auth-data",
       DateTimeTz.fromString("2018-10-10T04:00:00Z").unwrap(),
       DateTimeTz.fromString("2018-10-16T04:00:00Z").unwrap(),
-    )
+    )).unwrap()
 
     expect(result).toHaveLength(2)
 
     const weightRecord = result.find(
       r => r.id === "ae4bf2c4-9130-43d3-abb4-937c64d0d0f2",
     )
-    expect(weightRecord).toMatchObject({
-      id: "ae4bf2c4-9130-43d3-abb4-937c64d0d0f2",
-      date: DateTimeTz.fromString(
-        "2018-10-10T04:00:00+00:00 America/New_York",
-      ).unwrap(),
-      weight: math.unit(86.2, "kg"),
-    })
-    const tdRecord = result.find(
-      r => r.id === "15f9c464-6427-4368-ab88-13875d47865f",
+
+    expect(weightRecord).toEqual(
+      new Record(
+        "ae4bf2c4-9130-43d3-abb4-937c64d0d0f2",
+        new WeightRecord(
+          DateTimeTz.fromString(
+            "2018-10-10T04:00:00+00:00 America/New_York",
+          ).unwrap(),
+          math.unit(86.2, "kg"),
+        ),
+      ),
     )
-    expect(tdRecord && tdRecord.id).toEqual(
-      "15f9c464-6427-4368-ab88-13875d47865f",
-    )
-    expect((<TimeDistanceRecord>tdRecord).activity).toEqual(Running)
+    const tdRecord: Record<RecordTypes> = new Option<Record<RecordTypes>>(
+      result.find(r => r.id === "15f9c464-6427-4368-ab88-13875d47865f"),
+    ).unwrap()
+    expect(tdRecord.id).toEqual("15f9c464-6427-4368-ab88-13875d47865f")
+    expect((<TimeDistanceRecord>tdRecord.data).activity).toEqual(Running)
     expect(
       tdRecord &&
-        tdRecord.date.equals(
+        tdRecord.data.date.equals(
           DateTimeTz.fromString(
             "2018-11-14T17:30:00+00:00 America/New_York",
           ).unwrap(),
         ),
     ).toEqual(true)
     expect(
-      (<TimeDistanceRecord>tdRecord).distance.map(d =>
+      (<TimeDistanceRecord>tdRecord.data).distance.map(d =>
         d.equals(math.unit(3640.0, "m")),
       ),
     ).toEqual(Option.Some(true))
-    expect((<TimeDistanceRecord>tdRecord).duration).toEqual(
+    expect((<TimeDistanceRecord>tdRecord.data).duration).toEqual(
       Option.Some(Duration.fromObject({ seconds: 1800.0 })),
     )
+  })
+})
+
+describe("saveRecord", () => {
+  beforeEach(() => {
+    fetchMock.resetMocks()
+  })
+
+  it("saves a new weight record", async () => {
+    fetchMock.mockResponseOnce(JSON.stringify("new-record-id"))
+    const client = new Client("http://localhost:9010")
+
+    const rec = new WeightRecord(
+      DateTimeTz.fromString("2019-05-15T15:30:00Z America/New_York").unwrap(),
+      math.unit(50, "kg"),
+    )
+    const res = await client.saveRecord("auth-data", rec)
+    expect(fetchMock).toHaveBeenCalledWith("http://localhost:9010/api/weight", {
+      method: "PUT",
+      mode: "cors",
+      headers: new Headers({
+        Accept: "application/json",
+        "Content-Type": "application/json",
+        Authorization: "Bearer auth-data",
+      }),
+      body: JSON.stringify({
+        Weight: {
+          date: "2019-05-15T15:30:00Z America/New_York",
+          weight: 50,
+        },
+      }),
+    })
+    expect(res.unwrap()).toEqual("new-record-id")
+  })
+
+  it("saves an update to a weight record", async () => {
+    fetchMock.mockResponseOnce(JSON.stringify("efgh-ijkl"))
+    const client = new Client("http://localhost:9010")
+
+    const time = DateTimeTz.fromString("2019-05-15T15:30:00Z America/New_York")
+    const rec = new Record(
+      "efgh-ijkl",
+      new WeightRecord(
+        DateTimeTz.fromString("2019-05-15T15:30:00Z America/New_York").unwrap(),
+        math.unit(50, "kg"),
+      ),
+    )
+    const res = await client.saveRecord("auth-data", rec)
+    expect(fetchMock).toHaveBeenCalledWith(
+      "http://localhost:9010/api/record/efgh-ijkl",
+      {
+        method: "POST",
+        mode: "cors",
+        headers: new Headers({
+          Accept: "application/json",
+          "Content-Type": "application/json",
+          Authorization: "Bearer auth-data",
+        }),
+        body: JSON.stringify({
+          Weight: {
+            date: "2019-05-15T15:30:00Z America/New_York",
+            weight: 50,
+          },
+        }),
+      },
+    )
+    expect(res.unwrap()).toEqual("efgh-ijkl")
   })
 })

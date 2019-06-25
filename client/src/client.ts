@@ -13,8 +13,9 @@ import {
   TimeDistanceRecord,
   WeightRecord,
   timeDistanceActivityFromString,
-  recordIsWeight,
-  recordIsTimeDistance,
+  isRecord,
+  isWeightRecord,
+  isTimeDistanceRecord,
 } from "./types"
 
 interface WeightJS {
@@ -64,13 +65,13 @@ interface RecordJS {
   data: RecordJSTypes
 }
 
-const recordToJS = (record: Record<RecordTypes>): RecordJS => {
+const toRecordJS = (record: Record<RecordTypes>): RecordJS => {
   const data = record.data
   let dataJS = null
 
-  if (recordIsTimeDistance(data)) {
+  if (isTimeDistanceRecord(data)) {
     dataJS = toTimeDistanceJS(data)
-  } else if (recordIsWeight(data)) {
+  } else if (isWeightRecord(data)) {
     dataJS = toWeightJS(data)
   } else {
     throw new Error("unrecognized record data type")
@@ -186,6 +187,62 @@ class Client {
         authorization: `Bearer ${auth}`,
       }),
     }).then(r => r.ok)
+  }
+
+  saveRecord = (
+    auth: string,
+    record: Record<RecordTypes> | RecordTypes,
+  ): Promise<Result<string, string>> => {
+    const commonOptions = {
+      headers: new Headers({
+        Accept: "application/json",
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${auth}`,
+      }),
+    }
+
+    let promise = null
+    if (isRecord(record)) {
+      let data = null
+      if (isWeightRecord(record.data)) {
+        data = toWeightJS(record.data)
+      } else if (isTimeDistanceRecord(record.data)) {
+        data = toTimeDistanceJS(record.data)
+      } else {
+        throw new Error("unhandled record type")
+      }
+
+      promise = fetch(`${this.appUrl}/api/record/${record.id}`, {
+        ...commonOptions,
+        mode: "cors",
+        method: "POST",
+        body: JSON.stringify(data),
+      })
+    } else {
+      if (isWeightRecord(record)) {
+        promise = fetch(`${this.appUrl}/api/weight`, {
+          ...commonOptions,
+          mode: "cors",
+          method: "PUT",
+          body: JSON.stringify(toWeightJS(record)),
+        })
+      } else if (isTimeDistanceRecord(record)) {
+        promise = fetch(`${this.appUrl}/api/timedistance`, {
+          ...commonOptions,
+          mode: "cors",
+          method: "PUT",
+          body: JSON.stringify(toTimeDistanceJS(record)),
+        })
+      }
+    }
+
+    if (promise === null) {
+      throw new Error("unhandled record type")
+    }
+    return promise
+      .then(r => r.json())
+      .then(js => Result.Ok(js))
+      .catch(err => Result.Err(err.toString()))
   }
 }
 

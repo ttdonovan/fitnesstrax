@@ -21,6 +21,7 @@ exports[`HistoryView renders when there is no history 1`] = `
           "authenticate": [Function],
           "fetchHistory": [Function],
           "rfc3339Format": "YYYY-MM-DDTHH:mm:ssZ",
+          "saveRecord": [Function],
         },
         "fetchRecords": [MockFunction] {
           "calls": Array [
@@ -74,6 +75,7 @@ exports[`HistoryView renders when there is no history 1`] = `
             "authenticate": [Function],
             "fetchHistory": [Function],
             "rfc3339Format": "YYYY-MM-DDTHH:mm:ssZ",
+            "saveRecord": [Function],
           },
           "fetchRecords": [MockFunction] {
             "calls": Array [

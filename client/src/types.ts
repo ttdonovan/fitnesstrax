@@ -8,18 +8,6 @@ import Result from "./result"
 
 export type Range = { start: DateTimeTz; end: DateTimeTz }
 
-export type RecordTypes = TimeDistanceRecord | WeightRecord
-
-export class Record<A> {
-  constructor(readonly id: string, readonly data: A) {}
-}
-
-export const recordIsTimeDistance = (
-  rec: RecordTypes,
-): rec is TimeDistanceRecord => (<TimeDistanceRecord>rec).distance !== undefined
-export const recordIsWeight = (rec: RecordTypes): rec is WeightRecord =>
-  (<WeightRecord>rec).weight !== undefined
-
 export class WeightRecord {
   constructor(readonly date: DateTimeTz, readonly weight: math.Unit) {}
 
@@ -80,6 +68,21 @@ export class TimeDistanceRecord {
     )
   }
 }
+
+export type RecordTypes = TimeDistanceRecord | WeightRecord
+
+export const isTimeDistanceRecord = (
+  rec: RecordTypes,
+): rec is TimeDistanceRecord => (<TimeDistanceRecord>rec).distance !== undefined
+export const isWeightRecord = (rec: RecordTypes): rec is WeightRecord =>
+  (<WeightRecord>rec).weight !== undefined
+
+export class Record<A> {
+  constructor(readonly id: string, readonly data: A) {}
+}
+
+export const isRecord = (rec: any): rec is Record<any> =>
+  (<Record<any>>rec).id !== undefined
 
 /*
 export class HistoryEntry {
