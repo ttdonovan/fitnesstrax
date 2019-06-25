@@ -39,9 +39,21 @@ class Controller {
   }
 
   saveRecords = (records: Array<Record<RecordTypes>>): Promise<void> => {
-    console.log("saveRecords")
-    _.map(r => console.log(JSON.stringify(r)))(records)
-    return new Promise(r => null)
+    const authToken = redux.getAuthToken(this.store.getState())
+    if (authToken) {
+      return Promise.all(
+        _.map((r: Record<RecordTypes>) => {
+          this.client
+            .saveRecord(authToken, r)
+            .then((res: Result<string, string>) =>
+              res.mapErr(err => {
+                throw new Error(`save exception ${err}`)
+              }),
+            )
+        })(records),
+      ).then(r => {})
+    }
+    return new Promise(r => r())
   }
 
   setPreferences = (prefs: UserPreferences): void => {
