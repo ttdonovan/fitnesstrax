@@ -26,6 +26,22 @@ class Result<A, E> {
     return new Result("err", null, err)
   }
 
+  static try<A, E>(f: () => A): Result<A, E> {
+    try {
+      return Result.Ok(f())
+    } catch (e) {
+      return Result.Err(e)
+    }
+  }
+
+  isOk(): boolean {
+    return resultReprIsOk(this.val)
+  }
+
+  isErr(): boolean {
+    return resultReprIsErr(this.val)
+  }
+
   map<B>(f: (_: A) => B): Result<B, E> {
     if (resultReprIsOk(this.val)) {
       return Result.Ok(f(this.val.ok))
@@ -37,7 +53,7 @@ class Result<A, E> {
     throw new Error("Invalid Result state")
   }
 
-  map_err<F>(f: (_: E) => F): Result<A, F> {
+  mapErr<F>(f: (_: E) => F): Result<A, F> {
     if (resultReprIsErr(this.val)) {
       return Result.Err(f(this.val.err))
     }
@@ -51,8 +67,29 @@ class Result<A, E> {
     if (resultReprIsOk(this.val)) {
       return this.val.ok
     }
-    throw new Error("forced unwrap of an empty Result")
+    throw new Error("forced unwrap of an errored Result")
   }
+
+  unwrapErr(): E {
+    if (resultReprIsErr(this.val)) {
+      return this.val.err
+    }
+    throw new Error("forced error unwrap of an ok Result")
+  }
+}
+
+export const sequenceResult = <A, E>(
+  lst: Array<Result<A, E>>,
+): Result<Array<A>, E> => {
+  let res = []
+  for (var v of lst) {
+    if (v.isOk()) {
+      res.push(v.unwrap())
+    } else {
+      return Result.Err(v.unwrapErr())
+    }
+  }
+  return Result.Ok(res)
 }
 
 export default Result

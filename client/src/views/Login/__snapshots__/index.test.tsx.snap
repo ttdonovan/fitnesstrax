@@ -1,3 +1,62 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`LoginView renders 1`] = `ShallowWrapper {}`;
+exports[`LoginView renders 1`] = `
+<div
+  className="container-fluid"
+  id="LoginForm"
+>
+  <div
+    className="row"
+    style={
+      Object {
+        "paddingTop": "80px",
+      }
+    }
+  >
+    <div
+      className="col-sm-2"
+    >
+       
+    </div>
+    <div
+      className="col-sm-8"
+      style={
+        Object {
+          "textAlign": "center",
+        }
+      }
+    >
+      <h1>
+         
+        Health Tracker
+      </h1>
+      <p>
+        <InputField
+          onChange={[Function]}
+          placeholder="Enter your login token"
+          value={
+            Option {
+              "val_": null,
+            }
+          }
+        />
+      </p>
+      <p>
+        <button
+          className="btn btn-outline-primary"
+          name="LoginButton"
+          onClick={[Function]}
+          type="button"
+        >
+          Log In
+        </button>
+      </p>
+    </div>
+    <div
+      className="col-sm-2"
+    >
+       
+    </div>
+  </div>
+</div>
+`;

@@ -44,6 +44,9 @@
     ],
     "setupFiles": [
       "./setupOnFileLoad.ts"
+    ],
+    "snapshotSerializers": [
+      "enzyme-to-json/serializer"
     ]
   },
   "prettier": {
@@ -67,7 +70,8 @@
     "redux": "^4.0.1",
     "redux-logger": "^3.0.6",
     "redux-thunk": "^2.3.0",
-    "style-loader": "^0.23.1"
+    "style-loader": "^0.23.1",
+    "uuid": "^3.3.2"
   },
   "devDependencies": {
     "@types/enzyme": "^3.9.1",
@@ -83,9 +87,11 @@
     "@types/react-redux": "^7.0.8",
     "@types/react-select": "^2.0.19",
     "@types/redux-logger": "^3.0.7",
+    "@types/uuid": "^3.4.4",
     "css-loader": "^2.1.1",
     "enzyme": "^3.9.0",
     "enzyme-adapter-react-16": "^1.12.1",
+    "enzyme-to-json": "^3.3.5",
     "file-loader": "^3.0.1",
     "identity-obj-proxy": "^3.0.0",
     "jest": "^24.8.0",

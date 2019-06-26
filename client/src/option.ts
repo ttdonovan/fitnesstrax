@@ -1,9 +1,9 @@
 import Equals from "./equals"
 
 class Option<A> {
-  val_: A | null
+  val_: A | undefined | null
 
-  constructor(val: A | null) {
+  constructor(val: A | undefined | null) {
     this.val_ = val
   }
 
@@ -13,6 +13,13 @@ class Option<A> {
 
   static None<A>(): Option<A> {
     return new Option<A>(null)
+  }
+
+  static fromNaN(val: number): Option<number> {
+    if (val === NaN || val === null || val === undefined) {
+      return Option.None()
+    }
+    return Option.Some(val)
   }
 
   isSome(): boolean {
@@ -44,6 +51,13 @@ class Option<A> {
     return def
   }
 
+  mapOrElse<B>(f: (_: A) => B, defF: () => B): B {
+    if (this.val_) {
+      return f(this.val_)
+    }
+    return defF()
+  }
+
   unwrap(): A {
     if (this.val_) {
       return this.val_
@@ -65,6 +79,13 @@ class Option<A> {
     } else {
       return false
     }
+  }
+
+  unwrap_(): A | null {
+    if (this.val_) {
+      return this.val_
+    }
+    return null
   }
 }
 

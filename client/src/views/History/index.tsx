@@ -7,17 +7,20 @@ import { keyBy } from "../../common"
 import RangeView from "../../components/range"
 import DailyEntryView from "../../components/DailyEntry"
 import Controller from "../../controller"
+import Option from "../../option"
 import * as redux from "../../redux"
-import { Range, Record } from "../../types"
+import { Range, Record, RecordTypes } from "../../types"
 import { UserPreferences } from "../../userPrefs"
+import { Date } from "../../datetimetz"
 
-const bucketByDay = (recs: Array<Record>): Map<string, Array<Record>> =>
-  keyBy((r: Record) => r.date.toFormat("yyyy-MM-dd"))(recs)
+const bucketByDay = (
+  recs: Array<Record<RecordTypes>>,
+): Map<string, Array<Record<RecordTypes>>> =>
+  keyBy((r: Record<RecordTypes>) => r.data.date.toFormat("yyyy-MM-dd"))(recs)
 
 interface Props {
   controller: Controller
-  currentEdit: Record | null
-  history: Array<Record>
+  history: Array<Record<RecordTypes>>
   prefs: UserPreferences
   range: Range
 }
@@ -29,7 +32,7 @@ class History extends React.Component<Props, {}> {
   }
 
   render() {
-    const { controller, currentEdit, history, prefs, range } = this.props
+    const { controller, history, prefs, range } = this.props
 
     const buckets = bucketByDay(history)
     _.entries(buckets).forEach(pair => console.log(pair[0].toString()))
@@ -37,8 +40,18 @@ class History extends React.Component<Props, {}> {
       <div id="History">
         <RangeView classes={{}} range={range} />
         {_.compose(
-          _.map(([k, r]: [string, Array<Record>]) => {
-            return <DailyEntryView key={k} date={k} prefs={prefs} records={r} />
+          _.map(([k, r]: [string, Array<Record<RecordTypes>>]) => {
+            return (
+              <DailyEntryView
+                key={k}
+                date={Date.fromString(k).unwrap()}
+                prefs={prefs}
+                records={r}
+                saveRecords={records =>
+                  this.props.controller.saveRecords(records)
+                }
+              />
+            )
           }),
           _.sortBy(pair => pair[0]),
           _.entries,
@@ -49,7 +62,6 @@ class History extends React.Component<Props, {}> {
 }
 
 const HistoryView = connect((state: redux.AppState) => ({
-  currentEdit: redux.getCurrentlyEditing(state),
   prefs: redux.getPreferences(state),
   history: redux.getHistory(state),
 }))(History)

@@ -3,6 +3,7 @@ import React from "react"
 import { createStore } from "redux"
 
 import Controller from "../../controller"
+import Option from "../../option"
 import * as redux from "../../redux"
 import { standardPreferences } from "../../testSetup"
 import LoginView from "./index"
@@ -22,7 +23,7 @@ describe("LoginView", () => {
     const wrapper = shallow(
       <LoginView
         controller={controller}
-        token={null}
+        token={Option.None()}
         prefs={standardPreferences()}
       />,
     )
@@ -39,7 +40,7 @@ describe("LoginView", () => {
     const wrapper = shallow(
       <LoginView
         controller={controller}
-        token={"sample-token"}
+        token={Option.Some("sample-token")}
         prefs={standardPreferences()}
       />,
     )

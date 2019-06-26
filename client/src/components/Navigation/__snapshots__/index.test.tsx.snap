@@ -1,3 +1,22 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Navigation renders 1`] = `ShallowWrapper {}`;
+exports[`Navigation renders 1`] = `
+<div
+  className="navigation"
+>
+  <div>
+    <a
+      onClick={[Function]}
+    >
+      History
+    </a>
+  </div>
+  <div>
+    <a
+      onClick={[Function]}
+    >
+      Preferences
+    </a>
+  </div>
+</div>
+`;

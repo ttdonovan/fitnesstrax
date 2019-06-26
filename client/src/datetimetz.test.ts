@@ -13,11 +13,10 @@ describe("DateTimeTz", () => {
   })
 
   it("can parse a timestamp with a Z and a timezone", () => {
-    const dt = DateTimeTz.fromString("2019-06-15T19:00:00Z America/Phoenix")
     const dtz = DateTimeTz.fromString(
       "2019-06-15T19:00:00Z America/Phoenix",
     ).unwrap()
-    expect(dtz.toString()).toEqual("2019-06-15T12:00:00Z America/Phoenix")
+    expect(dtz.toString()).toEqual("2019-06-15T19:00:00Z America/Phoenix")
   })
 })
 

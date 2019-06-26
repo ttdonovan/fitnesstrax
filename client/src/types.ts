@@ -8,22 +8,15 @@ import Result from "./result"
 
 export type Range = { start: DateTimeTz; end: DateTimeTz }
 
-export type Record = TimeDistanceRecord | WeightRecord
-
-export const recordIsTimeDistance = (rec: Record): rec is TimeDistanceRecord =>
-  (<TimeDistanceRecord>rec).distance !== undefined
-export const recordIsWeight = (rec: Record): rec is WeightRecord =>
-  (<WeightRecord>rec).weight !== undefined
-
 export class WeightRecord {
-  constructor(
-    readonly id: string,
-    readonly date: DateTimeTz,
-    readonly weight: math.Unit,
-  ) {}
+  constructor(readonly date: DateTimeTz, readonly weight: math.Unit) {}
 
   clone() {
-    return new WeightRecord(this.id, this.date, this.weight.clone())
+    return new WeightRecord(this.date, this.weight.clone())
+  }
+
+  withWeight(weight: math.Unit) {
+    return new WeightRecord(this.date, weight)
   }
 }
 
@@ -33,13 +26,6 @@ export class TimeDistanceActivity {
 
 export const Cycling = new TimeDistanceActivity(msgs.Cycling)
 export const Running = new TimeDistanceActivity(msgs.Running)
-
-/*
-export enum TimeDistanceActivity {
-  Cycling,
-  Running,
-}
-   */
 
 export const timeDistanceActivityFromString = (
   str: string,
@@ -53,45 +39,50 @@ export const timeDistanceActivityFromString = (
   }
 }
 
-/*
-export const timeDistanceActivityToString = (
-  activity: TimeDistanceActivity,
-): string => {
-  if (activity === TimeDistanceActivity.Cycling) return "Cycling"
-  else if (activity === TimeDistanceActivity.Running) return "Running"
-  else throw Error("Invalid enumeration value")
-}
-   */
-
 export class TimeDistanceRecord {
   constructor(
-    readonly id: string,
     readonly date: DateTimeTz,
     readonly activity: TimeDistanceActivity,
     readonly distance: Option<math.Unit>,
     readonly duration: Option<Duration>,
+    readonly comments: Option<string>,
   ) {}
 
   equals(other: TimeDistanceRecord) {
     return (
-      this.id === other.id &&
       this.activity === other.activity &&
       this.date.equals(other.date) &&
       this.distance.equals(other.distance) &&
-      this.duration.equals(other.duration)
+      this.duration.equals(other.duration) &&
+      this.comments === other.comments
     )
   }
 
   clone() {
     return new TimeDistanceRecord(
-      this.id,
       this.date,
       this.activity,
       this.distance.map(v => v.clone()),
       this.duration,
+      this.comments,
     )
   }
 }
+
+export type RecordTypes = TimeDistanceRecord | WeightRecord
+
+export const isTimeDistanceRecord = (
+  rec: RecordTypes,
+): rec is TimeDistanceRecord => (<TimeDistanceRecord>rec).distance !== undefined
+export const isWeightRecord = (rec: RecordTypes): rec is WeightRecord =>
+  (<WeightRecord>rec).weight !== undefined
+
+export class Record<A> {
+  constructor(readonly id: string, readonly data: A) {}
+}
+
+export const isRecord = (rec: any): rec is Record<any> =>
+  (<Record<any>>rec).id !== undefined
 
 /*
 export class HistoryEntry {
