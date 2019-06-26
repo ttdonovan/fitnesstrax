@@ -2,11 +2,13 @@ import math from "mathjs"
 import React from "react"
 import { classnames, ClassNames } from "../../classnames"
 
+import uuidv4 from "uuid/v4"
 import ValidatedInputField from "../ValidatedInputField"
 import Option from "../../option"
 import * as msgs from "../../translations"
 import * as types from "../../types"
 import { UserPreferences } from "../../userPrefs"
+import { DateTimeTz, Date } from "../../datetimetz"
 
 interface ViewProps {
   prefs: UserPreferences
@@ -25,11 +27,14 @@ export const WeightRecordView: React.SFC<ViewProps> = ({ prefs, record }) => (
 
 interface EditProps {
   prefs: UserPreferences
+  date: Date
   record: Option<types.Record<types.WeightRecord>>
+  onUpdateNew: (uuid: string, data: types.WeightRecord) => void
   onUpdate: (record: types.Record<types.WeightRecord>) => void
 }
 
 interface State {
+  uuid: Option<string>
   weight: Option<math.Unit>
 }
 
@@ -40,31 +45,41 @@ interface Event {
 export class WeightRecordEdit extends React.Component<EditProps, State> {
   constructor(props: EditProps) {
     super(props)
-    this.state = { weight: this.props.record.map(w => w.data.weight) }
+    this.state = {
+      uuid: Option.None(),
+      weight: this.props.record.map(w => w.data.weight),
+    }
   }
 
-  // onUpdate(evt: any) {
-  //   console.log(evt)
-  //   const val = parseFloat(evt.value)
-  //   const newWeight = math.unit(val, this.props.prefs.units.mass)
-  //   /* Going to need the current date in order to be able to create a new
-  //        * record. Might also need a special function for creating new records
-  //        * since IDs get assigned by the database. */
-  //   this.setState({ weight: Option.Some(newWeight) })
-  //   this.props.onUpdate(
-  //     new types.Record(
-  //       this.props.record.unwrap().id,
-  //       this.props.record.unwrap().data.withWeight(newWeight),
-  //     ),
-  //   )
-  // }
+  onChange = (inp: math.Unit) => {
+    const { date, prefs, record, onUpdate, onUpdateNew } = this.props
+    const { uuid, weight } = this.state
+
+    const uuid_ = uuid.or(uuidv4())
+    this.setState({ uuid: Option.Some(uuid_) })
+
+    record.mapOrElse(
+      r => this.props.onUpdate(new types.Record(r.id, r.data.withWeight(inp))),
+      () => {
+        console.log("or_else dispatching")
+        this.props.onUpdateNew(
+          uuid_,
+          new types.WeightRecord(
+            DateTimeTz.fromDate(date, prefs.timezone),
+            inp,
+          ),
+        )
+      },
+    )
+  }
 
   render() {
-    const { prefs, record, onUpdate } = this.props
+    const { date, prefs, record } = this.props
+    console.log("rendering", record)
     return (
       <div className="flex">
         <ValidatedInputField
-          value={this.state.weight}
+          value={record.map(r => r.data.weight)}
           placeholder={msgs.WeightEntryPlaceholder.tr(prefs.language)}
           render={(val: math.Unit): string =>
             math.format(val.toNumber(prefs.units.mass), {
@@ -80,14 +95,7 @@ export class WeightRecordEdit extends React.Component<EditProps, State> {
             }
             return Option.None()
           }}
-          onChange={(inp: math.Unit) =>
-            this.props.onUpdate(
-              new types.Record(
-                record.unwrap().id,
-                this.props.record.unwrap().data.withWeight(inp),
-              ),
-            )
-          }
+          onChange={this.onChange}
         />
         <div> {prefs.units.massRepr.tr(prefs.language)} </div>
       </div>

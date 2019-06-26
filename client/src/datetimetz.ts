@@ -1,6 +1,7 @@
 import { DateTime, IANAZone } from "luxon"
 import pad from "pad-left"
 
+import Option from "./option"
 import Result from "./result"
 
 const UTC = IANAZone.create("UTC")
@@ -15,10 +16,38 @@ export class Date {
   toString(): string {
     return `${this.year}-${pad(this.month, 2, "0")}-${pad(this.day, 2, "0")}`
   }
+
+  static fromString = (s: string): Result<Date, string> => {
+    const parts = s.split("-")
+    if (parts.length !== 3) {
+      Result.Err(`invalid date string, ${s}`)
+    }
+    const year = Option.fromNaN(parseInt(parts[0]))
+    if (!year.isSome()) Result.Err("invalid year")
+    const month = Option.fromNaN(parseInt(parts[1]))
+    if (!month.isSome()) Result.Err("invalid month")
+    const day = Option.fromNaN(parseInt(parts[2]))
+    if (!day.isSome()) Result.Err("invalid day")
+
+    return Result.Ok(new Date(year.unwrap(), month.unwrap(), day.unwrap()))
+  }
 }
 
 export class DateTimeTz {
   constructor(readonly timestamp: DateTime) {}
+
+  static fromDate = (date: Date, zone: IANAZone): DateTimeTz =>
+    new DateTimeTz(
+      DateTime.fromObject({
+        year: date.year,
+        month: date.month,
+        day: date.day,
+        hour: 0,
+        minute: 0,
+        second: 0,
+        zone: zone,
+      }),
+    )
 
   map(fn: (_: DateTime) => DateTime): DateTimeTz {
     return new DateTimeTz(fn(this.timestamp))

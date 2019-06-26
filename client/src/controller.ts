@@ -38,11 +38,13 @@ class Controller {
     return new Promise(r => null)
   }
 
-  saveRecords = (records: Array<Record<RecordTypes>>): Promise<void> => {
+  saveRecords = (
+    records: Array<Record<RecordTypes> | RecordTypes>,
+  ): Promise<void> => {
     const authToken = redux.getAuthToken(this.store.getState())
     if (authToken) {
       return Promise.all(
-        _.map((r: Record<RecordTypes>) => {
+        _.map((r: Record<RecordTypes> | RecordTypes) => {
           this.client
             .saveRecord(authToken, r)
             .then((res: Result<Record<RecordTypes>, string>) =>

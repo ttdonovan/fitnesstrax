@@ -222,17 +222,17 @@ class Client {
         .catch(err => Result.Err(err.toString()))
     } else {
       if (isWeightRecord(record)) {
-        return fetch(`${this.appUrl}/api/weight`, {
+        return fetch(`${this.appUrl}/api/record/weight`, {
           ...commonOptions,
           mode: "cors",
           method: "PUT",
-          body: JSON.stringify(toWeightJS(record)),
+          body: JSON.stringify(toWeightJS(record).Weight),
         })
           .then(r => r.json())
           .then(uuid => Result.Ok(new Record(uuid, record)))
           .catch(err => Result.Err(err.toString()))
       } else if (isTimeDistanceRecord(record)) {
-        return fetch(`${this.appUrl}/api/timedistance`, {
+        return fetch(`${this.appUrl}/api/record/timedistance`, {
           ...commonOptions,
           mode: "cors",
           method: "PUT",

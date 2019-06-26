@@ -51,6 +51,13 @@ class Option<A> {
     return def
   }
 
+  mapOrElse<B>(f: (_: A) => B, defF: () => B): B {
+    if (this.val_) {
+      return f(this.val_)
+    }
+    return defF()
+  }
+
   unwrap(): A {
     if (this.val_) {
       return this.val_

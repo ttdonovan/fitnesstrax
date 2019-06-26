@@ -11,6 +11,7 @@ import Option from "../../option"
 import * as redux from "../../redux"
 import { Range, Record, RecordTypes } from "../../types"
 import { UserPreferences } from "../../userPrefs"
+import { Date } from "../../datetimetz"
 
 const bucketByDay = (
   recs: Array<Record<RecordTypes>>,
@@ -43,7 +44,7 @@ class History extends React.Component<Props, {}> {
             return (
               <DailyEntryView
                 key={k}
-                date={k}
+                date={Date.fromString(k).unwrap()}
                 prefs={prefs}
                 records={r}
                 saveRecords={records =>

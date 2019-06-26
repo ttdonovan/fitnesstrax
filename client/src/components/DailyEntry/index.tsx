@@ -9,11 +9,12 @@ import * as types from "../../types"
 import { UserPreferences } from "../../userPrefs"
 import { TimeDistanceRecordEdit, TimeDistanceRecordView } from "./TimeDistance"
 import { WeightRecordEdit, WeightRecordView } from "./Weight"
+import { Date } from "../../DateTimeTz"
 
 import "./style.css"
 
 interface ViewProps {
-  date: string
+  date: Date
   prefs: UserPreferences
   records: Array<types.Record<types.RecordTypes>>
   startEdit: () => void
@@ -39,7 +40,7 @@ const View: React.SFC<ViewProps> = ({
   return (
     <div onClick={startEdit}>
       <Card>
-        <div>{date}</div>
+        <div>{date.toString()}</div>
         {weight
           .map(w => <WeightRecordView prefs={prefs} record={w} />)
           .unwrap_()}
@@ -52,31 +53,44 @@ const View: React.SFC<ViewProps> = ({
 }
 
 interface EditProps {
-  date: string
+  date: Date
   prefs: UserPreferences
   records: Array<types.Record<types.RecordTypes>>
   editFinished: () => void
-  saveRecords: (_: Array<types.Record<types.RecordTypes>>) => Promise<void>
+  saveRecords: (
+    _: Array<types.Record<types.RecordTypes> | types.RecordTypes>,
+  ) => Promise<void>
 }
 //updateRecord: (uuid: string, record: types.Record) => void
 
 interface EditState {
-  newRecords: Array<types.Record<types.RecordTypes>>
+  newRecords: { [_: string]: types.RecordTypes }
   updatedRecords: { [_: string]: types.Record<types.RecordTypes> }
 }
 
 class Edit extends React.Component<EditProps, EditState> {
   constructor(props: EditProps) {
     super(props)
-    this.state = { newRecords: [], updatedRecords: {} }
+    this.state = { newRecords: {}, updatedRecords: {} }
   }
 
-  updateRecord = (uuid: string, record: types.Record<types.RecordTypes>) =>
+  updateNewRecord = (uuid: string, data: types.RecordTypes) => {
+    console.log("updateNewRecord", { ...this.state.newRecords, [uuid]: data })
+    this.setState({ newRecords: { ...this.state.newRecords, [uuid]: data } })
+  }
+
+  updateRecord = (uuid: string, record: types.Record<types.RecordTypes>) => {
+    console.log("updateRecord", {
+      ...this.state.updatedRecords,
+      [uuid]: record,
+    })
     this.setState({
       updatedRecords: { ...this.state.updatedRecords, [uuid]: record },
     })
+  }
 
   saveUpdates = () => {
+    this.props.saveRecords(_.values(this.state.newRecords))
     this.props.saveRecords(_.values(this.state.updatedRecords))
     this.props.editFinished()
   }
@@ -97,11 +111,15 @@ class Edit extends React.Component<EditProps, EditState> {
 
     return (
       <Card>
-        <div>{date}</div>
+        <div>{date.toString()}</div>
         <div>Edit Mode</div>
         <WeightRecordEdit
+          date={date}
           prefs={prefs}
           record={first(weights)}
+          onUpdateNew={(uuid: string, data: types.RecordTypes) =>
+            this.updateNewRecord(uuid, data)
+          }
           onUpdate={record => this.updateRecord(record.id, record)}
         />
         {_.map((r: types.Record<types.TimeDistanceRecord>) => (
@@ -115,10 +133,12 @@ class Edit extends React.Component<EditProps, EditState> {
 }
 
 interface RecordProps {
-  date: string
+  date: Date
   prefs: UserPreferences
   records: Array<types.Record<types.RecordTypes>>
-  saveRecords: (_: Array<types.Record<types.RecordTypes>>) => Promise<void>
+  saveRecords: (
+    _: Array<types.Record<types.RecordTypes> | types.RecordTypes>,
+  ) => Promise<void>
 }
 
 interface State {
