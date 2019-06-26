@@ -9,7 +9,7 @@ import * as types from "../../types"
 import { UserPreferences } from "../../userPrefs"
 import { TimeDistanceRecordEdit, TimeDistanceRecordView } from "./TimeDistance"
 import { WeightRecordEdit, WeightRecordView } from "./Weight"
-import { Date } from "../../DateTimeTz"
+import { Date } from "../../datetimetz"
 
 import "./style.css"
 
