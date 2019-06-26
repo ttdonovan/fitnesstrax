@@ -169,21 +169,22 @@ describe("saveRecord", () => {
       math.unit(50, "kg"),
     )
     const res = await client.saveRecord("auth-data", rec)
-    expect(fetchMock).toHaveBeenCalledWith("http://localhost:9010/api/weight", {
-      method: "PUT",
-      mode: "cors",
-      headers: new Headers({
-        Accept: "application/json",
-        "Content-Type": "application/json",
-        Authorization: "Bearer auth-data",
-      }),
-      body: JSON.stringify({
-        Weight: {
+    expect(fetchMock).toHaveBeenCalledWith(
+      "http://localhost:9010/api/record/weight",
+      {
+        method: "PUT",
+        mode: "cors",
+        headers: new Headers({
+          Accept: "application/json",
+          "Content-Type": "application/json",
+          Authorization: "Bearer auth-data",
+        }),
+        body: JSON.stringify({
           date: "2019-05-15T15:30:00Z America/New_York",
           weight: 50,
-        },
-      }),
-    })
+        }),
+      },
+    )
     expect(res.unwrap()).toEqual(
       new Record(
         "new-record-id",
