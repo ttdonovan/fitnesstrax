@@ -1,10 +1,10 @@
+import { Option } from "ld-ambiguity"
 import React from "react"
 import { connect } from "react-redux"
 
 //import { authenticate } from "../state"
 import Controller from "../../controller"
 import InputField from "../../components/InputField"
-import Option from "../../option"
 import * as msgs from "../../translations"
 import { UserPreferences } from "../../userPrefs"
 

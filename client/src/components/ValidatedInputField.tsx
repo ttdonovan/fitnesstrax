@@ -1,7 +1,7 @@
+import { Option } from "ld-ambiguity"
 import React from "react"
 
 import * as csn from "../classnames"
-import Option from "../option"
 import InputField from "./InputField"
 
 //import { maybe, isSomething } from "../common"

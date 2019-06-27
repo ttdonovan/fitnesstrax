@@ -1,7 +1,7 @@
+import { Option } from "ld-ambiguity"
 import _ from "lodash/fp"
-import { first } from "../common"
 
-import Option from "../option"
+import { first } from "../common"
 import * as msgs from "../translations"
 
 export class UnitSystem {

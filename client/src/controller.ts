@@ -1,7 +1,8 @@
-import Client from "./client"
+import { Result } from "ld-ambiguity"
 import _ from "lodash/fp"
+
+import Client from "./client"
 import * as redux from "./redux"
-import Result from "./result"
 import { Range, Record, RecordTypes } from "./types"
 import { UserPreferences } from "./userPrefs"
 

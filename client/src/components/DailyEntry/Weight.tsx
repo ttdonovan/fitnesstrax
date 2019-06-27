@@ -1,10 +1,10 @@
 import math from "mathjs"
 import React from "react"
 import { classnames, ClassNames } from "../../classnames"
+import { Option } from "ld-ambiguity"
 
 import uuidv4 from "uuid/v4"
 import ValidatedInputField from "../ValidatedInputField"
-import Option from "../../option"
 import * as msgs from "../../translations"
 import * as types from "../../types"
 import { UserPreferences } from "../../userPrefs"
@@ -58,19 +58,19 @@ export class WeightRecordEdit extends React.Component<EditProps, State> {
     const uuid_ = uuid.or(uuidv4())
     this.setState({ uuid: Option.Some(uuid_) })
 
-    record.mapOrElse(
-      r => this.props.onUpdate(new types.Record(r.id, r.data.withWeight(inp))),
-      () => {
-        console.log("or_else dispatching")
-        this.props.onUpdateNew(
-          uuid_,
-          new types.WeightRecord(
-            DateTimeTz.fromDate(date, prefs.timezone),
-            inp,
-          ),
-        )
-      },
-    )
+    if (record.isSome()) {
+      this.props.onUpdate(
+        new types.Record(
+          record.unwrap().id,
+          record.unwrap().data.withWeight(inp),
+        ),
+      )
+    } else {
+      this.props.onUpdateNew(
+        uuid_,
+        new types.WeightRecord(DateTimeTz.fromDate(date, prefs.timezone), inp),
+      )
+    }
   }
 
   render() {

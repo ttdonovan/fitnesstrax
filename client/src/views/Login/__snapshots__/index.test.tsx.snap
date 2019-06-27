@@ -35,7 +35,7 @@ exports[`LoginView renders 1`] = `
           onChange={[Function]}
           placeholder="Enter your login token"
           value={
-            Option {
+            t {
               "val_": null,
             }
           }

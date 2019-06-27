@@ -1,7 +1,7 @@
-import React from "react"
 import { mount } from "enzyme"
+import { Option } from "ld-ambiguity"
+import React from "react"
 
-import Option from "../option"
 import ValidatedInputField from "./ValidatedInputField"
 
 describe("ValidatedInputField", () => {

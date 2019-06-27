@@ -1,12 +1,12 @@
-import moment from "moment-timezone"
+import { Option } from "ld-ambiguity"
+import _ from "lodash/fp"
 import { IANAZone } from "luxon"
+import moment from "moment-timezone"
 import queryString from "query-string"
 import { Store } from "redux"
-import _ from "lodash/fp"
 
 import * as client from "./client"
 import { isSomething } from "./common"
-import Option from "./option"
 import { Range, Record, RecordTypes } from "./types"
 import {
   UnitSystem,

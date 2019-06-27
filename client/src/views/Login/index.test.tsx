@@ -1,9 +1,9 @@
+import { Option } from "ld-ambiguity"
 import { shallow } from "enzyme"
 import React from "react"
 import { createStore } from "redux"
 
 import Controller from "../../controller"
-import Option from "../../option"
 import * as redux from "../../redux"
 import { standardPreferences } from "../../testSetup"
 import LoginView from "./index"

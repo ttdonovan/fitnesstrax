@@ -1,11 +1,10 @@
 import { Duration } from "luxon"
 import math from "mathjs"
-//import moment from "moment"
 import _ from "lodash/fp"
 
 import DateTimeTz from "./datetimetz"
-import Option from "./option"
-import Result, { sequenceResult } from "./result"
+
+import { Option, Result, sequenceResult } from "ld-ambiguity"
 
 import {
   Record,

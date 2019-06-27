@@ -1,7 +1,7 @@
-import React from "react"
 import { shallow } from "enzyme"
+import { Option } from "ld-ambiguity"
+import React from "react"
 
-import Option from "../option"
 import InputField from "./InputField"
 
 describe("InputField", () => {

@@ -1,10 +1,9 @@
+import { Option, Result } from "ld-ambiguity"
 import { Duration } from "luxon"
 import math from "mathjs"
 
 import * as msgs from "./translations"
 import DateTimeTz from "./datetimetz"
-import Option from "./option"
-import Result from "./result"
 
 export type Range = { start: DateTimeTz; end: DateTimeTz }
 

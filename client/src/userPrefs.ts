@@ -1,6 +1,6 @@
+import { Option } from "ld-ambiguity"
 import { IANAZone } from "luxon"
 
-import Option from "./option"
 import { Language, UnitSystem } from "./settings"
 
 export class UserPreferences {
