@@ -1,8 +1,8 @@
+import { Option } from "ld-ambiguity"
 import { Duration } from "luxon"
 import React from "react"
 
 import { classnames, ClassNames } from "../classnames"
-import Option from "../option"
 
 interface Props {
   duration: Option<Duration>

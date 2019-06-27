@@ -3,7 +3,7 @@ import { Duration } from "luxon"
 
 import Client from "./client"
 import DateTimeTz from "./datetimetz"
-import Option from "./option"
+import { Option } from "ld-ambiguity"
 import {
   Record,
   RecordTypes,

@@ -1,7 +1,7 @@
+import { Option } from "ld-ambiguity"
 import React, { ChangeEvent } from "react"
-import * as csn from "../classnames"
 
-import Option from "../option"
+import * as csn from "../classnames"
 
 export interface Props {
   value: Option<string>

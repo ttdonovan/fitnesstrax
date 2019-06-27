@@ -1,6 +1,4 @@
 import { keyBy } from "./common"
-import Option from "./option"
-
 import { Language, Esperanto } from "./settings"
 
 type LanguageParam = {

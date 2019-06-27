@@ -1,5 +1,6 @@
+import { Option } from "ld-ambiguity"
+
 import { English, Esperanto, languageFromSymbol } from "./languages"
-import Option from "../option"
 
 describe("Language lookup from symbol", () => {
   it("looks up English", () =>

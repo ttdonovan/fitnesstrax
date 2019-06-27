@@ -1,8 +1,6 @@
+import { Option, Result } from "ld-ambiguity"
 import { DateTime, IANAZone } from "luxon"
 import pad from "pad-left"
-
-import Option from "./option"
-import Result from "./result"
 
 const UTC = IANAZone.create("UTC")
 

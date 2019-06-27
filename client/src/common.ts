@@ -1,10 +1,10 @@
+import { Option } from "ld-ambiguity"
+import _ from "lodash/fp"
+import { Duration } from "luxon"
 import math from "mathjs"
 import moment from "moment-timezone"
-import { Duration } from "luxon"
-import _ from "lodash/fp"
 
 import Equals from "./equals"
-import Option from "./option"
 //import "./moment-extensions"
 import { Record } from "./types"
 import trace from "./trace"

@@ -1,6 +1,7 @@
+import { Option } from "ld-ambiguity"
+
 import * as msgs from "./translations"
 import { English, Esperanto } from "./settings"
-import Option from "./option"
 
 const EdgeCase = new msgs.Message("EdgeCase", {})
 

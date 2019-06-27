@@ -55,7 +55,7 @@
     "trailingComma": "all"
   },
   "dependencies": {
-    "@types/luxon": "^1.15.1",
+    "ld-ambiguity": "^0.2.0",
     "luxon": "^1.16.0",
     "mathjs": "^5.7.0",
     "moment": "^2.24.0",
@@ -74,6 +74,7 @@
     "uuid": "^3.3.2"
   },
   "devDependencies": {
+    "@types/luxon": "^1.15.1",
     "@types/enzyme": "^3.9.1",
     "@types/enzyme-adapter-react-16": "^1.0.5",
     "@types/jest": "^24.0.13",
