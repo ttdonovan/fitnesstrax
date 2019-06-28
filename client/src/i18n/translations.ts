@@ -1,5 +1,4 @@
-import { keyBy } from "./common"
-import { Language, Esperanto } from "./settings"
+import { Language, Esperanto } from "./languages"
 
 type LanguageParam = {
   eo?: string

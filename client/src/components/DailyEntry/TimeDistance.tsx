@@ -1,7 +1,7 @@
 import math from "mathjs"
 import React from "react"
 import { classnames, ClassNames } from "../../classnames"
-import { UserPreferences } from "../../userPrefs"
+import { UserPreferences } from "../../settings"
 
 import * as types from "../../types"
 import Duration from "../Duration"

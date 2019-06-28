@@ -5,9 +5,9 @@ import { Option } from "ld-ambiguity"
 
 import uuidv4 from "uuid/v4"
 import ValidatedInputField from "../ValidatedInputField"
-import * as msgs from "../../translations"
+import * as i18n from "../../i18n"
 import * as types from "../../types"
-import { UserPreferences } from "../../userPrefs"
+import { UserPreferences } from "../../settings"
 import { DateTimeTz, Date } from "../../datetimetz"
 
 interface ViewProps {
@@ -80,7 +80,7 @@ export class WeightRecordEdit extends React.Component<EditProps, State> {
       <div className="flex">
         <ValidatedInputField
           value={record.map(r => r.data.weight)}
-          placeholder={msgs.WeightEntryPlaceholder.tr(prefs.language)}
+          placeholder={i18n.WeightEntryPlaceholder.tr(prefs.language)}
           render={(val: math.Unit): string =>
             math.format(val.toNumber(prefs.units.mass), {
               notation: "fixed",

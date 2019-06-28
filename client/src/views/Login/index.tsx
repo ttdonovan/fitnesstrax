@@ -5,8 +5,8 @@ import { connect } from "react-redux"
 //import { authenticate } from "../state"
 import Controller from "../../controller"
 import InputField from "../../components/InputField"
-import * as msgs from "../../translations"
-import { UserPreferences } from "../../userPrefs"
+import * as i18n from "../../i18n"
+import { UserPreferences } from "../../settings"
 
 export interface Props {
   controller: Controller
@@ -34,12 +34,12 @@ class Login extends React.Component<Props, State> {
         <div className="row" style={{ paddingTop: "80px" }}>
           <div className="col-sm-2"> </div>
           <div className="col-sm-8" style={{ textAlign: "center" }}>
-            <h1> {msgs.HealthTracker.tr(prefs.language)}</h1>
+            <h1> {i18n.HealthTracker.tr(prefs.language)}</h1>
             <p>
               <InputField
                 value={token}
                 onChange={val => this.setState({ token: Option.Some(val) })}
-                placeholder={msgs.LoginPlaceholder.tr(prefs.language)}
+                placeholder={i18n.LoginPlaceholder.tr(prefs.language)}
               />
             </p>
             <p>
@@ -49,7 +49,7 @@ class Login extends React.Component<Props, State> {
                 className="btn btn-outline-primary"
                 onClick={ev => token.map(t => controller.authenticate(t))}
               >
-                {msgs.LogIn.tr(prefs.language)}
+                {i18n.LogIn.tr(prefs.language)}
               </button>
             </p>
           </div>

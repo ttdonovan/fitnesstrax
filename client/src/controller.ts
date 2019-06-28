@@ -4,7 +4,7 @@ import _ from "lodash/fp"
 import Client from "./client"
 import * as redux from "./redux"
 import { Range, Record, RecordTypes } from "./types"
-import { UserPreferences } from "./userPrefs"
+import { UserPreferences } from "./settings"
 
 class Controller {
   client: Client

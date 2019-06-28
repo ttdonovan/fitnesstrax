@@ -2,8 +2,8 @@ import React from "react"
 import { shallow } from "enzyme"
 import { IANAZone } from "luxon"
 
-import { English, SI } from "../../settings"
-import { UserPreferences } from "../../userPrefs"
+import { English } from "../../i18n"
+import { SI, UserPreferences } from "../../settings"
 import UserPreferenceView from "./index"
 
 describe("UserPreferencesView", () => {

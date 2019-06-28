@@ -2,45 +2,45 @@ import { Option } from "ld-ambiguity"
 import _ from "lodash/fp"
 
 import { first } from "../common"
-import * as msgs from "../translations"
+import * as i18n from "../i18n"
 
 export class UnitSystem {
   constructor(
     readonly sym: string,
     readonly length: string,
-    readonly lengthRepr: msgs.Message,
+    readonly lengthRepr: i18n.Message,
     readonly mass: string,
-    readonly massRepr: msgs.Message,
+    readonly massRepr: i18n.Message,
   ) {}
 }
 
 export const SI = new UnitSystem(
   "SI",
   "km",
-  msgs.kilometers,
+  i18n.kilometers,
   "kg",
-  msgs.kilograms,
+  i18n.kilograms,
 )
 export const USA = new UnitSystem(
   "USA",
   "miles",
-  msgs.miles,
+  i18n.miles,
   "lbs",
-  msgs.pounds,
+  i18n.pounds,
 )
 export const UK = new UnitSystem(
   "UK",
   "miles",
-  msgs.miles,
+  i18n.miles,
   "stones",
-  msgs.stones,
+  i18n.stones,
 )
 export const Canada = new UnitSystem(
   "Canada",
   "km",
-  msgs.kilometers,
+  i18n.kilometers,
   "kg",
-  msgs.kilograms,
+  i18n.kilograms,
 )
 
 export const UnitSystems: Array<UnitSystem> = [SI, USA, UK, Canada]

@@ -8,15 +8,13 @@ import { Store } from "redux"
 import * as client from "./client"
 import { isSomething } from "./common"
 import { Range, Record, RecordTypes } from "./types"
+import { English, Language, languageFromSymbol } from "./i18n"
 import {
+  UserPreferences,
   UnitSystem,
   unitsystemFromSymbol,
-  English,
   SI,
-  Language,
-  languageFromSymbol,
 } from "./settings"
-import { UserPreferences } from "./userPrefs"
 
 export type Views = "History" | "Preferences"
 

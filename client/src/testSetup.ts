@@ -3,8 +3,8 @@ import { IANAZone } from "luxon"
 
 import Controller from "./controller"
 import * as redux from "./redux"
-import { USA, English } from "./settings"
-import { UserPreferences } from "./userPrefs"
+import { English } from "./i18n"
+import { USA, UserPreferences } from "./settings"
 
 export const setupEnv = () => {
   const store = createStore(redux.rootReducer)
