@@ -2,7 +2,7 @@ import { Duration } from "luxon"
 import math from "mathjs"
 import _ from "lodash/fp"
 
-import DateTimeTz from "./datetimetz"
+import { DateTimeTz } from "./datetimetz"
 
 import { Option, Result, sequenceResult } from "ld-ambiguity"
 
@@ -157,9 +157,9 @@ class Client {
     endDate: DateTimeTz,
   ): Promise<Result<Array<Record<RecordTypes>>, string>> => {
     return fetch(
-      `${
-        this.appUrl
-      }/api/history/all/${startDate.toString()}/${endDate.toString()}`,
+      `${this.appUrl}/api/history/all/${encodeURIComponent(
+        startDate.toRFC3339(),
+      )}/${encodeURIComponent(endDate.toRFC3339())}`,
       {
         method: "GET",
         mode: "cors",

@@ -2,7 +2,7 @@ import math from "mathjs"
 import { Duration } from "luxon"
 
 import Client from "./client"
-import DateTimeTz from "./datetimetz"
+import { DateTimeTz } from "./datetimetz"
 import { Option } from "ld-ambiguity"
 import {
   Record,
@@ -88,7 +88,7 @@ describe("fetchHistory", () => {
     )).unwrap()
 
     expect(fetchMock).toHaveBeenCalledWith(
-      "http://localhost:9010/api/history/all/2018-10-10T04:00:00Z/2018-10-16T04:00:00Z",
+      "http://localhost:9010/api/history/all/2018-10-10T04%3A00%3A00Z/2018-10-16T04%3A00%3A00Z",
       {
         method: "GET",
         mode: "cors",

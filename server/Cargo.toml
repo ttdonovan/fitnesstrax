@@ -23,6 +23,7 @@ serde_derive = "1"
 serde_json = "1.0"
 staticfile = "*"
 structopt = { version = "0.2", default-features = true }
+urlencoding = "1.0.0"
 
 [dependencies.mount]
 

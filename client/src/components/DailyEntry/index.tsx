@@ -39,7 +39,7 @@ const View: React.SFC<ViewProps> = ({
 
   return (
     <div onClick={startEdit}>
-      <Card>
+      <React.Fragment>
         <div>{date.toString()}</div>
         {weight
           .map(w => <WeightRecordView prefs={prefs} record={w} />)
@@ -47,7 +47,7 @@ const View: React.SFC<ViewProps> = ({
         {_.map((r: types.Record<types.TimeDistanceRecord>) => (
           <TimeDistanceRecordView prefs={prefs} record={r} />
         ))(timeDistances)}
-      </Card>
+      </React.Fragment>
     </div>
   )
 }
@@ -110,7 +110,7 @@ class Edit extends React.Component<EditProps, EditState> {
     )(records) as Array<types.Record<types.TimeDistanceRecord>>
 
     return (
-      <Card>
+      <React.Fragment>
         <div>{date.toString()}</div>
         <div>Edit Mode</div>
         <WeightRecordEdit
@@ -127,12 +127,12 @@ class Edit extends React.Component<EditProps, EditState> {
         ))(timeDistances)}
         <button onClick={this.saveUpdates}>Save</button>
         <button onClick={this.props.editFinished}>Cancel</button>
-      </Card>
+      </React.Fragment>
     )
   }
 }
 
-interface RecordProps {
+interface DailyEntryProps {
   date: Date
   prefs: UserPreferences
   records: Array<types.Record<types.RecordTypes>>
@@ -145,8 +145,8 @@ interface State {
   editMode: boolean
 }
 
-class Record extends React.Component<RecordProps, State> {
-  constructor(props: RecordProps) {
+class DailyEntry extends React.Component<DailyEntryProps, State> {
+  constructor(props: DailyEntryProps) {
     super(props)
     this.state = { editMode: false }
   }
@@ -155,7 +155,7 @@ class Record extends React.Component<RecordProps, State> {
   leaveEditMode = () => this.setState({ editMode: false })
 
   render = () => (
-    <div>
+    <Card>
       {this.state.editMode ? (
         <Edit
           {...this.props}
@@ -165,11 +165,11 @@ class Record extends React.Component<RecordProps, State> {
       ) : (
         <View {...this.props} startEdit={this.enterEditMode} />
       )}
-    </div>
+    </Card>
   )
 }
 
-export default Record
+export default DailyEntry
 
 /*
 import cns from "classnames"

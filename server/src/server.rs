@@ -10,6 +10,7 @@ extern crate orizentic;
 extern crate params;
 extern crate router;
 extern crate serde;
+extern crate urlencoding;
 
 //use self::chrono::*;
 use self::iron::headers::{Authorization, Bearer};
@@ -17,6 +18,7 @@ use self::iron::middleware::{BeforeMiddleware, Handler};
 use self::iron::prelude::*;
 use self::iron::status;
 use self::router::Router;
+use self::urlencoding::decode;
 use chrono_tz::Etc::UTC;
 use emseries::DateTimeTz;
 use std::env;
@@ -328,7 +330,7 @@ impl Handler for GetHistoryHandler {
                 .find("start")
                 .ok_or(Error::MissingParameter)
                 .and_then(|s| {
-                    DateTimeTz::from_str(s)
+                    DateTimeTz::from_str(&decode(s).unwrap())
                         .map(|dtz| DateTimeTz(dtz.0.with_timezone(&UTC)))
                         .map_err(Error::from)
                 })?;
@@ -337,7 +339,7 @@ impl Handler for GetHistoryHandler {
                 .find("end")
                 .ok_or(Error::MissingParameter)
                 .and_then(|s| {
-                    DateTimeTz::from_str(s)
+                    DateTimeTz::from_str(&decode(s).unwrap())
                         .map(|dtz| DateTimeTz(dtz.0.with_timezone(&UTC)))
                         .map_err(Error::from)
                 })?;

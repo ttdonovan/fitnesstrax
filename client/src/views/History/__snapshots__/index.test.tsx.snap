@@ -26,12 +26,12 @@ exports[`HistoryView renders when there is no history 1`] = `
         "fetchRecords": [MockFunction] {
           "calls": Array [
             Array [
-              Object {
+              Range {
                 "end": DateTimeTz {
-                  "timestamp": "2018-11-12T18:30:00.000Z",
+                  "timestamp": "2017-10-29T00:00:00.000+00:00",
                 },
                 "start": DateTimeTz {
-                  "timestamp": "2017-10-23T22:09:00.000Z",
+                  "timestamp": "2017-10-23T00:00:00.000+00:00",
                 },
               },
             ],
@@ -55,16 +55,6 @@ exports[`HistoryView renders when there is no history 1`] = `
         },
       }
     }
-    range={
-      Object {
-        "end": DateTimeTz {
-          "timestamp": "2018-11-12T18:30:00.000Z",
-        },
-        "start": DateTimeTz {
-          "timestamp": "2017-10-23T22:09:00.000Z",
-        },
-      }
-    }
   >
     <History
       controller={
@@ -80,12 +70,12 @@ exports[`HistoryView renders when there is no history 1`] = `
           "fetchRecords": [MockFunction] {
             "calls": Array [
               Array [
-                Object {
+                Range {
                   "end": DateTimeTz {
-                    "timestamp": "2018-11-12T18:30:00.000Z",
+                    "timestamp": "2017-10-29T00:00:00.000+00:00",
                   },
                   "start": DateTimeTz {
-                    "timestamp": "2017-10-23T22:09:00.000Z",
+                    "timestamp": "2017-10-23T00:00:00.000+00:00",
                   },
                 },
               ],
@@ -144,12 +134,16 @@ exports[`HistoryView renders when there is no history 1`] = `
         }
       }
       range={
-        Object {
-          "end": DateTimeTz {
-            "timestamp": "2018-11-12T18:30:00.000Z",
+        Range {
+          "end": Date {
+            "day": 29,
+            "month": 10,
+            "year": 2017,
           },
-          "start": DateTimeTz {
-            "timestamp": "2017-10-23T22:09:00.000Z",
+          "start": Date {
+            "day": 23,
+            "month": 10,
+            "year": 2017,
           },
         }
       }
@@ -160,12 +154,16 @@ exports[`HistoryView renders when there is no history 1`] = `
         <Range
           classes={Object {}}
           range={
-            Object {
-              "end": DateTimeTz {
-                "timestamp": "2018-11-12T18:30:00.000Z",
+            Range {
+              "end": Date {
+                "day": 29,
+                "month": 10,
+                "year": 2017,
               },
-              "start": DateTimeTz {
-                "timestamp": "2017-10-23T22:09:00.000Z",
+              "start": Date {
+                "day": 23,
+                "month": 10,
+                "year": 2017,
               },
             }
           }
@@ -175,9 +173,730 @@ exports[`HistoryView renders when there is no history 1`] = `
           >
             2017-10-23
              - 
-            2018-11-12
+            2017-10-29
           </div>
         </Range>
+        <DailyEntry
+          date={
+            Date {
+              "day": 29,
+              "month": 10,
+              "year": 2017,
+            }
+          }
+          key="2017-10-29"
+          prefs={
+            UserPreferences {
+              "language": Language {
+                "name": "English",
+                "sym": "en",
+              },
+              "timezone": IANAZone {
+                "valid": true,
+                "zoneName": "UTC",
+              },
+              "units": UnitSystem {
+                "length": "km",
+                "lengthRepr": Message {
+                  "en": "kilometers",
+                  "translations": Object {
+                    "eo": "kilometroj",
+                  },
+                },
+                "mass": "kg",
+                "massRepr": Message {
+                  "en": "kilograms",
+                  "translations": Object {
+                    "eo": "kilogramoj",
+                  },
+                },
+                "sym": "SI",
+              },
+              "withLanguage": [Function],
+              "withTimezone": [Function],
+              "withUnits": [Function],
+            }
+          }
+          records={Array []}
+          saveRecords={[Function]}
+        >
+          <Card>
+            <div
+              className="l-card card"
+            >
+              <View
+                date={
+                  Date {
+                    "day": 29,
+                    "month": 10,
+                    "year": 2017,
+                  }
+                }
+                prefs={
+                  UserPreferences {
+                    "language": Language {
+                      "name": "English",
+                      "sym": "en",
+                    },
+                    "timezone": IANAZone {
+                      "valid": true,
+                      "zoneName": "UTC",
+                    },
+                    "units": UnitSystem {
+                      "length": "km",
+                      "lengthRepr": Message {
+                        "en": "kilometers",
+                        "translations": Object {
+                          "eo": "kilometroj",
+                        },
+                      },
+                      "mass": "kg",
+                      "massRepr": Message {
+                        "en": "kilograms",
+                        "translations": Object {
+                          "eo": "kilogramoj",
+                        },
+                      },
+                      "sym": "SI",
+                    },
+                    "withLanguage": [Function],
+                    "withTimezone": [Function],
+                    "withUnits": [Function],
+                  }
+                }
+                records={Array []}
+                saveRecords={[Function]}
+                startEdit={[Function]}
+              >
+                <div
+                  onClick={[Function]}
+                >
+                  <div>
+                    2017-10-29
+                  </div>
+                </div>
+              </View>
+            </div>
+          </Card>
+        </DailyEntry>
+        <DailyEntry
+          date={
+            Date {
+              "day": 28,
+              "month": 10,
+              "year": 2017,
+            }
+          }
+          key="2017-10-28"
+          prefs={
+            UserPreferences {
+              "language": Language {
+                "name": "English",
+                "sym": "en",
+              },
+              "timezone": IANAZone {
+                "valid": true,
+                "zoneName": "UTC",
+              },
+              "units": UnitSystem {
+                "length": "km",
+                "lengthRepr": Message {
+                  "en": "kilometers",
+                  "translations": Object {
+                    "eo": "kilometroj",
+                  },
+                },
+                "mass": "kg",
+                "massRepr": Message {
+                  "en": "kilograms",
+                  "translations": Object {
+                    "eo": "kilogramoj",
+                  },
+                },
+                "sym": "SI",
+              },
+              "withLanguage": [Function],
+              "withTimezone": [Function],
+              "withUnits": [Function],
+            }
+          }
+          records={Array []}
+          saveRecords={[Function]}
+        >
+          <Card>
+            <div
+              className="l-card card"
+            >
+              <View
+                date={
+                  Date {
+                    "day": 28,
+                    "month": 10,
+                    "year": 2017,
+                  }
+                }
+                prefs={
+                  UserPreferences {
+                    "language": Language {
+                      "name": "English",
+                      "sym": "en",
+                    },
+                    "timezone": IANAZone {
+                      "valid": true,
+                      "zoneName": "UTC",
+                    },
+                    "units": UnitSystem {
+                      "length": "km",
+                      "lengthRepr": Message {
+                        "en": "kilometers",
+                        "translations": Object {
+                          "eo": "kilometroj",
+                        },
+                      },
+                      "mass": "kg",
+                      "massRepr": Message {
+                        "en": "kilograms",
+                        "translations": Object {
+                          "eo": "kilogramoj",
+                        },
+                      },
+                      "sym": "SI",
+                    },
+                    "withLanguage": [Function],
+                    "withTimezone": [Function],
+                    "withUnits": [Function],
+                  }
+                }
+                records={Array []}
+                saveRecords={[Function]}
+                startEdit={[Function]}
+              >
+                <div
+                  onClick={[Function]}
+                >
+                  <div>
+                    2017-10-28
+                  </div>
+                </div>
+              </View>
+            </div>
+          </Card>
+        </DailyEntry>
+        <DailyEntry
+          date={
+            Date {
+              "day": 27,
+              "month": 10,
+              "year": 2017,
+            }
+          }
+          key="2017-10-27"
+          prefs={
+            UserPreferences {
+              "language": Language {
+                "name": "English",
+                "sym": "en",
+              },
+              "timezone": IANAZone {
+                "valid": true,
+                "zoneName": "UTC",
+              },
+              "units": UnitSystem {
+                "length": "km",
+                "lengthRepr": Message {
+                  "en": "kilometers",
+                  "translations": Object {
+                    "eo": "kilometroj",
+                  },
+                },
+                "mass": "kg",
+                "massRepr": Message {
+                  "en": "kilograms",
+                  "translations": Object {
+                    "eo": "kilogramoj",
+                  },
+                },
+                "sym": "SI",
+              },
+              "withLanguage": [Function],
+              "withTimezone": [Function],
+              "withUnits": [Function],
+            }
+          }
+          records={Array []}
+          saveRecords={[Function]}
+        >
+          <Card>
+            <div
+              className="l-card card"
+            >
+              <View
+                date={
+                  Date {
+                    "day": 27,
+                    "month": 10,
+                    "year": 2017,
+                  }
+                }
+                prefs={
+                  UserPreferences {
+                    "language": Language {
+                      "name": "English",
+                      "sym": "en",
+                    },
+                    "timezone": IANAZone {
+                      "valid": true,
+                      "zoneName": "UTC",
+                    },
+                    "units": UnitSystem {
+                      "length": "km",
+                      "lengthRepr": Message {
+                        "en": "kilometers",
+                        "translations": Object {
+                          "eo": "kilometroj",
+                        },
+                      },
+                      "mass": "kg",
+                      "massRepr": Message {
+                        "en": "kilograms",
+                        "translations": Object {
+                          "eo": "kilogramoj",
+                        },
+                      },
+                      "sym": "SI",
+                    },
+                    "withLanguage": [Function],
+                    "withTimezone": [Function],
+                    "withUnits": [Function],
+                  }
+                }
+                records={Array []}
+                saveRecords={[Function]}
+                startEdit={[Function]}
+              >
+                <div
+                  onClick={[Function]}
+                >
+                  <div>
+                    2017-10-27
+                  </div>
+                </div>
+              </View>
+            </div>
+          </Card>
+        </DailyEntry>
+        <DailyEntry
+          date={
+            Date {
+              "day": 26,
+              "month": 10,
+              "year": 2017,
+            }
+          }
+          key="2017-10-26"
+          prefs={
+            UserPreferences {
+              "language": Language {
+                "name": "English",
+                "sym": "en",
+              },
+              "timezone": IANAZone {
+                "valid": true,
+                "zoneName": "UTC",
+              },
+              "units": UnitSystem {
+                "length": "km",
+                "lengthRepr": Message {
+                  "en": "kilometers",
+                  "translations": Object {
+                    "eo": "kilometroj",
+                  },
+                },
+                "mass": "kg",
+                "massRepr": Message {
+                  "en": "kilograms",
+                  "translations": Object {
+                    "eo": "kilogramoj",
+                  },
+                },
+                "sym": "SI",
+              },
+              "withLanguage": [Function],
+              "withTimezone": [Function],
+              "withUnits": [Function],
+            }
+          }
+          records={Array []}
+          saveRecords={[Function]}
+        >
+          <Card>
+            <div
+              className="l-card card"
+            >
+              <View
+                date={
+                  Date {
+                    "day": 26,
+                    "month": 10,
+                    "year": 2017,
+                  }
+                }
+                prefs={
+                  UserPreferences {
+                    "language": Language {
+                      "name": "English",
+                      "sym": "en",
+                    },
+                    "timezone": IANAZone {
+                      "valid": true,
+                      "zoneName": "UTC",
+                    },
+                    "units": UnitSystem {
+                      "length": "km",
+                      "lengthRepr": Message {
+                        "en": "kilometers",
+                        "translations": Object {
+                          "eo": "kilometroj",
+                        },
+                      },
+                      "mass": "kg",
+                      "massRepr": Message {
+                        "en": "kilograms",
+                        "translations": Object {
+                          "eo": "kilogramoj",
+                        },
+                      },
+                      "sym": "SI",
+                    },
+                    "withLanguage": [Function],
+                    "withTimezone": [Function],
+                    "withUnits": [Function],
+                  }
+                }
+                records={Array []}
+                saveRecords={[Function]}
+                startEdit={[Function]}
+              >
+                <div
+                  onClick={[Function]}
+                >
+                  <div>
+                    2017-10-26
+                  </div>
+                </div>
+              </View>
+            </div>
+          </Card>
+        </DailyEntry>
+        <DailyEntry
+          date={
+            Date {
+              "day": 25,
+              "month": 10,
+              "year": 2017,
+            }
+          }
+          key="2017-10-25"
+          prefs={
+            UserPreferences {
+              "language": Language {
+                "name": "English",
+                "sym": "en",
+              },
+              "timezone": IANAZone {
+                "valid": true,
+                "zoneName": "UTC",
+              },
+              "units": UnitSystem {
+                "length": "km",
+                "lengthRepr": Message {
+                  "en": "kilometers",
+                  "translations": Object {
+                    "eo": "kilometroj",
+                  },
+                },
+                "mass": "kg",
+                "massRepr": Message {
+                  "en": "kilograms",
+                  "translations": Object {
+                    "eo": "kilogramoj",
+                  },
+                },
+                "sym": "SI",
+              },
+              "withLanguage": [Function],
+              "withTimezone": [Function],
+              "withUnits": [Function],
+            }
+          }
+          records={Array []}
+          saveRecords={[Function]}
+        >
+          <Card>
+            <div
+              className="l-card card"
+            >
+              <View
+                date={
+                  Date {
+                    "day": 25,
+                    "month": 10,
+                    "year": 2017,
+                  }
+                }
+                prefs={
+                  UserPreferences {
+                    "language": Language {
+                      "name": "English",
+                      "sym": "en",
+                    },
+                    "timezone": IANAZone {
+                      "valid": true,
+                      "zoneName": "UTC",
+                    },
+                    "units": UnitSystem {
+                      "length": "km",
+                      "lengthRepr": Message {
+                        "en": "kilometers",
+                        "translations": Object {
+                          "eo": "kilometroj",
+                        },
+                      },
+                      "mass": "kg",
+                      "massRepr": Message {
+                        "en": "kilograms",
+                        "translations": Object {
+                          "eo": "kilogramoj",
+                        },
+                      },
+                      "sym": "SI",
+                    },
+                    "withLanguage": [Function],
+                    "withTimezone": [Function],
+                    "withUnits": [Function],
+                  }
+                }
+                records={Array []}
+                saveRecords={[Function]}
+                startEdit={[Function]}
+              >
+                <div
+                  onClick={[Function]}
+                >
+                  <div>
+                    2017-10-25
+                  </div>
+                </div>
+              </View>
+            </div>
+          </Card>
+        </DailyEntry>
+        <DailyEntry
+          date={
+            Date {
+              "day": 24,
+              "month": 10,
+              "year": 2017,
+            }
+          }
+          key="2017-10-24"
+          prefs={
+            UserPreferences {
+              "language": Language {
+                "name": "English",
+                "sym": "en",
+              },
+              "timezone": IANAZone {
+                "valid": true,
+                "zoneName": "UTC",
+              },
+              "units": UnitSystem {
+                "length": "km",
+                "lengthRepr": Message {
+                  "en": "kilometers",
+                  "translations": Object {
+                    "eo": "kilometroj",
+                  },
+                },
+                "mass": "kg",
+                "massRepr": Message {
+                  "en": "kilograms",
+                  "translations": Object {
+                    "eo": "kilogramoj",
+                  },
+                },
+                "sym": "SI",
+              },
+              "withLanguage": [Function],
+              "withTimezone": [Function],
+              "withUnits": [Function],
+            }
+          }
+          records={Array []}
+          saveRecords={[Function]}
+        >
+          <Card>
+            <div
+              className="l-card card"
+            >
+              <View
+                date={
+                  Date {
+                    "day": 24,
+                    "month": 10,
+                    "year": 2017,
+                  }
+                }
+                prefs={
+                  UserPreferences {
+                    "language": Language {
+                      "name": "English",
+                      "sym": "en",
+                    },
+                    "timezone": IANAZone {
+                      "valid": true,
+                      "zoneName": "UTC",
+                    },
+                    "units": UnitSystem {
+                      "length": "km",
+                      "lengthRepr": Message {
+                        "en": "kilometers",
+                        "translations": Object {
+                          "eo": "kilometroj",
+                        },
+                      },
+                      "mass": "kg",
+                      "massRepr": Message {
+                        "en": "kilograms",
+                        "translations": Object {
+                          "eo": "kilogramoj",
+                        },
+                      },
+                      "sym": "SI",
+                    },
+                    "withLanguage": [Function],
+                    "withTimezone": [Function],
+                    "withUnits": [Function],
+                  }
+                }
+                records={Array []}
+                saveRecords={[Function]}
+                startEdit={[Function]}
+              >
+                <div
+                  onClick={[Function]}
+                >
+                  <div>
+                    2017-10-24
+                  </div>
+                </div>
+              </View>
+            </div>
+          </Card>
+        </DailyEntry>
+        <DailyEntry
+          date={
+            Date {
+              "day": 23,
+              "month": 10,
+              "year": 2017,
+            }
+          }
+          key="2017-10-23"
+          prefs={
+            UserPreferences {
+              "language": Language {
+                "name": "English",
+                "sym": "en",
+              },
+              "timezone": IANAZone {
+                "valid": true,
+                "zoneName": "UTC",
+              },
+              "units": UnitSystem {
+                "length": "km",
+                "lengthRepr": Message {
+                  "en": "kilometers",
+                  "translations": Object {
+                    "eo": "kilometroj",
+                  },
+                },
+                "mass": "kg",
+                "massRepr": Message {
+                  "en": "kilograms",
+                  "translations": Object {
+                    "eo": "kilogramoj",
+                  },
+                },
+                "sym": "SI",
+              },
+              "withLanguage": [Function],
+              "withTimezone": [Function],
+              "withUnits": [Function],
+            }
+          }
+          records={Array []}
+          saveRecords={[Function]}
+        >
+          <Card>
+            <div
+              className="l-card card"
+            >
+              <View
+                date={
+                  Date {
+                    "day": 23,
+                    "month": 10,
+                    "year": 2017,
+                  }
+                }
+                prefs={
+                  UserPreferences {
+                    "language": Language {
+                      "name": "English",
+                      "sym": "en",
+                    },
+                    "timezone": IANAZone {
+                      "valid": true,
+                      "zoneName": "UTC",
+                    },
+                    "units": UnitSystem {
+                      "length": "km",
+                      "lengthRepr": Message {
+                        "en": "kilometers",
+                        "translations": Object {
+                          "eo": "kilometroj",
+                        },
+                      },
+                      "mass": "kg",
+                      "massRepr": Message {
+                        "en": "kilograms",
+                        "translations": Object {
+                          "eo": "kilogramoj",
+                        },
+                      },
+                      "sym": "SI",
+                    },
+                    "withLanguage": [Function],
+                    "withTimezone": [Function],
+                    "withUnits": [Function],
+                  }
+                }
+                records={Array []}
+                saveRecords={[Function]}
+                startEdit={[Function]}
+              >
+                <div
+                  onClick={[Function]}
+                >
+                  <div>
+                    2017-10-23
+                  </div>
+                </div>
+              </View>
+            </div>
+          </Card>
+        </DailyEntry>
       </div>
     </History>
   </Connect(History)>

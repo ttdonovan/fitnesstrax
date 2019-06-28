@@ -3,6 +3,7 @@ import _ from "lodash/fp"
 
 import Client from "./client"
 import * as redux from "./redux"
+import { DateTimeTz } from "./datetimetz"
 import { Range, Record, RecordTypes } from "./types"
 import { UserPreferences } from "./settings"
 
@@ -27,7 +28,7 @@ class Controller {
 
   logout = () => this.store.dispatch(redux.clearAuthToken())
 
-  fetchRecords = (range: Range): Promise<void> => {
+  fetchRecords = (range: Range<DateTimeTz>): Promise<void> => {
     const authToken = redux.getAuthToken(this.store.getState())
     if (authToken) {
       return this.client

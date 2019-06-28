@@ -6,9 +6,10 @@ import { connect } from "react-redux"
 import CenterPanel from "../../components/CenterPanel"
 import Navigation from "../../components/Navigation"
 import Controller from "../../controller"
-import DateTimeTz from "../../datetimetz"
+import { DateTimeTz } from "../../datetimetz"
 import * as redux from "../../redux"
 import { UserPreferences } from "../../settings"
+import { Range } from "../../types"
 import HistoryView from "../History"
 import LoginView from "../Login"
 import UserPreferencesView from "../UserPrefs"
@@ -38,13 +39,7 @@ const App: React.SFC<Props> = ({
           setView={setView}
         />
         {view === "History" ? (
-          <HistoryView
-            controller={controller}
-            range={{
-              start: DateTimeTz.fromString("2017-10-27T00:00:00Z").unwrap(),
-              end: DateTimeTz.fromString("2018-01-01T00:00:00Z").unwrap(),
-            }}
-          />
+          <HistoryView controller={controller} />
         ) : (
           <UserPreferencesView
             prefs={prefs}

@@ -2,10 +2,9 @@ import { Option, Result } from "ld-ambiguity"
 import { Duration } from "luxon"
 import math from "mathjs"
 
-import * as i18n from "./i18n"
-import { DateTimeTz } from "./datetimetz"
-
-export type Range = { start: DateTimeTz; end: DateTimeTz }
+import * as i18n from "../i18n"
+import { DateTimeTz } from "../datetimetz"
+export * from "./range"
 
 export class WeightRecord {
   constructor(readonly date: DateTimeTz, readonly weight: math.Unit) {}

@@ -1,6 +1,6 @@
-import { Option } from "ld-ambiguity"
+import { Option, Result } from "ld-ambiguity"
 import _ from "lodash/fp"
-import { IANAZone } from "luxon"
+import { DateTime, IANAZone } from "luxon"
 import moment from "moment-timezone"
 import queryString from "query-string"
 import { Store } from "redux"
@@ -9,6 +9,7 @@ import * as client from "./client"
 import { isSomething } from "./common"
 import { Range, Record, RecordTypes } from "./types"
 import { English, Language, languageFromSymbol } from "./i18n"
+import { Date, DateTimeTz } from "./datetimetz"
 import {
   UserPreferences,
   UnitSystem,
@@ -25,6 +26,7 @@ export interface AppState {
   history: Map<string, Record<RecordTypes>>
   preferences: UserPreferences
   utcOffset: number
+  range: Range<Date>
   /* TODO: I actually want a real live timezone entry here, but I don't know how to get the current timezone. Figure it out when I have internet again. */
 }
 
@@ -37,7 +39,7 @@ export const getHistory = (state: AppState): Array<Record<RecordTypes>> =>
     ),
     _.entries,
   )(state.history)
-//export const getRange = (state: AppState) => state.range
+export const getRange = (state: AppState) => state.range
 export const getPreferences = (state: AppState): UserPreferences =>
   state.preferences
 export const getRecord = (state: AppState): Map<string, Record<RecordTypes>> =>
@@ -99,6 +101,15 @@ export const setPreferences = (
   prefs,
 })
 
+interface SetRangeAction {
+  type: "SET_RANGE"
+  range: Range<Date>
+}
+export const setRange = (range: Range<Date>): SetRangeAction => ({
+  type: "SET_RANGE",
+  range,
+})
+
 interface SetViewAction {
   type: "SET_VIEW"
   view: Views
@@ -115,6 +126,7 @@ export type Actions =
   | SetAuthTokenAction
   | SetErrorAction
   | SetPreferencesAction
+  | SetRangeAction
   | SetViewAction
 
 const loadPreferences = (): UserPreferences => {
@@ -134,22 +146,33 @@ const loadPreferences = (): UserPreferences => {
 
 export const initialState = (): AppState => {
   const params = queryString.parse(location.search)
+
+  /* Need a useful lookup function for this */
   if (isSomething(params.token)) {
-    if (isSomething((<Array<string>>params.token)[0])) {
-      localStorage.setItem("credentials", (<Array<string>>params.token)[0])
+    if (typeof params.token === "string") {
+      localStorage.setItem("credentials", params.token)
+    } else {
+      localStorage.setItem("credentials", params.token[0])
     }
   }
 
-  /*
-  var range = null
-  if (isSomething(params.start) && isSomething(params.end)) {
-    const start = parseDate(params.start)
-    const end = parseDate(params.end)
-    if (isSomething(start) && isSomething(end) && start.isBefore(end)) {
-      range = [start, end]
+  let start = new DateTimeTz(DateTime.local().minus({ days: 7 })).toDate()
+  if (isSomething(params.start)) {
+    if (typeof params.start === "string") {
+      start = Date.fromString(params.start).unwrap()
+    } else {
+      start = Date.fromString(params.start[0]).unwrap()
     }
   }
-     */
+
+  let end = new DateTimeTz(DateTime.local()).toDate()
+  if (isSomething(params.end)) {
+    if (typeof params.end === "string") {
+      end = Date.fromString(params.end).unwrap()
+    } else {
+      end = Date.fromString(params.end[0]).unwrap()
+    }
+  }
 
   return {
     creds: localStorage.getItem("credentials"),
@@ -157,7 +180,7 @@ export const initialState = (): AppState => {
     error: null,
     history: new Map(),
     preferences: loadPreferences(),
-    //range,
+    range: new Range(start, end),
     utcOffset: moment().utcOffset(),
   }
 }
@@ -194,6 +217,8 @@ export const rootReducer = (
     }
   } else if (action.type === "SET_PREFERENCES") {
     state_ = { ...state_, preferences: action.prefs }
+  } else if (action.type === "SET_RANGE") {
+    state_ = { ...state_, range: action.range }
   } else if (action.type === "SET_VIEW") {
     state_ = { ...state_, currentView: action.view }
   }

@@ -3,8 +3,9 @@ import moment from "moment"
 import React from "react"
 import { Provider } from "react-redux"
 
-import DateTimeTz from "../../datetimetz"
+import { DateTimeTz, Date } from "../../datetimetz"
 import { setupEnv } from "../../testSetup"
+import { Range } from "../../types"
 import HistoryView from "./index"
 
 describe("HistoryView", () => {
@@ -14,15 +15,13 @@ describe("HistoryView", () => {
 
     const wrapper = mount(
       <Provider store={store}>
-        <HistoryView
-          controller={controller}
-          range={{
-            start: DateTimeTz.fromString("2017-10-23T22:09:00Z").unwrap(),
-            end: DateTimeTz.fromString("2018-11-12T18:30:00Z").unwrap(),
-          }}
-        />
+        <HistoryView controller={controller} />
       </Provider>,
     )
+    expect(wrapper.find("Range").prop("range")).toEqual(
+      new Range(new Date(2017, 10, 23), new Date(2017, 10, 29)),
+    )
+    expect(wrapper.find("DailyEntry").length).toEqual(7)
     expect(wrapper).toMatchSnapshot()
   })
 

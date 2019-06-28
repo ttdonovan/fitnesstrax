@@ -21,11 +21,11 @@ export class Date {
       Result.Err(`invalid date string, ${s}`)
     }
     const year = Option.fromNaN(parseInt(parts[0]))
-    if (!year.isSome()) Result.Err("invalid year")
+    if (!year.isSome()) return Result.Err("invalid year")
     const month = Option.fromNaN(parseInt(parts[1]))
-    if (!month.isSome()) Result.Err("invalid month")
+    if (!month.isSome()) return Result.Err("invalid month")
     const day = Option.fromNaN(parseInt(parts[2]))
-    if (!day.isSome()) Result.Err("invalid day")
+    if (!day.isSome()) return Result.Err("invalid day")
 
     return Result.Ok(new Date(year.unwrap(), month.unwrap(), day.unwrap()))
   }
@@ -47,6 +47,14 @@ export class DateTimeTz {
       }),
     )
 
+  toDate(): Date {
+    return new Date(
+      this.timestamp.year,
+      this.timestamp.month,
+      this.timestamp.day,
+    )
+  }
+
   map(fn: (_: DateTime) => DateTime): DateTimeTz {
     return new DateTimeTz(fn(this.timestamp))
   }
@@ -65,6 +73,11 @@ export class DateTimeTz {
       this.timestamp.month === rside.month &&
       this.timestamp.day === rside.day
     )
+  }
+
+  toRFC3339(): string {
+    const rfc3339Format = "yyyy-MM-dd'T'HH:mm:ss"
+    return `${this.timestamp.setZone("UTC").toFormat(rfc3339Format)}Z`
   }
 
   toString(): string {
@@ -96,5 +109,3 @@ export class DateTimeTz {
     }
   }
 }
-
-export default DateTimeTz

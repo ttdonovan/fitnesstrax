@@ -18,7 +18,7 @@ export const encodeFormBody = (params: { [_: string]: string }): string =>
 /* And then these functions come from Javascript Allonge */
 
 /* return true if the value isSomething */
-export const isSomething = (value: any | null | undefined): boolean =>
+export const isSomething = <A>(value: A | null | undefined): value is A =>
   value != null && value != void 0
 
 /* maybe(someFunction)(possibly null value)
