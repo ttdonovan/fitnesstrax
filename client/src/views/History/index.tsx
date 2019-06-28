@@ -10,7 +10,7 @@ import DailyEntryView from "../../components/DailyEntry"
 import Controller from "../../controller"
 import * as redux from "../../redux"
 import { Range, Record, RecordTypes } from "../../types"
-import { UserPreferences } from "../../userPrefs"
+import { UserPreferences } from "../../settings"
 import { Date } from "../../datetimetz"
 
 const bucketByDay = (

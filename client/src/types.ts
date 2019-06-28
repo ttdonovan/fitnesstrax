@@ -2,8 +2,8 @@ import { Option, Result } from "ld-ambiguity"
 import { Duration } from "luxon"
 import math from "mathjs"
 
-import * as msgs from "./translations"
-import DateTimeTz from "./datetimetz"
+import * as i18n from "./i18n"
+import { DateTimeTz } from "./datetimetz"
 
 export type Range = { start: DateTimeTz; end: DateTimeTz }
 
@@ -20,11 +20,11 @@ export class WeightRecord {
 }
 
 export class TimeDistanceActivity {
-  constructor(readonly repr: msgs.Message) {}
+  constructor(readonly repr: i18n.Message) {}
 }
 
-export const Cycling = new TimeDistanceActivity(msgs.Cycling)
-export const Running = new TimeDistanceActivity(msgs.Running)
+export const Cycling = new TimeDistanceActivity(i18n.Cycling)
+export const Running = new TimeDistanceActivity(i18n.Running)
 
 export const timeDistanceActivityFromString = (
   str: string,

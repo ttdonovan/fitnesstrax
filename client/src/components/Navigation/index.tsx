@@ -3,8 +3,8 @@ import { connect } from "react-redux"
 
 import { classnames, ClassNames } from "../../classnames"
 import * as redux from "../../redux"
-import * as msgs from "../../translations"
-import { UserPreferences } from "../../userPrefs"
+import * as i18n from "../../i18n"
+import { UserPreferences } from "../../settings"
 
 interface Props {
   classes?: ClassNames
@@ -22,12 +22,12 @@ const Navigation: React.SFC<Props> = ({
   <div className={classnames({ navigation: true, ...classes })}>
     <div>
       <a onClick={() => setView("History")}>
-        {msgs.History.tr(prefs.language)}
+        {i18n.History.tr(prefs.language)}
       </a>
     </div>
     <div>
       <a onClick={() => setView("Preferences")}>
-        {msgs.Preferences.tr(prefs.language)}
+        {i18n.Preferences.tr(prefs.language)}
       </a>
     </div>
   </div>

@@ -123,9 +123,19 @@ exports[`HistoryView renders when there is no history 1`] = `
           },
           "units": UnitSystem {
             "length": "km",
-            "lengthRepr": undefined,
+            "lengthRepr": Message {
+              "en": "kilometers",
+              "translations": Object {
+                "eo": "kilometroj",
+              },
+            },
             "mass": "kg",
-            "massRepr": undefined,
+            "massRepr": Message {
+              "en": "kilograms",
+              "translations": Object {
+                "eo": "kilogramoj",
+              },
+            },
             "sym": "SI",
           },
           "withLanguage": [Function],

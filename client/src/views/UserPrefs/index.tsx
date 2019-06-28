@@ -4,15 +4,13 @@ import _ from "lodash/fp"
 import moment from "moment-timezone"
 import { IANAZone } from "luxon"
 
+import { Language, Languages, languageFromSymbol } from "../../i18n"
 import {
-  Language,
-  Languages,
-  languageFromSymbol,
+  UserPreferences,
   UnitSystem,
   UnitSystems,
   unitsystemFromSymbol,
 } from "../../settings"
-import { UserPreferences } from "../../userPrefs"
 
 interface Props {
   prefs: UserPreferences
