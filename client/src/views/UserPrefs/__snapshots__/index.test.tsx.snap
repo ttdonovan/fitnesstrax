@@ -8,7 +8,9 @@ exports[`UserPreferencesView renders with default values 1`] = `
     className="l-2-column"
   >
     <div>
-       TimeZone 
+       
+      Timezone
+       
     </div>
     <div>
       <StateManager
@@ -2405,7 +2407,9 @@ exports[`UserPreferencesView renders with default values 1`] = `
     className="l-2-column"
   >
     <div>
-       Language 
+       
+      Language
+       
     </div>
     <div>
       <StateManager
@@ -2438,7 +2442,9 @@ exports[`UserPreferencesView renders with default values 1`] = `
     className="l-2-column"
   >
     <div>
-       Units 
+       
+      Units
+       
     </div>
     <div>
       <StateManager

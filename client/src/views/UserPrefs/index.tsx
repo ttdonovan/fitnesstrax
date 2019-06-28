@@ -4,7 +4,14 @@ import _ from "lodash/fp"
 import moment from "moment-timezone"
 import { IANAZone } from "luxon"
 
-import { Language, Languages, languageFromSymbol } from "../../i18n"
+import {
+  Language,
+  Languages,
+  languageFromSymbol,
+  Timezone,
+  LanguageString,
+  UnitsString,
+} from "../../i18n"
 import {
   UserPreferences,
   UnitSystem,
@@ -20,7 +27,7 @@ interface Props {
 const UserPreferenceView: React.SFC<Props> = ({ prefs, onSave }: Props) => (
   <div id="UserPreferences">
     <div className="l-2-column">
-      <div> TimeZone </div>
+      <div> {Timezone.tr(prefs.language)} </div>
       <div>
         <Select
           name="timezone-selection"
@@ -39,7 +46,7 @@ const UserPreferenceView: React.SFC<Props> = ({ prefs, onSave }: Props) => (
       </div>
     </div>
     <div className="l-2-column">
-      <div> Language </div>
+      <div> {LanguageString.tr(prefs.language)} </div>
       <div>
         <Select
           name="language-selection"
@@ -57,7 +64,7 @@ const UserPreferenceView: React.SFC<Props> = ({ prefs, onSave }: Props) => (
       </div>
     </div>
     <div className="l-2-column">
-      <div> Units </div>
+      <div> {UnitsString.tr(prefs.language)} </div>
       <div>
         <Select
           name="units-selection"

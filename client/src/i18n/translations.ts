@@ -15,22 +15,25 @@ export class Message {
   }
 }
 
+export const Cycling = new Message("Cycling", { eo: "Biciklado" })
 export const HealthTracker = new Message("Health Tracker", {
   eo: "Sana Supuristo",
 })
 export const History = new Message("History", { eo: "Historio" })
+export const LanguageString = new Message("Language", { eo: "Lingvo" })
+export const UnitsString = new Message("Units", { eo: "Unuoj" })
 export const LogIn = new Message("Log In", { eo: "Ensaluti" })
 export const LoginPlaceholder = new Message("Enter your login token", {
   eo: "Eniru vian ensalutan ĵetono",
 })
 export const Preferences = new Message("Preferences", { eo: "Agordoj" })
-export const Cycling = new Message("Cycling", { eo: "Biciklado" })
 export const Running = new Message("Running", { eo: "Kurado" })
-export const miles = new Message("miles", { eo: "mejloj" })
-export const kilometers = new Message("kilometers", { eo: "kilometroj" })
-export const pounds = new Message("pounds", { eo: "funtoj" })
-export const stones = new Message("stones", { eo: "ŝtonoj" })
-export const kilograms = new Message("kilograms", { eo: "kilogramoj" })
+export const Timezone = new Message("Timezone", { eo: "Horzono" })
 export const WeightEntryPlaceholder = new Message("Enter weight", {
   eo: "Eniru pezon",
 })
+export const kilograms = new Message("kilograms", { eo: "kilogramoj" })
+export const kilometers = new Message("kilometers", { eo: "kilometroj" })
+export const miles = new Message("miles", { eo: "mejloj" })
+export const pounds = new Message("pounds", { eo: "funtoj" })
+export const stones = new Message("stones", { eo: "ŝtonoj" })
