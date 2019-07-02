@@ -1,14 +1,14 @@
+import { Option } from "ld-ambiguity"
 import math from "mathjs"
 import React from "react"
-import { classnames, ClassNames } from "../../classnames"
-import { Option } from "ld-ambiguity"
-
 import uuidv4 from "uuid/v4"
-import ValidatedInputField from "../ValidatedInputField"
-import * as i18n from "../../i18n"
-import * as types from "../../types"
-import { UserPreferences } from "../../settings"
+
+import { classnames, ClassNames } from "../../classnames"
 import { DateTimeTz, Date } from "../../datetimetz"
+import * as i18n from "../../i18n"
+import { UserPreferences } from "../../settings"
+import * as types from "../../types"
+import ValidatedInputField from "../ValidatedInputField"
 
 interface ViewProps {
   prefs: UserPreferences
@@ -75,7 +75,6 @@ export class WeightRecordEdit extends React.Component<EditProps, State> {
 
   render() {
     const { date, prefs, record } = this.props
-    console.log("rendering", record)
     return (
       <div className="flex">
         <ValidatedInputField

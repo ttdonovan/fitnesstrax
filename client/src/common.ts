@@ -8,6 +8,8 @@ import Equals from "./equals"
 //import "./moment-extensions"
 import { Record } from "./types"
 import trace from "./trace"
+import * as i18n from "./i18n"
+import { UnitSystem } from "./settings"
 
 /* pulled this directly from https://stackoverflow.com/questions/35325370/how-to-post-a-x-www-form-urlencoded-request-from-react-native */
 export const encodeFormBody = (params: { [_: string]: string }): string =>
@@ -160,25 +162,79 @@ export const parseWeight = str => parseUnit(str)
 export const renderDistance = d => d.to("km").format()
    */
 
-export const parseDuration = (str: string): Option<Duration> => {
-  /* TODO: put in a bunch of code to reject invalid strings */
-  const lst = str.split(":")
-  var m = null
-  if (lst.length == 1) {
-    m = Duration.fromObject({ seconds: parseInt(lst[0]) })
-  } else if (lst.length == 2) {
-    m = Duration.fromObject({
-      minutes: parseInt(lst[0]),
-      seconds: parseInt(lst[1]),
+export const renderDistance = (
+  d: math.Unit,
+  units: UnitSystem,
+  language?: i18n.Language,
+): string => {
+  if (isSomething(language)) {
+    return `${math.format(d.toNumber(units.length), {
+      notation: "fixed",
+      precision: 2,
+    })} ${units.length}`
+  } else {
+    return `${math.format(d.toNumber(units.length), {
+      notation: "fixed",
+      precision: 2,
+    })}`
+  }
+}
+
+export const parseTime = (
+  str: string,
+): Option<{ hours: number; minutes: number; seconds: number }> => {
+  const lst: Array<Option<number>> = _.map(
+    (v: string): Option<number> => Option.fromNaN(parseInt(v)),
+  )(str.split(":"))
+  for (let elem of lst) {
+    if (elem.isNone()) return Option.None()
+  }
+  if (lst.length === 2) {
+    return Option.Some({
+      hours: lst[0].unwrap(),
+      minutes: lst[1].unwrap(),
+      seconds: 0,
     })
-  } else if (lst.length == 3) {
+  } else if (lst.length === 3) {
+    return Option.Some({
+      hours: lst[0].unwrap(),
+      minutes: lst[1].unwrap(),
+      seconds: lst[2].unwrap(),
+    })
+  }
+  return Option.None()
+}
+
+export const parseDuration = (str: string): Option<Duration> => {
+  const lst: Array<Option<number>> = _.map(
+    (v: string): Option<number> => Option.fromNaN(parseInt(v)),
+  )(str.split(":"))
+  for (let elem of lst) {
+    if (elem.isNone()) return Option.None()
+  }
+
+  var m = null
+  if (lst.length === 1) {
+    m = Duration.fromObject({ seconds: lst[0].unwrap() })
+  } else if (lst.length === 2) {
     m = Duration.fromObject({
-      hours: parseInt(lst[0]),
-      minutes: parseInt(lst[1]),
-      seconds: parseInt(lst[2]),
+      minutes: lst[0].unwrap(),
+      seconds: lst[1].unwrap(),
+    })
+  } else if (lst.length === 3) {
+    m = Duration.fromObject({
+      hours: lst[0].unwrap(),
+      minutes: lst[1].unwrap(),
+      seconds: lst[2].unwrap(),
     })
   }
   return new Option(m)
+}
+
+export const renderDuration = (d: Duration): string => {
+  if (d.as("hours") >= 1) return d.toFormat("h:mm:ss")
+  else if (d.as("minutes") >= 1) return d.toFormat("m:ss")
+  else return d.toFormat("s")
 }
 
 /* TODO: maybe parseDuration should return an object that has had equals hacked in, and I should also provide a general constructor that does it. */

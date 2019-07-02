@@ -46,7 +46,7 @@ const toTimeDistanceJS = (record: TimeDistanceRecord): TimeDistanceJS => ({
     activity: record.activity.repr.en,
     comments: record.comments.unwrap_(),
     date: record.date.toString(),
-    distance: record.distance.map(d => d.toNumber("km")).unwrap_(),
+    distance: record.distance.map(d => d.toNumber("m")).unwrap_(),
     duration: record.duration.map(d => d.as("second")).unwrap_(),
   },
 })
@@ -235,7 +235,7 @@ class Client {
           ...commonOptions,
           mode: "cors",
           method: "PUT",
-          body: JSON.stringify(toTimeDistanceJS(record)),
+          body: JSON.stringify(toTimeDistanceJS(record).TimeDistance),
         })
           .then(r => r.json())
           .then(uuid => Result.Ok(new Record(uuid, record)))

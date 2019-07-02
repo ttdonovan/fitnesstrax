@@ -6,6 +6,6 @@
   display: flex;
 }
 
-.timedistance div {
+.timedistance > div {
   width: 25%;
 }

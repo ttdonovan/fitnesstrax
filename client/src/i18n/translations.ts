@@ -16,6 +16,18 @@ export class Message {
 }
 
 export const Cycling = new Message("Cycling", { eo: "Biciklado" })
+export const DistanceEntryPlaceholder = new Message(
+  "Enter distance [hh:mm:ss]",
+  {
+    eo: "Eniru distanco",
+  },
+)
+export const DurationEntryPlaceholder = new Message(
+  "Enter duration [hh:mm:ss]",
+  {
+    eo: "Eniru daŭro [hh:mm:ss]",
+  },
+)
 export const HealthTracker = new Message("Health Tracker", {
   eo: "Sana Supuristo",
 })
@@ -28,6 +40,9 @@ export const LoginPlaceholder = new Message("Enter your login token", {
 })
 export const Preferences = new Message("Preferences", { eo: "Agordoj" })
 export const Running = new Message("Running", { eo: "Kurado" })
+export const TimeEntryPlaceholder = new Message("Enter time [hh:mm:ss]", {
+  eo: "Eniru tempon [hh:mm:ss]",
+})
 export const Timezone = new Message("Timezone", { eo: "Horzono" })
 export const WeightEntryPlaceholder = new Message("Enter weight", {
   eo: "Eniru pezon",

@@ -1,3 +1,4 @@
+import { Option } from "ld-ambiguity"
 import _ from "lodash/fp"
 import React from "react"
 import moment from "moment-timezone"
@@ -123,8 +124,25 @@ class Edit extends React.Component<EditProps, EditState> {
           onUpdate={record => this.updateRecord(record.id, record)}
         />
         {_.map((r: types.Record<types.TimeDistanceRecord>) => (
-          <TimeDistanceRecordView prefs={prefs} record={r} />
+          <TimeDistanceRecordEdit
+            date={date}
+            prefs={prefs}
+            record={Option.Some(r)}
+            onUpdateNew={(uuid: string, data: types.RecordTypes) =>
+              this.updateNewRecord(uuid, data)
+            }
+            onUpdate={record => this.updateRecord(record.id, record)}
+          />
         ))(timeDistances)}
+        <TimeDistanceRecordEdit
+          date={date}
+          prefs={prefs}
+          record={Option.None()}
+          onUpdateNew={(uuid: string, data: types.RecordTypes) =>
+            this.updateNewRecord(uuid, data)
+          }
+          onUpdate={record => this.updateRecord(record.id, record)}
+        />
         <button onClick={this.saveUpdates}>Save</button>
         <button onClick={this.props.editFinished}>Cancel</button>
       </React.Fragment>
