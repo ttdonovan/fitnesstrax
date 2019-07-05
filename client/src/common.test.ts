@@ -1,6 +1,6 @@
 import { Option } from "ld-ambiguity"
 
-import { keyBy, parseDTZ } from "./common"
+import { keyBy } from "./common"
 
 import trace from "./trace"
 

@@ -37,7 +37,7 @@ class Login extends React.Component<Props, State> {
             <h1> {i18n.HealthTracker.tr(prefs.language)}</h1>
             <p>
               <InputField
-                value={token}
+                value={token.or("")}
                 onChange={val => this.setState({ token: Option.Some(val) })}
                 placeholder={i18n.LoginPlaceholder.tr(prefs.language)}
               />

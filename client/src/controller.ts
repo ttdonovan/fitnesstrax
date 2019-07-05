@@ -1,4 +1,4 @@
-import { Result } from "ld-ambiguity"
+import { Result, sequenceResult } from "ld-ambiguity"
 import _ from "lodash/fp"
 
 import Client from "./client"
@@ -22,11 +22,21 @@ class Controller {
         localStorage.setItem("credentials", token)
         this.store.dispatch(redux.setAuthToken(token))
       } else {
-        this.store.dispatch(redux.setError("Invalid authentication token"))
+        this.setError("Invalid authentication token")
       }
     })
 
   logout = () => this.store.dispatch(redux.clearAuthToken())
+
+  setError = (errMsg: string) => {
+    this.store.dispatch(redux.setError(errMsg))
+    new Promise(r =>
+      setTimeout(() => {
+        this.store.dispatch(redux.clearError())
+        r()
+      }, 5000),
+    )
+  }
 
   fetchRecords = (range: Range<DateTimeTz>): Promise<void> => {
     const authToken = redux.getAuthToken(this.store.getState())
@@ -34,30 +44,48 @@ class Controller {
       return this.client
         .fetchHistory(authToken, range.start, range.end)
         .then((records: Result<Array<Record<RecordTypes>>, string>) => {
-          this.store.dispatch(redux.saveRecords(records.unwrap()))
+          records
+            .map(r => this.store.dispatch(redux.saveRecords(r)))
+            .mapErr(err => this.setError(err))
         })
     }
     return new Promise(r => null)
   }
 
+  saveRecord = (
+    token: string,
+    r: Record<RecordTypes> | RecordTypes,
+  ): Promise<Result<null, string>> =>
+    this.client
+      .saveRecord(token, r)
+      .then((res: Result<Record<RecordTypes>, string>) => {
+        if (res.isOk()) {
+          this.store.dispatch(redux.saveRecords([res.unwrap()]))
+          return Result.Ok(null)
+        } else {
+          return Result.Err(res.unwrapErr())
+        }
+      })
+
   saveRecords = (
     records: Array<Record<RecordTypes> | RecordTypes>,
-  ): Promise<void> => {
+  ): Promise<Result<null, string>> => {
     const authToken = redux.getAuthToken(this.store.getState())
+
     if (authToken) {
+      const authToken_ = authToken as string
       return Promise.all(
-        _.map((r: Record<RecordTypes> | RecordTypes) => {
-          this.client
-            .saveRecord(authToken, r)
-            .then((res: Result<Record<RecordTypes>, string>) =>
-              res
-                .map(rec => this.store.dispatch(redux.saveRecords([rec])))
-                .mapErr(err => {
-                  throw new Error(`save exception ${err}`)
-                }),
-            )
-        })(records),
-      ).then(r => {})
+        _.map((r: Record<RecordTypes> | RecordTypes) =>
+          this.saveRecord(authToken_, r),
+        )(records),
+      ).then((r: Array<Result<null, string>>) =>
+        sequenceResult(r)
+          .map(_ => null)
+          .mapErr(err => {
+            this.setError(err)
+            return err
+          }),
+      )
     }
     return new Promise(r => r())
   }

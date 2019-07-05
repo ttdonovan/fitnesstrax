@@ -130,6 +130,7 @@ const parseRfc3339 = (str: string): Option<moment.Moment> => {
   return m.isValid() ? Option.Some(m) : Option.None()
 }
 
+/*
 export const parseDTZ = (str: string): Option<moment.Moment> => {
   const parts = str.split(" @ ")
   if (parts.length === 2) {
@@ -140,6 +141,7 @@ export const parseDTZ = (str: string): Option<moment.Moment> => {
     return dtz.isValid() ? Option.Some(dtz) : Option.None()
   }
 }
+   */
 
 /*
 export const renderDate = (d: moment.Moment): string => d.format("YYYY-MM-DD")
@@ -178,57 +180,6 @@ export const renderDistance = (
       precision: 2,
     })}`
   }
-}
-
-export const parseTime = (
-  str: string,
-): Option<{ hours: number; minutes: number; seconds: number }> => {
-  const lst: Array<Option<number>> = _.map(
-    (v: string): Option<number> => Option.fromNaN(parseInt(v)),
-  )(str.split(":"))
-  for (let elem of lst) {
-    if (elem.isNone()) return Option.None()
-  }
-  if (lst.length === 2) {
-    return Option.Some({
-      hours: lst[0].unwrap(),
-      minutes: lst[1].unwrap(),
-      seconds: 0,
-    })
-  } else if (lst.length === 3) {
-    return Option.Some({
-      hours: lst[0].unwrap(),
-      minutes: lst[1].unwrap(),
-      seconds: lst[2].unwrap(),
-    })
-  }
-  return Option.None()
-}
-
-export const parseDuration = (str: string): Option<Duration> => {
-  const lst: Array<Option<number>> = _.map(
-    (v: string): Option<number> => Option.fromNaN(parseInt(v)),
-  )(str.split(":"))
-  for (let elem of lst) {
-    if (elem.isNone()) return Option.None()
-  }
-
-  var m = null
-  if (lst.length === 1) {
-    m = Duration.fromObject({ seconds: lst[0].unwrap() })
-  } else if (lst.length === 2) {
-    m = Duration.fromObject({
-      minutes: lst[0].unwrap(),
-      seconds: lst[1].unwrap(),
-    })
-  } else if (lst.length === 3) {
-    m = Duration.fromObject({
-      hours: lst[0].unwrap(),
-      minutes: lst[1].unwrap(),
-      seconds: lst[2].unwrap(),
-    })
-  }
-  return new Option(m)
 }
 
 export const renderDuration = (d: Duration): string => {

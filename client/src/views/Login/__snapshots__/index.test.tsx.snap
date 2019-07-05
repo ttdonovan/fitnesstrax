@@ -34,11 +34,7 @@ exports[`LoginView renders 1`] = `
         <InputField
           onChange={[Function]}
           placeholder="Enter your login token"
-          value={
-            t {
-              "val_": null,
-            }
-          }
+          value=""
         />
       </p>
       <p>

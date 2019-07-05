@@ -2,14 +2,14 @@ import { shallow } from "enzyme"
 import { Option } from "ld-ambiguity"
 import React from "react"
 
-import InputField from "./InputField"
+import InputField from "./index"
 
 describe("InputField", () => {
   it("renders", () => {
     const onChange = jest.fn()
     const wrapper = shallow(
       <InputField
-        value={Option.Some("sample-token")}
+        value={"sample-token"}
         classNames={{}}
         onChange={onChange}
         placeholder="placeholder text"
@@ -23,7 +23,7 @@ describe("InputField", () => {
     const onChange = jest.fn()
     const wrapper = shallow(
       <InputField
-        value={Option.Some("sample-token")}
+        value={"sample-token"}
         classNames={{}}
         onChange={onChange}
         placeholder="placeholder text"

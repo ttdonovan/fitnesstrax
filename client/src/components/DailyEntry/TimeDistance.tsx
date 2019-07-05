@@ -1,4 +1,4 @@
-import { Option } from "ld-ambiguity"
+import { Option, Result } from "ld-ambiguity"
 import _ from "lodash/fp"
 import { DateTime, Duration } from "luxon"
 import math from "mathjs"
@@ -7,12 +7,8 @@ import Select from "react-select"
 import uuidv4 from "uuid/v4"
 
 import { classnames, ClassNames } from "../../classnames"
-import {
-  renderDistance,
-  parseDuration,
-  renderDuration,
-  parseTime,
-} from "../../common"
+import { renderDistance, renderDuration } from "../../common"
+import { parseDuration, parseNumber, parseTime } from "../../parsers"
 import { Date, DateTimeTz } from "../../datetimetz"
 import * as i18n from "../../i18n"
 import { UserPreferences } from "../../settings"
@@ -100,9 +96,9 @@ export class TimeDistanceRecordEdit extends React.Component<
     }
   }
 
-  onChangeTime(inp: DateTimeTz) {
-    const newState = { ...this.state, time: Option.Some(inp) }
-    this.setState({ time: Option.Some(inp) })
+  onChangeTime(inp: Option<DateTimeTz>) {
+    const newState = { ...this.state, time: inp }
+    this.setState({ time: inp })
     this.sendRecord(newState)
   }
   onChangeActivity(inp: { label: string; value: types.TimeDistanceActivity }) {
@@ -110,14 +106,14 @@ export class TimeDistanceRecordEdit extends React.Component<
     this.setState({ activity: Option.Some(inp.value) })
     this.sendRecord(newState)
   }
-  onChangeDistance(inp: math.Unit) {
-    const newState = { ...this.state, distance: Option.Some(inp) }
-    this.setState({ distance: Option.Some(inp) })
+  onChangeDistance(inp: Option<math.Unit>) {
+    const newState = { ...this.state, distance: inp }
+    this.setState({ distance: inp })
     this.sendRecord(newState)
   }
-  onChangeDuration(inp: Duration) {
-    const newState = { ...this.state, duration: Option.Some(inp) }
-    this.setState({ duration: Option.Some(inp) })
+  onChangeDuration(inp: Option<Duration>) {
+    const newState = { ...this.state, duration: inp }
+    this.setState({ duration: inp })
     this.sendRecord(newState)
   }
 
@@ -132,22 +128,25 @@ export class TimeDistanceRecordEdit extends React.Component<
             render={v =>
               v.map(dt => dt.setZone(prefs.timezone)).toFormat("HH:mm:ss")
             }
-            parse={(inp: string): Option<DateTimeTz> =>
-              parseTime(inp).map(
-                t =>
-                  new DateTimeTz(
-                    DateTime.fromObject({
-                      year: date.year,
-                      month: date.month,
-                      day: date.day,
-                      hour: t.hours,
-                      minute: t.minutes,
-                      second: t.seconds,
-                      zone: prefs.timezone,
-                    }),
-                  ),
+            parse={(inp: string): Result<Option<DateTimeTz>, string> => {
+              if (inp === "") return Result.Ok(Option.None())
+              return parseTime(inp).map(t =>
+                t.map(
+                  t_ =>
+                    new DateTimeTz(
+                      DateTime.fromObject({
+                        year: date.year,
+                        month: date.month,
+                        day: date.day,
+                        hour: t_.hours,
+                        minute: t_.minutes,
+                        second: t_.seconds,
+                        zone: prefs.timezone,
+                      }),
+                    ),
+                ),
               )
-            }
+            }}
             onChange={inp => this.onChangeTime(inp)}
           />
         </div>
@@ -173,11 +172,12 @@ export class TimeDistanceRecordEdit extends React.Component<
             value={record.andThen(r => r.data.distance)}
             placeholder={i18n.DistanceEntryPlaceholder.tr(prefs.language)}
             render={d => renderDistance(d, prefs.units)}
-            parse={str =>
-              Option.fromNaN(parseFloat(str)).map(v =>
-                math.unit(v, prefs.units.length),
+            parse={str => {
+              if (str === "") return Result.Ok(Option.None())
+              return parseNumber(str).map(n =>
+                n.map(n_ => math.unit(n_, prefs.units.length)),
               )
-            }
+            }}
             onChange={inp => this.onChangeDistance(inp)}
           />
           {prefs.units.length}

@@ -1,4 +1,4 @@
-import { Option } from "ld-ambiguity"
+import { Option, Result } from "ld-ambiguity"
 import _ from "lodash/fp"
 import React from "react"
 import moment from "moment-timezone"
@@ -60,7 +60,7 @@ interface EditProps {
   editFinished: () => void
   saveRecords: (
     _: Array<types.Record<types.RecordTypes> | types.RecordTypes>,
-  ) => Promise<void>
+  ) => Promise<Result<null, string>>
 }
 //updateRecord: (uuid: string, record: types.Record) => void
 
@@ -91,9 +91,16 @@ class Edit extends React.Component<EditProps, EditState> {
   }
 
   saveUpdates = () => {
-    this.props.saveRecords(_.values(this.state.newRecords))
-    this.props.saveRecords(_.values(this.state.updatedRecords))
-    this.props.editFinished()
+    console.log("saveUpdates")
+    this.props
+      .saveRecords([
+        ..._.values(this.state.newRecords),
+        ..._.values(this.state.updatedRecords),
+      ])
+      .then(result => {
+        console.log(JSON.stringify(result))
+        if (result.isOk()) this.props.editFinished()
+      })
   }
 
   cancelUpdates = () => this.props.editFinished()
@@ -156,7 +163,7 @@ interface DailyEntryProps {
   records: Array<types.Record<types.RecordTypes>>
   saveRecords: (
     _: Array<types.Record<types.RecordTypes> | types.RecordTypes>,
-  ) => Promise<void>
+  ) => Promise<Result<null, string>>
 }
 
 interface State {

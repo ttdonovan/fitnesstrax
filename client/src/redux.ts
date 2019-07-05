@@ -22,7 +22,7 @@ export type Views = "History" | "Preferences"
 export interface AppState {
   creds: string | null
   currentView: Views
-  error: { msg: string; timeout: Promise<{}> } | null
+  error: string | null
   history: Map<string, Record<RecordTypes>>
   preferences: UserPreferences
   utcOffset: number
@@ -32,6 +32,7 @@ export interface AppState {
 
 export const getAuthToken = (state: AppState): string | null => state.creds
 export const getCurrentView = (state: AppState): Views => state.currentView
+export const getError = (state: AppState): string | null => state.error
 export const getHistory = (state: AppState): Array<Record<RecordTypes>> =>
   _.compose(
     _.map(
@@ -206,14 +207,7 @@ export const rootReducer = (
   } else if (action.type === "SET_ERROR") {
     state_ = {
       ...state_,
-      error: {
-        msg: action.msg,
-        timeout: new Promise(r => setTimeout(r, 5 * 1000))
-          .then
-          /* I want to set a timeout that clears the error, but I don't know how to write the dispatch here */
-          //this.store.dispatch(clearError()),
-          (),
-      },
+      error: action.msg,
     }
   } else if (action.type === "SET_PREFERENCES") {
     state_ = { ...state_, preferences: action.prefs }

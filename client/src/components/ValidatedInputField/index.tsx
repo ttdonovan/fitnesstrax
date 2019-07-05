@@ -1,10 +1,9 @@
-import { Option } from "ld-ambiguity"
+import { Option, Result } from "ld-ambiguity"
 import React from "react"
 
-import * as csn from "../classnames"
-import InputField from "./InputField"
-
-//import { maybe, isSomething } from "../common"
+import * as csn from "../../classnames"
+import InputField from "../InputField"
+import "./style.css"
 
 /* Required parameters:
  *
@@ -21,13 +20,14 @@ export interface Props<A> {
   value: Option<A>
   placeholder: string
   render: (_: A) => string
-  parse: (_: string) => Option<A>
-  onChange: ((_: A) => void)
+  parse: (_: string) => Result<Option<A>, string>
+  onChange: ((_: Option<A>) => void)
 }
 
 interface State<A> {
-  text: Option<string>
+  text: string
   value: Option<A>
+  valid: boolean
 }
 
 export class ValidatedInputField<A> extends React.Component<
@@ -40,35 +40,38 @@ export class ValidatedInputField<A> extends React.Component<
     super(props)
 
     this.state = {
-      text: props.value.map(props.render),
+      text: props.value.map(props.render).or(""),
       value: props.value,
+      valid: true,
     }
   }
 
   update(value: string) {
     const { parse, onChange } = this.props
     const res = parse(value)
-    this.setState({ text: Option.Some(value), value: res })
-    res.map(v => onChange(v))
+    if (res.isOk()) {
+      this.setState({ text: value, value: res.unwrap(), valid: true })
+      res.map(v => onChange(v))
+    } else {
+      this.setState({ text: value, value: Option.None(), valid: false })
+    }
   }
 
   render() {
     const { placeholder } = this.props
-    const { value } = this.state
-    const valid = value
-      .map(_ => ({
-        valid: true,
-      }))
-      .or({ valid: false })
+    const { value, valid } = this.state
+    const validityClass = valid
+      ? { valid: true, invalid: false }
+      : { valid: false, invalid: true }
     return (
-      <span className={csn.classnames(valid)}>
+      <div className={csn.classnames(validityClass)}>
         <InputField
-          classNames={valid}
+          classNames={validityClass}
           value={this.state.text}
           onChange={value => this.update(value)}
           placeholder={placeholder}
         />
-      </span>
+      </div>
     )
   }
 }

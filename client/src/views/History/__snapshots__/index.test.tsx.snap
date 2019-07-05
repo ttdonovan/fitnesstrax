@@ -44,7 +44,9 @@ exports[`HistoryView renders when there is no history 1`] = `
           ],
         },
         "logout": [Function],
+        "saveRecord": [Function],
         "saveRecords": [Function],
+        "setError": [Function],
         "setPreferences": [Function],
         "store": Object {
           "dispatch": [Function],
@@ -88,7 +90,9 @@ exports[`HistoryView renders when there is no history 1`] = `
             ],
           },
           "logout": [Function],
+          "saveRecord": [Function],
           "saveRecords": [Function],
+          "setError": [Function],
           "setPreferences": [Function],
           "store": Object {
             "dispatch": [Function],

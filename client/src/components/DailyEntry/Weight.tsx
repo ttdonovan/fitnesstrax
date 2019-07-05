@@ -1,4 +1,4 @@
-import { Option } from "ld-ambiguity"
+import { Option, Result } from "ld-ambiguity"
 import math from "mathjs"
 import React from "react"
 import uuidv4 from "uuid/v4"
@@ -6,6 +6,7 @@ import uuidv4 from "uuid/v4"
 import { classnames, ClassNames } from "../../classnames"
 import { DateTimeTz, Date } from "../../datetimetz"
 import * as i18n from "../../i18n"
+import { parseNumber } from "../../parsers"
 import { UserPreferences } from "../../settings"
 import * as types from "../../types"
 import ValidatedInputField from "../ValidatedInputField"
@@ -51,25 +52,30 @@ export class WeightRecordEdit extends React.Component<EditProps, State> {
     }
   }
 
-  onChange = (inp: math.Unit) => {
+  onChange = (inp: Option<math.Unit>) => {
     const { date, prefs, record, onUpdate, onUpdateNew } = this.props
     const { uuid, weight } = this.state
 
     const uuid_ = uuid.or(uuidv4())
     this.setState({ uuid: Option.Some(uuid_) })
 
-    if (record.isSome()) {
-      this.props.onUpdate(
-        new types.Record(
-          record.unwrap().id,
-          record.unwrap().data.withWeight(inp),
-        ),
-      )
-    } else {
-      this.props.onUpdateNew(
-        uuid_,
-        new types.WeightRecord(DateTimeTz.fromDate(date, prefs.timezone), inp),
-      )
+    if (inp.isSome()) {
+      if (record.isSome()) {
+        this.props.onUpdate(
+          new types.Record(
+            record.unwrap().id,
+            record.unwrap().data.withWeight(inp.unwrap()),
+          ),
+        )
+      } else {
+        this.props.onUpdateNew(
+          uuid_,
+          new types.WeightRecord(
+            DateTimeTz.fromDate(date, prefs.timezone),
+            inp.unwrap(),
+          ),
+        )
+      }
     }
   }
 
@@ -86,14 +92,11 @@ export class WeightRecordEdit extends React.Component<EditProps, State> {
               precision: 2,
             })
           }
-          parse={(inp: string): Option<math.Unit> => {
-            const val = parseFloat(inp)
-            if (val !== NaN) {
-              const newWeight = math.unit(val, this.props.prefs.units.mass)
-              return Option.Some(newWeight)
-            }
-            return Option.None()
-          }}
+          parse={(inp: string): Result<Option<math.Unit>, string> =>
+            parseNumber(inp).map(v =>
+              v.map(v_ => math.unit(v_, this.props.prefs.units.mass)),
+            )
+          }
           onChange={this.onChange}
         />
         <div> {prefs.units.massRepr.tr(prefs.language)} </div>

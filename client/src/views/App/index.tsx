@@ -4,6 +4,7 @@ import React from "react"
 import { connect } from "react-redux"
 
 import CenterPanel from "../../components/CenterPanel"
+import Error from "../../components/Error"
 import Navigation from "../../components/Navigation"
 import Controller from "../../controller"
 import { DateTimeTz } from "../../datetimetz"
@@ -17,6 +18,7 @@ import UserPreferencesView from "../UserPrefs"
 interface Props {
   controller: Controller
   creds: string | null
+  error: string | null
   prefs: UserPreferences
   view: redux.Views
   setView: (_: redux.Views) => void
@@ -25,36 +27,42 @@ interface Props {
 const App: React.SFC<Props> = ({
   controller,
   creds,
+  error,
   prefs,
   view,
   setView,
-}: Props) =>
-  creds ? (
-    <CenterPanel>
-      <div>
-        <Navigation
-          classes={{ "l-navigation": true }}
-          prefs={prefs}
-          view={view}
-          setView={setView}
-        />
-        {view === "History" ? (
-          <HistoryView controller={controller} />
-        ) : (
-          <UserPreferencesView
+}: Props) => (
+  <div>
+    {error ? <Error msg={error} /> : null}
+    {creds ? (
+      <CenterPanel>
+        <div>
+          <Navigation
+            classes={{ "l-navigation": true }}
             prefs={prefs}
-            onSave={controller.setPreferences}
+            view={view}
+            setView={setView}
           />
-        )}
-      </div>
-    </CenterPanel>
-  ) : (
-    <LoginView controller={controller} prefs={prefs} token={Option.None()} />
-  )
+          {view === "History" ? (
+            <HistoryView controller={controller} />
+          ) : (
+            <UserPreferencesView
+              prefs={prefs}
+              onSave={controller.setPreferences}
+            />
+          )}
+        </div>
+      </CenterPanel>
+    ) : (
+      <LoginView controller={controller} prefs={prefs} token={Option.None()} />
+    )}
+  </div>
+)
 
 const AppView = connect(
   (state: redux.AppState) => ({
     creds: redux.getAuthToken(state),
+    error: redux.getError(state),
     prefs: redux.getPreferences(state),
     view: redux.getCurrentView(state),
   }),

@@ -12,32 +12,29 @@ exports[`ValidatedInputField handles invalid updates 1`] = `
     }
   }
 >
-  <span
-    className=""
+  <div
+    className="invalid"
   >
     <InputField
       classNames={
         Object {
+          "invalid": true,
           "valid": false,
         }
       }
       onChange={[Function]}
       placeholder="validated input field"
-      value={
-        t {
-          "val_": "abcdefg",
-        }
-      }
+      value="abcdefg"
     >
       <input
-        className=""
+        className="invalid"
         onChange={[Function]}
         placeholder="validated input field"
         type="text"
         value="abcdefg"
       />
     </InputField>
-  </span>
+  </div>
 </ValidatedInputField>
 `;
 
@@ -47,7 +44,9 @@ exports[`ValidatedInputField handles valid updates 1`] = `
     [MockFunction] {
       "calls": Array [
         Array [
-          16,
+          t {
+            "val_": 16,
+          },
         ],
       ],
       "results": Array [
@@ -67,22 +66,19 @@ exports[`ValidatedInputField handles valid updates 1`] = `
     }
   }
 >
-  <span
+  <div
     className="valid"
   >
     <InputField
       classNames={
         Object {
+          "invalid": false,
           "valid": true,
         }
       }
       onChange={[Function]}
       placeholder="validated input field"
-      value={
-        t {
-          "val_": "16",
-        }
-      }
+      value="16"
     >
       <input
         className="valid"
@@ -92,7 +88,7 @@ exports[`ValidatedInputField handles valid updates 1`] = `
         value="16"
       />
     </InputField>
-  </span>
+  </div>
 </ValidatedInputField>
 `;
 
@@ -108,22 +104,19 @@ exports[`ValidatedInputField renders 1`] = `
     }
   }
 >
-  <span
+  <div
     className="valid"
   >
     <InputField
       classNames={
         Object {
+          "invalid": false,
           "valid": true,
         }
       }
       onChange={[Function]}
       placeholder="validated input field"
-      value={
-        t {
-          "val_": "15",
-        }
-      }
+      value="15"
     >
       <input
         className="valid"
@@ -133,6 +126,6 @@ exports[`ValidatedInputField renders 1`] = `
         value="15"
       />
     </InputField>
-  </span>
+  </div>
 </ValidatedInputField>
 `;
