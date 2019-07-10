@@ -23,19 +23,23 @@ interface Props {
 }
 
 export const TimeDistanceRecordView: React.SFC<Props> = ({ prefs, record }) => (
-  <div className="record timedistance">
-    <div>
+  <div className="timedistance-view">
+    <div className="date">
       {record.data.date
         .map(dt => dt.setZone(prefs.timezone))
         .toFormat("HH:mm:ss")}
     </div>
-    <div>{record.data.activity.repr.tr(prefs.language)}</div>
-    <div>
+    <div className="activity">
+      {record.data.activity.repr.tr(prefs.language)}
+    </div>
+    <div className="distance">
       {record.data.distance
         .map(d => renderDistance(d, prefs.units, prefs.language))
         .or("")}
     </div>
-    <div>{record.data.duration.map(d => renderDuration(d)).or("")}</div>
+    <div className="duration">
+      {record.data.duration.map(d => renderDuration(d)).or("")}
+    </div>
   </div>
 )
 
@@ -120,8 +124,8 @@ export class TimeDistanceRecordEdit extends React.Component<
   render() {
     const { date, prefs, record } = this.props
     return (
-      <div className="record timedistance">
-        <div>
+      <div className="timedistance-edit">
+        <div className="date">
           <ValidatedInputField
             value={record.map(r => r.data.date)}
             placeholder={i18n.TimeEntryPlaceholder.tr(prefs.language)}
@@ -150,7 +154,7 @@ export class TimeDistanceRecordEdit extends React.Component<
             onChange={inp => this.onChangeTime(inp)}
           />
         </div>
-        <div>
+        <div className="activity">
           <Select
             style={{ width: "100%" }}
             name="activity-selection"
@@ -163,11 +167,11 @@ export class TimeDistanceRecordEdit extends React.Component<
             options={_.map((activity: types.TimeDistanceActivity) => ({
               value: activity,
               label: activity.repr.tr(prefs.language),
-            }))([types.Cycling, types.Running])}
+            }))([types.Cycling, types.Running, types.Walking])}
             onChange={(evt: any) => this.onChangeActivity(evt)}
           />
         </div>
-        <div>
+        <div className="distance">
           <ValidatedInputField
             value={record.andThen(r => r.data.distance)}
             placeholder={i18n.DistanceEntryPlaceholder.tr(prefs.language)}
@@ -182,7 +186,7 @@ export class TimeDistanceRecordEdit extends React.Component<
           />
           {prefs.units.length}
         </div>
-        <div>
+        <div className="duration">
           <ValidatedInputField
             value={record.andThen(r => r.data.duration)}
             placeholder={i18n.DurationEntryPlaceholder.tr(prefs.language)}

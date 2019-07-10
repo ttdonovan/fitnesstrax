@@ -155,31 +155,6 @@ exports[`HistoryView renders when there is no history 1`] = `
       <div
         id="History"
       >
-        <Range
-          classes={Object {}}
-          range={
-            Range {
-              "end": Date {
-                "day": 29,
-                "month": 10,
-                "year": 2017,
-              },
-              "start": Date {
-                "day": 23,
-                "month": 10,
-                "year": 2017,
-              },
-            }
-          }
-        >
-          <div
-            className=""
-          >
-            2017-10-23
-             - 
-            2017-10-29
-          </div>
-        </Range>
         <DailyEntry
           date={
             Date {
@@ -224,10 +199,17 @@ exports[`HistoryView renders when there is no history 1`] = `
           records={Array []}
           saveRecords={[Function]}
         >
-          <Card>
+          <Card
+            title="2017-10-29"
+          >
             <div
-              className="l-card card"
+              className="card"
             >
+              <div
+                className="title"
+              >
+                2017-10-29
+              </div>
               <View
                 date={
                   Date {
@@ -274,11 +256,7 @@ exports[`HistoryView renders when there is no history 1`] = `
               >
                 <div
                   onClick={[Function]}
-                >
-                  <div>
-                    2017-10-29
-                  </div>
-                </div>
+                />
               </View>
             </div>
           </Card>
@@ -327,10 +305,17 @@ exports[`HistoryView renders when there is no history 1`] = `
           records={Array []}
           saveRecords={[Function]}
         >
-          <Card>
+          <Card
+            title="2017-10-28"
+          >
             <div
-              className="l-card card"
+              className="card"
             >
+              <div
+                className="title"
+              >
+                2017-10-28
+              </div>
               <View
                 date={
                   Date {
@@ -377,11 +362,7 @@ exports[`HistoryView renders when there is no history 1`] = `
               >
                 <div
                   onClick={[Function]}
-                >
-                  <div>
-                    2017-10-28
-                  </div>
-                </div>
+                />
               </View>
             </div>
           </Card>
@@ -430,10 +411,17 @@ exports[`HistoryView renders when there is no history 1`] = `
           records={Array []}
           saveRecords={[Function]}
         >
-          <Card>
+          <Card
+            title="2017-10-27"
+          >
             <div
-              className="l-card card"
+              className="card"
             >
+              <div
+                className="title"
+              >
+                2017-10-27
+              </div>
               <View
                 date={
                   Date {
@@ -480,11 +468,7 @@ exports[`HistoryView renders when there is no history 1`] = `
               >
                 <div
                   onClick={[Function]}
-                >
-                  <div>
-                    2017-10-27
-                  </div>
-                </div>
+                />
               </View>
             </div>
           </Card>
@@ -533,10 +517,17 @@ exports[`HistoryView renders when there is no history 1`] = `
           records={Array []}
           saveRecords={[Function]}
         >
-          <Card>
+          <Card
+            title="2017-10-26"
+          >
             <div
-              className="l-card card"
+              className="card"
             >
+              <div
+                className="title"
+              >
+                2017-10-26
+              </div>
               <View
                 date={
                   Date {
@@ -583,11 +574,7 @@ exports[`HistoryView renders when there is no history 1`] = `
               >
                 <div
                   onClick={[Function]}
-                >
-                  <div>
-                    2017-10-26
-                  </div>
-                </div>
+                />
               </View>
             </div>
           </Card>
@@ -636,10 +623,17 @@ exports[`HistoryView renders when there is no history 1`] = `
           records={Array []}
           saveRecords={[Function]}
         >
-          <Card>
+          <Card
+            title="2017-10-25"
+          >
             <div
-              className="l-card card"
+              className="card"
             >
+              <div
+                className="title"
+              >
+                2017-10-25
+              </div>
               <View
                 date={
                   Date {
@@ -686,11 +680,7 @@ exports[`HistoryView renders when there is no history 1`] = `
               >
                 <div
                   onClick={[Function]}
-                >
-                  <div>
-                    2017-10-25
-                  </div>
-                </div>
+                />
               </View>
             </div>
           </Card>
@@ -739,10 +729,17 @@ exports[`HistoryView renders when there is no history 1`] = `
           records={Array []}
           saveRecords={[Function]}
         >
-          <Card>
+          <Card
+            title="2017-10-24"
+          >
             <div
-              className="l-card card"
+              className="card"
             >
+              <div
+                className="title"
+              >
+                2017-10-24
+              </div>
               <View
                 date={
                   Date {
@@ -789,11 +786,7 @@ exports[`HistoryView renders when there is no history 1`] = `
               >
                 <div
                   onClick={[Function]}
-                >
-                  <div>
-                    2017-10-24
-                  </div>
-                </div>
+                />
               </View>
             </div>
           </Card>
@@ -842,10 +835,17 @@ exports[`HistoryView renders when there is no history 1`] = `
           records={Array []}
           saveRecords={[Function]}
         >
-          <Card>
+          <Card
+            title="2017-10-23"
+          >
             <div
-              className="l-card card"
+              className="card"
             >
+              <div
+                className="title"
+              >
+                2017-10-23
+              </div>
               <View
                 date={
                   Date {
@@ -892,11 +892,7 @@ exports[`HistoryView renders when there is no history 1`] = `
               >
                 <div
                   onClick={[Function]}
-                >
-                  <div>
-                    2017-10-23
-                  </div>
-                </div>
+                />
               </View>
             </div>
           </Card>

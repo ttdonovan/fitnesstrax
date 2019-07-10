@@ -5,6 +5,7 @@ use emseries::{DateTimeTz, Recordable};
 pub enum ActivityType {
     Cycling,
     Running,
+    Walking,
 }
 
 pub type TimeDistanceRecord = TimeDistance;
@@ -46,6 +47,7 @@ impl Recordable for TimeDistance {
         match self.activity {
             ActivityType::Cycling => vec![String::from("Cycling")],
             ActivityType::Running => vec![String::from("Running")],
+            ActivityType::Walking => vec![String::from("Walking")],
         }
     }
 }

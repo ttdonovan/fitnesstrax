@@ -18,9 +18,6 @@ describe("HistoryView", () => {
         <HistoryView controller={controller} />
       </Provider>,
     )
-    expect(wrapper.find("Range").prop("range")).toEqual(
-      new Range(new Date(2017, 10, 23), new Date(2017, 10, 29)),
-    )
     expect(wrapper.find("DailyEntry").length).toEqual(7)
     expect(wrapper).toMatchSnapshot()
   })

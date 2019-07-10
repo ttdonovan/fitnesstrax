@@ -1,4 +1,8 @@
-.l-card {
+.card {
     margin: 1em;
     padding: 1em;
+}
+.card > .title {
+  margin-bottom: 1em;
+  font-size: larger;
 }

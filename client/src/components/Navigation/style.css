@@ -1,0 +1,9 @@
+.navigation {
+    display: flex;
+}
+
+.navigation > div {
+    padding: 0.5em;
+    cursor: pointer;
+    margin: 1em;
+}

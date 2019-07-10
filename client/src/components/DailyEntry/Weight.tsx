@@ -17,11 +17,13 @@ interface ViewProps {
 }
 
 export const WeightRecordView: React.SFC<ViewProps> = ({ prefs, record }) => (
-  <div className="record weight">
+  <div className="weight">
     <div>
-      {record.data.weight
-        .to(prefs.units.mass)
-        .format({ notation: "fixed", precision: 2 })}
+      {math.format(record.data.weight.toNumber(prefs.units.mass), {
+        notation: "fixed",
+        precision: 2,
+      })}{" "}
+      {prefs.units.massRepr.tr(prefs.language)}
     </div>
   </div>
 )
@@ -82,7 +84,7 @@ export class WeightRecordEdit extends React.Component<EditProps, State> {
   render() {
     const { date, prefs, record } = this.props
     return (
-      <div className="flex">
+      <div className="weight">
         <ValidatedInputField
           value={record.map(r => r.data.weight)}
           placeholder={i18n.WeightEntryPlaceholder.tr(prefs.language)}

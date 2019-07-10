@@ -44,6 +44,7 @@ export const TimeEntryPlaceholder = new Message("Enter time [hh:mm:ss]", {
   eo: "Eniru tempon [hh:mm:ss]",
 })
 export const Timezone = new Message("Timezone", { eo: "Horzono" })
+export const Walking = new Message("Walking", { eo: "Promenadi" })
 export const WeightEntryPlaceholder = new Message("Enter weight", {
   eo: "Eniru pezon",
 })

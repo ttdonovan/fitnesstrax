@@ -32,7 +32,6 @@ class History extends React.Component<Props, {}> {
 
     return (
       <div id="History">
-        <RangeView classes={{}} range={range} />
         {_.map((date: Date) => (
           <DailyEntryView
             key={date.toString()}

@@ -10,7 +10,6 @@
 @media screen and (min-width: 40em) {
     .center-panel {
         display: flex;
-        margin-top: 1em;
     }
 
     .center-panel > .l-side {

@@ -35,24 +35,24 @@ const App: React.SFC<Props> = ({
   <div>
     {error ? <Error msg={error} /> : null}
     {creds ? (
-      <CenterPanel>
-        <div>
-          <Navigation
-            classes={{ "l-navigation": true }}
-            prefs={prefs}
-            view={view}
-            setView={setView}
-          />
-          {view === "History" ? (
-            <HistoryView controller={controller} />
-          ) : (
-            <UserPreferencesView
-              prefs={prefs}
-              onSave={controller.setPreferences}
-            />
-          )}
+      <React.Fragment>
+        <div className="header">
+          <div className="logo">Fitnesstrax</div>
+          <Navigation prefs={prefs} view={view} setView={setView} />
         </div>
-      </CenterPanel>
+        <CenterPanel>
+          <div>
+            {view === "History" ? (
+              <HistoryView controller={controller} />
+            ) : (
+              <UserPreferencesView
+                prefs={prefs}
+                onSave={controller.setPreferences}
+              />
+            )}
+          </div>
+        </CenterPanel>
+      </React.Fragment>
     ) : (
       <LoginView controller={controller} prefs={prefs} token={Option.None()} />
     )}

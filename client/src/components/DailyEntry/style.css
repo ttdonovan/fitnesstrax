@@ -2,10 +2,93 @@
   margin-bottom: 2em;
 }
 
-.timedistance {
-  display: flex;
+.activity-header {
+  font-weight: bold;
+  margin-top: 0.5em;
+  margin-bottom: 0.5em;
 }
 
-.timedistance > div {
-  width: 25%;
+.record {
+  margin: 0.25em;
+  line-height: 43px;
+}
+
+.weight {
+  display: flex;
+  align-items: center;
+}
+
+.weight input {
+  width: 5em;
+  font-size: inherit;
+}
+
+.timedistance-view, .timedistance-edit {
+  margin: 0.25em;
+  line-height: 33px;
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+}
+
+.timedistance-view .date {
+  width: 20%;
+  padding: 5px;
+}
+
+.timedistance-view .activity {
+  width: 20%;
+  padding: 5px;
+}
+
+.timedistance-view .distance {
+  width: 20%;
+  padding: 5px;
+}
+
+.timedistance-view .duration {
+  width: 20%;
+  padding: 5px;
+}
+
+.timedistance-edit .date {
+  width: 20%;
+}
+
+.timedistance-edit .date input {
+  font-size: inherit;
+  width: 90%;
+  padding: 5px;
+}
+
+.timedistance-edit .activity {
+  width: 20%;
+}
+
+.timedistance-edit .activity input {
+  font-size: inherit;
+  width: 6em;
+  padding: 5px;
+}
+
+.timedistance-edit .distance {
+  width: 20%;
+  display: flex;
+  align-items: center;
+}
+
+.timedistance-edit .distance input {
+  font-size: inherit;
+  width: 6em;
+  padding: 5px;
+}
+
+.timedistance-edit .duration {
+  width: 20%;
+}
+
+.timedistance-edit .duration input {
+  font-size: inherit;
+  width: 6em;
+  padding: 5px;
 }

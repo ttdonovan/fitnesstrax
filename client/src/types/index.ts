@@ -24,6 +24,7 @@ export class TimeDistanceActivity {
 
 export const Cycling = new TimeDistanceActivity(i18n.Cycling)
 export const Running = new TimeDistanceActivity(i18n.Running)
+export const Walking = new TimeDistanceActivity(i18n.Walking)
 
 export const timeDistanceActivityFromString = (
   str: string,
@@ -32,6 +33,8 @@ export const timeDistanceActivityFromString = (
     return Result.Ok(Cycling)
   } else if (str === "Running") {
     return Result.Ok(Running)
+  } else if (str === "Walking") {
+    return Result.Ok(Walking)
   } else {
     return Result.Err("unrecognized activity type")
   }

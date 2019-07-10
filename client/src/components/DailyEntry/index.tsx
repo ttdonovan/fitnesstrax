@@ -41,13 +41,23 @@ const View: React.SFC<ViewProps> = ({
   return (
     <div onClick={startEdit}>
       <React.Fragment>
-        <div>{date.toString()}</div>
         {weight
-          .map(w => <WeightRecordView prefs={prefs} record={w} />)
+          .map(w => (
+            <div className="record">
+              <WeightRecordView prefs={prefs} record={w} />
+            </div>
+          ))
           .unwrap_()}
-        {_.map((r: types.Record<types.TimeDistanceRecord>) => (
-          <TimeDistanceRecordView prefs={prefs} record={r} />
-        ))(timeDistances)}
+        {timeDistances.length > 0 ? (
+          <React.Fragment>
+            <div className="activity-header">Activities</div>
+            {_.map((r: types.Record<types.TimeDistanceRecord>) => (
+              <div className="record">
+                <TimeDistanceRecordView prefs={prefs} record={r} />
+              </div>
+            ))(timeDistances)}
+          </React.Fragment>
+        ) : null}
       </React.Fragment>
     </div>
   )
@@ -119,39 +129,44 @@ class Edit extends React.Component<EditProps, EditState> {
 
     return (
       <React.Fragment>
-        <div>{date.toString()}</div>
-        <div>Edit Mode</div>
-        <WeightRecordEdit
-          date={date}
-          prefs={prefs}
-          record={first(weights)}
-          onUpdateNew={(uuid: string, data: types.RecordTypes) =>
-            this.updateNewRecord(uuid, data)
-          }
-          onUpdate={record => this.updateRecord(record.id, record)}
-        />
-        {_.map((r: types.Record<types.TimeDistanceRecord>) => (
-          <TimeDistanceRecordEdit
+        <div className="record">
+          <WeightRecordEdit
             date={date}
             prefs={prefs}
-            record={Option.Some(r)}
+            record={first(weights)}
             onUpdateNew={(uuid: string, data: types.RecordTypes) =>
               this.updateNewRecord(uuid, data)
             }
             onUpdate={record => this.updateRecord(record.id, record)}
           />
+        </div>
+        <div className="activity-header">Distance Activities</div>
+        {_.map((r: types.Record<types.TimeDistanceRecord>) => (
+          <div className="record">
+            <TimeDistanceRecordEdit
+              date={date}
+              prefs={prefs}
+              record={Option.Some(r)}
+              onUpdateNew={(uuid: string, data: types.RecordTypes) =>
+                this.updateNewRecord(uuid, data)
+              }
+              onUpdate={record => this.updateRecord(record.id, record)}
+            />
+          </div>
         ))(timeDistances)}
-        <TimeDistanceRecordEdit
-          date={date}
-          prefs={prefs}
-          record={Option.None()}
-          onUpdateNew={(uuid: string, data: types.RecordTypes) =>
-            this.updateNewRecord(uuid, data)
-          }
-          onUpdate={record => this.updateRecord(record.id, record)}
-        />
-        <button onClick={this.saveUpdates}>Save</button>
-        <button onClick={this.props.editFinished}>Cancel</button>
+        <div className="record">
+          <TimeDistanceRecordEdit
+            date={date}
+            prefs={prefs}
+            record={Option.None()}
+            onUpdateNew={(uuid: string, data: types.RecordTypes) =>
+              this.updateNewRecord(uuid, data)
+            }
+            onUpdate={record => this.updateRecord(record.id, record)}
+          />
+          <button onClick={this.saveUpdates}>Save</button>
+          <button onClick={this.props.editFinished}>Cancel</button>
+        </div>
       </React.Fragment>
     )
   }
@@ -180,7 +195,7 @@ class DailyEntry extends React.Component<DailyEntryProps, State> {
   leaveEditMode = () => this.setState({ editMode: false })
 
   render = () => (
-    <Card>
+    <Card title={this.props.date.toString()}>
       {this.state.editMode ? (
         <Edit
           {...this.props}
