@@ -48,8 +48,8 @@ export const Walking = new Message("Walking", { eo: "Promenadi" })
 export const WeightEntryPlaceholder = new Message("Enter weight", {
   eo: "Eniru pezon",
 })
-export const kilograms = new Message("kilograms", { eo: "kilogramoj" })
-export const kilometers = new Message("kilometers", { eo: "kilometroj" })
-export const miles = new Message("miles", { eo: "mejloj" })
-export const pounds = new Message("pounds", { eo: "funtoj" })
-export const stones = new Message("stones", { eo: "ŝtonoj" })
+export const kilograms = new Message("kg", { eo: "kg" })
+export const kilometers = new Message("km", { eo: "km" })
+export const miles = new Message("mi", { eo: "me" })
+export const pounds = new Message("lbs", {})
+export const stones = new Message("st", { eo: "ŝt" })

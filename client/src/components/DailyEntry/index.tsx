@@ -5,9 +5,11 @@ import moment from "moment-timezone"
 
 import { classnames, ClassNames } from "../../classnames"
 import { first } from "../../common"
-import Card from "../../components/Card"
 import * as types from "../../types"
 import { UserPreferences } from "../../settings"
+import Card from "../Card"
+import Row from "../Row"
+import Summary from "./Summary"
 import { TimeDistanceRecordEdit, TimeDistanceRecordView } from "./TimeDistance"
 import { WeightRecordEdit, WeightRecordView } from "./Weight"
 import { Date } from "../../datetimetz"
@@ -40,7 +42,7 @@ const View: React.SFC<ViewProps> = ({
 
   return (
     <div onClick={startEdit}>
-      <React.Fragment>
+      <Row classNames={{ "l-2-column": true }}>
         {weight
           .map(w => (
             <div className="record">
@@ -48,17 +50,18 @@ const View: React.SFC<ViewProps> = ({
             </div>
           ))
           .unwrap_()}
-        {timeDistances.length > 0 ? (
-          <React.Fragment>
-            <div className="activity-header">Activities</div>
-            {_.map((r: types.Record<types.TimeDistanceRecord>) => (
-              <div className="record">
-                <TimeDistanceRecordView prefs={prefs} record={r} />
-              </div>
-            ))(timeDistances)}
-          </React.Fragment>
-        ) : null}
-      </React.Fragment>
+        <Summary prefs={prefs} records={records} />
+      </Row>
+      {timeDistances.length > 0 ? (
+        <React.Fragment>
+          <div className="activity-header">Activities</div>
+          {_.map((r: types.Record<types.TimeDistanceRecord>) => (
+            <div className="record">
+              <TimeDistanceRecordView prefs={prefs} record={r} />
+            </div>
+          ))(timeDistances)}
+        </React.Fragment>
+      ) : null}
     </div>
   )
 }

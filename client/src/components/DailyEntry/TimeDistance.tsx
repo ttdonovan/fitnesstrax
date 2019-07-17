@@ -1,18 +1,20 @@
 import { Option, Result } from "ld-ambiguity"
 import _ from "lodash/fp"
-import { DateTime, Duration } from "luxon"
+import * as luxon from "luxon"
 import math from "mathjs"
 import React from "react"
 import Select from "react-select"
 import uuidv4 from "uuid/v4"
 
 import { classnames, ClassNames } from "../../classnames"
-import { renderDistance, renderDuration } from "../../common"
+import { renderDistance } from "../../common"
 import { parseDuration, parseNumber, parseTime } from "../../parsers"
 import { Date, DateTimeTz } from "../../datetimetz"
 import * as i18n from "../../i18n"
 import { UserPreferences } from "../../settings"
 import * as types from "../../types"
+import { DistanceView, DistanceEdit } from "../Distance"
+import { DurationView, DurationEdit } from "../Duration"
 import ValidatedInputField from "../ValidatedInputField"
 
 import trace from "../../trace"
@@ -34,11 +36,14 @@ export const TimeDistanceRecordView: React.SFC<Props> = ({ prefs, record }) => (
     </div>
     <div className="distance">
       {record.data.distance
-        .map(d => renderDistance(d, prefs.units, prefs.language))
-        .or("")}
+        .map(d => <DistanceView distance={d} prefs={prefs} />)
+
+        .or(<React.Fragment />)}
     </div>
     <div className="duration">
-      {record.data.duration.map(d => renderDuration(d)).or("")}
+      {record.data.duration
+        .map(d => <DurationView duration={d} />)
+        .or(<React.Fragment />)}
     </div>
   </div>
 )
@@ -56,7 +61,7 @@ interface EditState {
   time: Option<DateTimeTz>
   activity: Option<types.TimeDistanceActivity>
   distance: Option<math.Unit>
-  duration: Option<Duration>
+  duration: Option<luxon.Duration>
 }
 
 export class TimeDistanceRecordEdit extends React.Component<
@@ -115,7 +120,7 @@ export class TimeDistanceRecordEdit extends React.Component<
     this.setState({ distance: inp })
     this.sendRecord(newState)
   }
-  onChangeDuration(inp: Option<Duration>) {
+  onChangeDuration(inp: Option<luxon.Duration>) {
     const newState = { ...this.state, duration: inp }
     this.setState({ duration: inp })
     this.sendRecord(newState)
@@ -138,7 +143,7 @@ export class TimeDistanceRecordEdit extends React.Component<
                 t.map(
                   t_ =>
                     new DateTimeTz(
-                      DateTime.fromObject({
+                      luxon.DateTime.fromObject({
                         year: date.year,
                         month: date.month,
                         day: date.day,
@@ -172,27 +177,17 @@ export class TimeDistanceRecordEdit extends React.Component<
           />
         </div>
         <div className="distance">
-          <ValidatedInputField
-            value={record.andThen(r => r.data.distance)}
-            placeholder={i18n.DistanceEntryPlaceholder.tr(prefs.language)}
-            render={d => renderDistance(d, prefs.units)}
-            parse={str => {
-              if (str === "") return Result.Ok(Option.None())
-              return parseNumber(str).map(n =>
-                n.map(n_ => math.unit(n_, prefs.units.length)),
-              )
-            }}
+          <DistanceEdit
+            distance={record.andThen(r => r.data.distance)}
             onChange={inp => this.onChangeDistance(inp)}
+            prefs={prefs}
           />
-          {prefs.units.length}
         </div>
         <div className="duration">
-          <ValidatedInputField
-            value={record.andThen(r => r.data.duration)}
-            placeholder={i18n.DurationEntryPlaceholder.tr(prefs.language)}
-            render={d => renderDuration(d)}
-            parse={str => parseDuration(str)}
+          <DurationEdit
+            duration={record.andThen(r => r.data.duration)}
             onChange={inp => this.onChangeDuration(inp)}
+            prefs={prefs}
           />
         </div>
       </div>

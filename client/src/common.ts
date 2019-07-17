@@ -182,12 +182,6 @@ export const renderDistance = (
   }
 }
 
-export const renderDuration = (d: Duration): string => {
-  if (d.as("hours") >= 1) return d.toFormat("h:mm:ss")
-  else if (d.as("minutes") >= 1) return d.toFormat("m:ss")
-  else return d.toFormat("s")
-}
-
 /* TODO: maybe parseDuration should return an object that has had equals hacked in, and I should also provide a general constructor that does it. */
 /*
 export const equalDurations = (

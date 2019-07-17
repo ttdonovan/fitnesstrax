@@ -13,6 +13,14 @@
   line-height: 43px;
 }
 
+.day-summary {
+  display: flex;
+}
+
+.day-summary > div {
+  width: 50%;
+}
+
 .weight {
   display: flex;
   align-items: center;

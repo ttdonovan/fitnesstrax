@@ -10,6 +10,7 @@ import { parseNumber } from "../../parsers"
 import { UserPreferences } from "../../settings"
 import * as types from "../../types"
 import ValidatedInputField from "../ValidatedInputField"
+import Weight from "../Weight"
 
 interface ViewProps {
   prefs: UserPreferences
@@ -19,11 +20,7 @@ interface ViewProps {
 export const WeightRecordView: React.SFC<ViewProps> = ({ prefs, record }) => (
   <div className="weight">
     <div>
-      {math.format(record.data.weight.toNumber(prefs.units.mass), {
-        notation: "fixed",
-        precision: 2,
-      })}{" "}
-      {prefs.units.massRepr.tr(prefs.language)}
+      <Weight weight={record.data.weight} prefs={prefs} />
     </div>
   </div>
 )

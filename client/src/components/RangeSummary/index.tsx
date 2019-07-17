@@ -1,23 +1,45 @@
 import math from "mathjs"
 import React from "react"
-import { connect } from "react-redux"
 import _ from "lodash/fp"
 
+/*
 import { first, isSomething, intercalate, sum, divmod, padStr } from "../common"
-import { getHistory } from "../state/state"
 import { TimeDistanceActivity } from "../types"
 import { TimeDistanceSummary } from "./TimeDistanceRow"
+*/
 
-const Summary = ({ history }: { history: any }) => {
-  if (isSomething(history)) {
-    const weights = history
-      .weights()
-      .filter(w => isSomething(w))
-      .sort((a, b) => a.date >= b.date)
-    const startWeight = first(weights)
-    const endWeight = first(weights.slice().reverse())
+import { first } from "../../common"
+import { UserPreferences } from "../../settings"
+import * as types from "../../types"
 
-    console.log("Summary: ", history.timeDistanceWorkouts())
+interface Props {
+  dayCount: number
+  prefs: UserPreferences
+  records: Array<types.Record<types.RecordTypes>>
+}
+
+const RangeSummary: React.SFC<Props> = ({ prefs, records }: Props) => {
+  console.log(records)
+  const weights = _.filter(
+    (r: types.Record<types.RecordTypes>): boolean =>
+      types.isWeightRecord(r.data),
+  )(records) as Array<types.Record<types.WeightRecord>>
+
+  const startWeight = first(weights)
+  const endWeight = first(weights.slice().reverse())
+  const weightChange = math.subtract(
+    endWeight.map(r => r.data.weight).or(math.unit(0, prefs.units.mass)),
+    startWeight.map(r => r.data.weight).or(math.unit(0, prefs.units.mass)),
+  ) as math.Unit
+
+  console.log(weightChange)
+
+  const timeDistance = _.filter(
+    (r: types.Record<types.RecordTypes>): boolean =>
+      types.isTimeDistanceRecord(r.data),
+  )(records) as Array<types.Record<types.TimeDistanceRecord>>
+
+  /*
     const timeDistanceActivities: Array<TimeDistanceActivity> = _.uniq(
       history
         .timeDistanceWorkouts()
@@ -25,10 +47,23 @@ const Summary = ({ history }: { history: any }) => {
         .map(td => td.activity),
     )
     console.log("Summary: ", timeDistanceActivities)
+    */
 
-    return (
+  return (
+    <div>
       <div>
-        <h2> Summary </h2>
+        Weight Change:
+        {math.format(weightChange.toNumber(prefs.units.mass), {
+          notation: "fixed",
+          precision: 2,
+        })}
+        {prefs.units.massRepr.tr(prefs.language)}
+      </div>
+    </div>
+  )
+}
+
+/*
         <div>
           {" "}
           {isSomething(startWeight)
@@ -49,17 +84,7 @@ const Summary = ({ history }: { history: any }) => {
             ))}
           </tbody>
         </table>
-      </div>
-    )
-  } else {
-    return (
-      <div>
-        {" "}
-        <h2> Summary </h2> <div> No data </div>{" "}
-      </div>
-    )
-  }
-}
+        */
 
 /*
             <table className="table">
@@ -82,11 +107,7 @@ const Summary = ({ history }: { history: any }) => {
             </table>
             */
 
-export const SummaryView = connect(
-  state => ({ history: getHistory(state) }),
-  dispatch => ({}),
-)(Summary)
-
+/*
 const renderDistance = d => d.to("km").toNumber()
 const renderDuration = t => {
   let [hr, sec] = divmod(t, 3600)
@@ -100,3 +121,6 @@ const renderDuration = t => {
     return intercalate([min, padStr(sec_.toString(), "0", 2)], ":")
   }
 }
+*/
+
+export default RangeSummary

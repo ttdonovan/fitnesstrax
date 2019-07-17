@@ -118,16 +118,16 @@ exports[`HistoryView renders when there is no history 1`] = `
           "units": UnitSystem {
             "length": "km",
             "lengthRepr": Message {
-              "en": "kilometers",
+              "en": "km",
               "translations": Object {
-                "eo": "kilometroj",
+                "eo": "km",
               },
             },
             "mass": "kg",
             "massRepr": Message {
-              "en": "kilograms",
+              "en": "kg",
               "translations": Object {
-                "eo": "kilogramoj",
+                "eo": "kg",
               },
             },
             "sym": "SI",
@@ -177,16 +177,16 @@ exports[`HistoryView renders when there is no history 1`] = `
               "units": UnitSystem {
                 "length": "km",
                 "lengthRepr": Message {
-                  "en": "kilometers",
+                  "en": "km",
                   "translations": Object {
-                    "eo": "kilometroj",
+                    "eo": "km",
                   },
                 },
                 "mass": "kg",
                 "massRepr": Message {
-                  "en": "kilograms",
+                  "en": "kg",
                   "translations": Object {
-                    "eo": "kilogramoj",
+                    "eo": "kg",
                   },
                 },
                 "sym": "SI",
@@ -231,16 +231,16 @@ exports[`HistoryView renders when there is no history 1`] = `
                     "units": UnitSystem {
                       "length": "km",
                       "lengthRepr": Message {
-                        "en": "kilometers",
+                        "en": "km",
                         "translations": Object {
-                          "eo": "kilometroj",
+                          "eo": "km",
                         },
                       },
                       "mass": "kg",
                       "massRepr": Message {
-                        "en": "kilograms",
+                        "en": "kg",
                         "translations": Object {
-                          "eo": "kilogramoj",
+                          "eo": "kg",
                         },
                       },
                       "sym": "SI",
@@ -256,7 +256,119 @@ exports[`HistoryView renders when there is no history 1`] = `
               >
                 <div
                   onClick={[Function]}
-                />
+                >
+                  <Row
+                    classNames={
+                      Object {
+                        "l-2-column": true,
+                      }
+                    }
+                  >
+                    <div
+                      className="l-2-column"
+                      style={
+                        Object {
+                          "alignItems": "center",
+                          "display": "flex",
+                        }
+                      }
+                    >
+                      <Summary
+                        prefs={
+                          UserPreferences {
+                            "language": Language {
+                              "name": "English",
+                              "sym": "en",
+                            },
+                            "timezone": IANAZone {
+                              "valid": true,
+                              "zoneName": "UTC",
+                            },
+                            "units": UnitSystem {
+                              "length": "km",
+                              "lengthRepr": Message {
+                                "en": "km",
+                                "translations": Object {
+                                  "eo": "km",
+                                },
+                              },
+                              "mass": "kg",
+                              "massRepr": Message {
+                                "en": "kg",
+                                "translations": Object {
+                                  "eo": "kg",
+                                },
+                              },
+                              "sym": "SI",
+                            },
+                            "withLanguage": [Function],
+                            "withTimezone": [Function],
+                            "withUnits": [Function],
+                          }
+                        }
+                        records={Array []}
+                      >
+                        <div
+                          className="day-summary"
+                        >
+                          <div>
+                            <Component
+                              distance={
+                                Object {
+                                  "fixPrefix": false,
+                                  "mathjs": "Unit",
+                                  "unit": "km",
+                                  "value": 0,
+                                }
+                              }
+                              prefs={
+                                UserPreferences {
+                                  "language": Language {
+                                    "name": "English",
+                                    "sym": "en",
+                                  },
+                                  "timezone": IANAZone {
+                                    "valid": true,
+                                    "zoneName": "UTC",
+                                  },
+                                  "units": UnitSystem {
+                                    "length": "km",
+                                    "lengthRepr": Message {
+                                      "en": "km",
+                                      "translations": Object {
+                                        "eo": "km",
+                                      },
+                                    },
+                                    "mass": "kg",
+                                    "massRepr": Message {
+                                      "en": "kg",
+                                      "translations": Object {
+                                        "eo": "kg",
+                                      },
+                                    },
+                                    "sym": "SI",
+                                  },
+                                  "withLanguage": [Function],
+                                  "withTimezone": [Function],
+                                  "withUnits": [Function],
+                                }
+                              }
+                            >
+                              0.00 km
+                            </Component>
+                          </div>
+                          <div>
+                            <Component
+                              duration={"PT0S"}
+                            >
+                              0:00:00
+                            </Component>
+                          </div>
+                        </div>
+                      </Summary>
+                    </div>
+                  </Row>
+                </div>
               </View>
             </div>
           </Card>
@@ -283,16 +395,16 @@ exports[`HistoryView renders when there is no history 1`] = `
               "units": UnitSystem {
                 "length": "km",
                 "lengthRepr": Message {
-                  "en": "kilometers",
+                  "en": "km",
                   "translations": Object {
-                    "eo": "kilometroj",
+                    "eo": "km",
                   },
                 },
                 "mass": "kg",
                 "massRepr": Message {
-                  "en": "kilograms",
+                  "en": "kg",
                   "translations": Object {
-                    "eo": "kilogramoj",
+                    "eo": "kg",
                   },
                 },
                 "sym": "SI",
@@ -337,16 +449,16 @@ exports[`HistoryView renders when there is no history 1`] = `
                     "units": UnitSystem {
                       "length": "km",
                       "lengthRepr": Message {
-                        "en": "kilometers",
+                        "en": "km",
                         "translations": Object {
-                          "eo": "kilometroj",
+                          "eo": "km",
                         },
                       },
                       "mass": "kg",
                       "massRepr": Message {
-                        "en": "kilograms",
+                        "en": "kg",
                         "translations": Object {
-                          "eo": "kilogramoj",
+                          "eo": "kg",
                         },
                       },
                       "sym": "SI",
@@ -362,7 +474,119 @@ exports[`HistoryView renders when there is no history 1`] = `
               >
                 <div
                   onClick={[Function]}
-                />
+                >
+                  <Row
+                    classNames={
+                      Object {
+                        "l-2-column": true,
+                      }
+                    }
+                  >
+                    <div
+                      className="l-2-column"
+                      style={
+                        Object {
+                          "alignItems": "center",
+                          "display": "flex",
+                        }
+                      }
+                    >
+                      <Summary
+                        prefs={
+                          UserPreferences {
+                            "language": Language {
+                              "name": "English",
+                              "sym": "en",
+                            },
+                            "timezone": IANAZone {
+                              "valid": true,
+                              "zoneName": "UTC",
+                            },
+                            "units": UnitSystem {
+                              "length": "km",
+                              "lengthRepr": Message {
+                                "en": "km",
+                                "translations": Object {
+                                  "eo": "km",
+                                },
+                              },
+                              "mass": "kg",
+                              "massRepr": Message {
+                                "en": "kg",
+                                "translations": Object {
+                                  "eo": "kg",
+                                },
+                              },
+                              "sym": "SI",
+                            },
+                            "withLanguage": [Function],
+                            "withTimezone": [Function],
+                            "withUnits": [Function],
+                          }
+                        }
+                        records={Array []}
+                      >
+                        <div
+                          className="day-summary"
+                        >
+                          <div>
+                            <Component
+                              distance={
+                                Object {
+                                  "fixPrefix": false,
+                                  "mathjs": "Unit",
+                                  "unit": "km",
+                                  "value": 0,
+                                }
+                              }
+                              prefs={
+                                UserPreferences {
+                                  "language": Language {
+                                    "name": "English",
+                                    "sym": "en",
+                                  },
+                                  "timezone": IANAZone {
+                                    "valid": true,
+                                    "zoneName": "UTC",
+                                  },
+                                  "units": UnitSystem {
+                                    "length": "km",
+                                    "lengthRepr": Message {
+                                      "en": "km",
+                                      "translations": Object {
+                                        "eo": "km",
+                                      },
+                                    },
+                                    "mass": "kg",
+                                    "massRepr": Message {
+                                      "en": "kg",
+                                      "translations": Object {
+                                        "eo": "kg",
+                                      },
+                                    },
+                                    "sym": "SI",
+                                  },
+                                  "withLanguage": [Function],
+                                  "withTimezone": [Function],
+                                  "withUnits": [Function],
+                                }
+                              }
+                            >
+                              0.00 km
+                            </Component>
+                          </div>
+                          <div>
+                            <Component
+                              duration={"PT0S"}
+                            >
+                              0:00:00
+                            </Component>
+                          </div>
+                        </div>
+                      </Summary>
+                    </div>
+                  </Row>
+                </div>
               </View>
             </div>
           </Card>
@@ -389,16 +613,16 @@ exports[`HistoryView renders when there is no history 1`] = `
               "units": UnitSystem {
                 "length": "km",
                 "lengthRepr": Message {
-                  "en": "kilometers",
+                  "en": "km",
                   "translations": Object {
-                    "eo": "kilometroj",
+                    "eo": "km",
                   },
                 },
                 "mass": "kg",
                 "massRepr": Message {
-                  "en": "kilograms",
+                  "en": "kg",
                   "translations": Object {
-                    "eo": "kilogramoj",
+                    "eo": "kg",
                   },
                 },
                 "sym": "SI",
@@ -443,16 +667,16 @@ exports[`HistoryView renders when there is no history 1`] = `
                     "units": UnitSystem {
                       "length": "km",
                       "lengthRepr": Message {
-                        "en": "kilometers",
+                        "en": "km",
                         "translations": Object {
-                          "eo": "kilometroj",
+                          "eo": "km",
                         },
                       },
                       "mass": "kg",
                       "massRepr": Message {
-                        "en": "kilograms",
+                        "en": "kg",
                         "translations": Object {
-                          "eo": "kilogramoj",
+                          "eo": "kg",
                         },
                       },
                       "sym": "SI",
@@ -468,7 +692,119 @@ exports[`HistoryView renders when there is no history 1`] = `
               >
                 <div
                   onClick={[Function]}
-                />
+                >
+                  <Row
+                    classNames={
+                      Object {
+                        "l-2-column": true,
+                      }
+                    }
+                  >
+                    <div
+                      className="l-2-column"
+                      style={
+                        Object {
+                          "alignItems": "center",
+                          "display": "flex",
+                        }
+                      }
+                    >
+                      <Summary
+                        prefs={
+                          UserPreferences {
+                            "language": Language {
+                              "name": "English",
+                              "sym": "en",
+                            },
+                            "timezone": IANAZone {
+                              "valid": true,
+                              "zoneName": "UTC",
+                            },
+                            "units": UnitSystem {
+                              "length": "km",
+                              "lengthRepr": Message {
+                                "en": "km",
+                                "translations": Object {
+                                  "eo": "km",
+                                },
+                              },
+                              "mass": "kg",
+                              "massRepr": Message {
+                                "en": "kg",
+                                "translations": Object {
+                                  "eo": "kg",
+                                },
+                              },
+                              "sym": "SI",
+                            },
+                            "withLanguage": [Function],
+                            "withTimezone": [Function],
+                            "withUnits": [Function],
+                          }
+                        }
+                        records={Array []}
+                      >
+                        <div
+                          className="day-summary"
+                        >
+                          <div>
+                            <Component
+                              distance={
+                                Object {
+                                  "fixPrefix": false,
+                                  "mathjs": "Unit",
+                                  "unit": "km",
+                                  "value": 0,
+                                }
+                              }
+                              prefs={
+                                UserPreferences {
+                                  "language": Language {
+                                    "name": "English",
+                                    "sym": "en",
+                                  },
+                                  "timezone": IANAZone {
+                                    "valid": true,
+                                    "zoneName": "UTC",
+                                  },
+                                  "units": UnitSystem {
+                                    "length": "km",
+                                    "lengthRepr": Message {
+                                      "en": "km",
+                                      "translations": Object {
+                                        "eo": "km",
+                                      },
+                                    },
+                                    "mass": "kg",
+                                    "massRepr": Message {
+                                      "en": "kg",
+                                      "translations": Object {
+                                        "eo": "kg",
+                                      },
+                                    },
+                                    "sym": "SI",
+                                  },
+                                  "withLanguage": [Function],
+                                  "withTimezone": [Function],
+                                  "withUnits": [Function],
+                                }
+                              }
+                            >
+                              0.00 km
+                            </Component>
+                          </div>
+                          <div>
+                            <Component
+                              duration={"PT0S"}
+                            >
+                              0:00:00
+                            </Component>
+                          </div>
+                        </div>
+                      </Summary>
+                    </div>
+                  </Row>
+                </div>
               </View>
             </div>
           </Card>
@@ -495,16 +831,16 @@ exports[`HistoryView renders when there is no history 1`] = `
               "units": UnitSystem {
                 "length": "km",
                 "lengthRepr": Message {
-                  "en": "kilometers",
+                  "en": "km",
                   "translations": Object {
-                    "eo": "kilometroj",
+                    "eo": "km",
                   },
                 },
                 "mass": "kg",
                 "massRepr": Message {
-                  "en": "kilograms",
+                  "en": "kg",
                   "translations": Object {
-                    "eo": "kilogramoj",
+                    "eo": "kg",
                   },
                 },
                 "sym": "SI",
@@ -549,16 +885,16 @@ exports[`HistoryView renders when there is no history 1`] = `
                     "units": UnitSystem {
                       "length": "km",
                       "lengthRepr": Message {
-                        "en": "kilometers",
+                        "en": "km",
                         "translations": Object {
-                          "eo": "kilometroj",
+                          "eo": "km",
                         },
                       },
                       "mass": "kg",
                       "massRepr": Message {
-                        "en": "kilograms",
+                        "en": "kg",
                         "translations": Object {
-                          "eo": "kilogramoj",
+                          "eo": "kg",
                         },
                       },
                       "sym": "SI",
@@ -574,7 +910,119 @@ exports[`HistoryView renders when there is no history 1`] = `
               >
                 <div
                   onClick={[Function]}
-                />
+                >
+                  <Row
+                    classNames={
+                      Object {
+                        "l-2-column": true,
+                      }
+                    }
+                  >
+                    <div
+                      className="l-2-column"
+                      style={
+                        Object {
+                          "alignItems": "center",
+                          "display": "flex",
+                        }
+                      }
+                    >
+                      <Summary
+                        prefs={
+                          UserPreferences {
+                            "language": Language {
+                              "name": "English",
+                              "sym": "en",
+                            },
+                            "timezone": IANAZone {
+                              "valid": true,
+                              "zoneName": "UTC",
+                            },
+                            "units": UnitSystem {
+                              "length": "km",
+                              "lengthRepr": Message {
+                                "en": "km",
+                                "translations": Object {
+                                  "eo": "km",
+                                },
+                              },
+                              "mass": "kg",
+                              "massRepr": Message {
+                                "en": "kg",
+                                "translations": Object {
+                                  "eo": "kg",
+                                },
+                              },
+                              "sym": "SI",
+                            },
+                            "withLanguage": [Function],
+                            "withTimezone": [Function],
+                            "withUnits": [Function],
+                          }
+                        }
+                        records={Array []}
+                      >
+                        <div
+                          className="day-summary"
+                        >
+                          <div>
+                            <Component
+                              distance={
+                                Object {
+                                  "fixPrefix": false,
+                                  "mathjs": "Unit",
+                                  "unit": "km",
+                                  "value": 0,
+                                }
+                              }
+                              prefs={
+                                UserPreferences {
+                                  "language": Language {
+                                    "name": "English",
+                                    "sym": "en",
+                                  },
+                                  "timezone": IANAZone {
+                                    "valid": true,
+                                    "zoneName": "UTC",
+                                  },
+                                  "units": UnitSystem {
+                                    "length": "km",
+                                    "lengthRepr": Message {
+                                      "en": "km",
+                                      "translations": Object {
+                                        "eo": "km",
+                                      },
+                                    },
+                                    "mass": "kg",
+                                    "massRepr": Message {
+                                      "en": "kg",
+                                      "translations": Object {
+                                        "eo": "kg",
+                                      },
+                                    },
+                                    "sym": "SI",
+                                  },
+                                  "withLanguage": [Function],
+                                  "withTimezone": [Function],
+                                  "withUnits": [Function],
+                                }
+                              }
+                            >
+                              0.00 km
+                            </Component>
+                          </div>
+                          <div>
+                            <Component
+                              duration={"PT0S"}
+                            >
+                              0:00:00
+                            </Component>
+                          </div>
+                        </div>
+                      </Summary>
+                    </div>
+                  </Row>
+                </div>
               </View>
             </div>
           </Card>
@@ -601,16 +1049,16 @@ exports[`HistoryView renders when there is no history 1`] = `
               "units": UnitSystem {
                 "length": "km",
                 "lengthRepr": Message {
-                  "en": "kilometers",
+                  "en": "km",
                   "translations": Object {
-                    "eo": "kilometroj",
+                    "eo": "km",
                   },
                 },
                 "mass": "kg",
                 "massRepr": Message {
-                  "en": "kilograms",
+                  "en": "kg",
                   "translations": Object {
-                    "eo": "kilogramoj",
+                    "eo": "kg",
                   },
                 },
                 "sym": "SI",
@@ -655,16 +1103,16 @@ exports[`HistoryView renders when there is no history 1`] = `
                     "units": UnitSystem {
                       "length": "km",
                       "lengthRepr": Message {
-                        "en": "kilometers",
+                        "en": "km",
                         "translations": Object {
-                          "eo": "kilometroj",
+                          "eo": "km",
                         },
                       },
                       "mass": "kg",
                       "massRepr": Message {
-                        "en": "kilograms",
+                        "en": "kg",
                         "translations": Object {
-                          "eo": "kilogramoj",
+                          "eo": "kg",
                         },
                       },
                       "sym": "SI",
@@ -680,7 +1128,119 @@ exports[`HistoryView renders when there is no history 1`] = `
               >
                 <div
                   onClick={[Function]}
-                />
+                >
+                  <Row
+                    classNames={
+                      Object {
+                        "l-2-column": true,
+                      }
+                    }
+                  >
+                    <div
+                      className="l-2-column"
+                      style={
+                        Object {
+                          "alignItems": "center",
+                          "display": "flex",
+                        }
+                      }
+                    >
+                      <Summary
+                        prefs={
+                          UserPreferences {
+                            "language": Language {
+                              "name": "English",
+                              "sym": "en",
+                            },
+                            "timezone": IANAZone {
+                              "valid": true,
+                              "zoneName": "UTC",
+                            },
+                            "units": UnitSystem {
+                              "length": "km",
+                              "lengthRepr": Message {
+                                "en": "km",
+                                "translations": Object {
+                                  "eo": "km",
+                                },
+                              },
+                              "mass": "kg",
+                              "massRepr": Message {
+                                "en": "kg",
+                                "translations": Object {
+                                  "eo": "kg",
+                                },
+                              },
+                              "sym": "SI",
+                            },
+                            "withLanguage": [Function],
+                            "withTimezone": [Function],
+                            "withUnits": [Function],
+                          }
+                        }
+                        records={Array []}
+                      >
+                        <div
+                          className="day-summary"
+                        >
+                          <div>
+                            <Component
+                              distance={
+                                Object {
+                                  "fixPrefix": false,
+                                  "mathjs": "Unit",
+                                  "unit": "km",
+                                  "value": 0,
+                                }
+                              }
+                              prefs={
+                                UserPreferences {
+                                  "language": Language {
+                                    "name": "English",
+                                    "sym": "en",
+                                  },
+                                  "timezone": IANAZone {
+                                    "valid": true,
+                                    "zoneName": "UTC",
+                                  },
+                                  "units": UnitSystem {
+                                    "length": "km",
+                                    "lengthRepr": Message {
+                                      "en": "km",
+                                      "translations": Object {
+                                        "eo": "km",
+                                      },
+                                    },
+                                    "mass": "kg",
+                                    "massRepr": Message {
+                                      "en": "kg",
+                                      "translations": Object {
+                                        "eo": "kg",
+                                      },
+                                    },
+                                    "sym": "SI",
+                                  },
+                                  "withLanguage": [Function],
+                                  "withTimezone": [Function],
+                                  "withUnits": [Function],
+                                }
+                              }
+                            >
+                              0.00 km
+                            </Component>
+                          </div>
+                          <div>
+                            <Component
+                              duration={"PT0S"}
+                            >
+                              0:00:00
+                            </Component>
+                          </div>
+                        </div>
+                      </Summary>
+                    </div>
+                  </Row>
+                </div>
               </View>
             </div>
           </Card>
@@ -707,16 +1267,16 @@ exports[`HistoryView renders when there is no history 1`] = `
               "units": UnitSystem {
                 "length": "km",
                 "lengthRepr": Message {
-                  "en": "kilometers",
+                  "en": "km",
                   "translations": Object {
-                    "eo": "kilometroj",
+                    "eo": "km",
                   },
                 },
                 "mass": "kg",
                 "massRepr": Message {
-                  "en": "kilograms",
+                  "en": "kg",
                   "translations": Object {
-                    "eo": "kilogramoj",
+                    "eo": "kg",
                   },
                 },
                 "sym": "SI",
@@ -761,16 +1321,16 @@ exports[`HistoryView renders when there is no history 1`] = `
                     "units": UnitSystem {
                       "length": "km",
                       "lengthRepr": Message {
-                        "en": "kilometers",
+                        "en": "km",
                         "translations": Object {
-                          "eo": "kilometroj",
+                          "eo": "km",
                         },
                       },
                       "mass": "kg",
                       "massRepr": Message {
-                        "en": "kilograms",
+                        "en": "kg",
                         "translations": Object {
-                          "eo": "kilogramoj",
+                          "eo": "kg",
                         },
                       },
                       "sym": "SI",
@@ -786,7 +1346,119 @@ exports[`HistoryView renders when there is no history 1`] = `
               >
                 <div
                   onClick={[Function]}
-                />
+                >
+                  <Row
+                    classNames={
+                      Object {
+                        "l-2-column": true,
+                      }
+                    }
+                  >
+                    <div
+                      className="l-2-column"
+                      style={
+                        Object {
+                          "alignItems": "center",
+                          "display": "flex",
+                        }
+                      }
+                    >
+                      <Summary
+                        prefs={
+                          UserPreferences {
+                            "language": Language {
+                              "name": "English",
+                              "sym": "en",
+                            },
+                            "timezone": IANAZone {
+                              "valid": true,
+                              "zoneName": "UTC",
+                            },
+                            "units": UnitSystem {
+                              "length": "km",
+                              "lengthRepr": Message {
+                                "en": "km",
+                                "translations": Object {
+                                  "eo": "km",
+                                },
+                              },
+                              "mass": "kg",
+                              "massRepr": Message {
+                                "en": "kg",
+                                "translations": Object {
+                                  "eo": "kg",
+                                },
+                              },
+                              "sym": "SI",
+                            },
+                            "withLanguage": [Function],
+                            "withTimezone": [Function],
+                            "withUnits": [Function],
+                          }
+                        }
+                        records={Array []}
+                      >
+                        <div
+                          className="day-summary"
+                        >
+                          <div>
+                            <Component
+                              distance={
+                                Object {
+                                  "fixPrefix": false,
+                                  "mathjs": "Unit",
+                                  "unit": "km",
+                                  "value": 0,
+                                }
+                              }
+                              prefs={
+                                UserPreferences {
+                                  "language": Language {
+                                    "name": "English",
+                                    "sym": "en",
+                                  },
+                                  "timezone": IANAZone {
+                                    "valid": true,
+                                    "zoneName": "UTC",
+                                  },
+                                  "units": UnitSystem {
+                                    "length": "km",
+                                    "lengthRepr": Message {
+                                      "en": "km",
+                                      "translations": Object {
+                                        "eo": "km",
+                                      },
+                                    },
+                                    "mass": "kg",
+                                    "massRepr": Message {
+                                      "en": "kg",
+                                      "translations": Object {
+                                        "eo": "kg",
+                                      },
+                                    },
+                                    "sym": "SI",
+                                  },
+                                  "withLanguage": [Function],
+                                  "withTimezone": [Function],
+                                  "withUnits": [Function],
+                                }
+                              }
+                            >
+                              0.00 km
+                            </Component>
+                          </div>
+                          <div>
+                            <Component
+                              duration={"PT0S"}
+                            >
+                              0:00:00
+                            </Component>
+                          </div>
+                        </div>
+                      </Summary>
+                    </div>
+                  </Row>
+                </div>
               </View>
             </div>
           </Card>
@@ -813,16 +1485,16 @@ exports[`HistoryView renders when there is no history 1`] = `
               "units": UnitSystem {
                 "length": "km",
                 "lengthRepr": Message {
-                  "en": "kilometers",
+                  "en": "km",
                   "translations": Object {
-                    "eo": "kilometroj",
+                    "eo": "km",
                   },
                 },
                 "mass": "kg",
                 "massRepr": Message {
-                  "en": "kilograms",
+                  "en": "kg",
                   "translations": Object {
-                    "eo": "kilogramoj",
+                    "eo": "kg",
                   },
                 },
                 "sym": "SI",
@@ -867,16 +1539,16 @@ exports[`HistoryView renders when there is no history 1`] = `
                     "units": UnitSystem {
                       "length": "km",
                       "lengthRepr": Message {
-                        "en": "kilometers",
+                        "en": "km",
                         "translations": Object {
-                          "eo": "kilometroj",
+                          "eo": "km",
                         },
                       },
                       "mass": "kg",
                       "massRepr": Message {
-                        "en": "kilograms",
+                        "en": "kg",
                         "translations": Object {
-                          "eo": "kilogramoj",
+                          "eo": "kg",
                         },
                       },
                       "sym": "SI",
@@ -892,7 +1564,119 @@ exports[`HistoryView renders when there is no history 1`] = `
               >
                 <div
                   onClick={[Function]}
-                />
+                >
+                  <Row
+                    classNames={
+                      Object {
+                        "l-2-column": true,
+                      }
+                    }
+                  >
+                    <div
+                      className="l-2-column"
+                      style={
+                        Object {
+                          "alignItems": "center",
+                          "display": "flex",
+                        }
+                      }
+                    >
+                      <Summary
+                        prefs={
+                          UserPreferences {
+                            "language": Language {
+                              "name": "English",
+                              "sym": "en",
+                            },
+                            "timezone": IANAZone {
+                              "valid": true,
+                              "zoneName": "UTC",
+                            },
+                            "units": UnitSystem {
+                              "length": "km",
+                              "lengthRepr": Message {
+                                "en": "km",
+                                "translations": Object {
+                                  "eo": "km",
+                                },
+                              },
+                              "mass": "kg",
+                              "massRepr": Message {
+                                "en": "kg",
+                                "translations": Object {
+                                  "eo": "kg",
+                                },
+                              },
+                              "sym": "SI",
+                            },
+                            "withLanguage": [Function],
+                            "withTimezone": [Function],
+                            "withUnits": [Function],
+                          }
+                        }
+                        records={Array []}
+                      >
+                        <div
+                          className="day-summary"
+                        >
+                          <div>
+                            <Component
+                              distance={
+                                Object {
+                                  "fixPrefix": false,
+                                  "mathjs": "Unit",
+                                  "unit": "km",
+                                  "value": 0,
+                                }
+                              }
+                              prefs={
+                                UserPreferences {
+                                  "language": Language {
+                                    "name": "English",
+                                    "sym": "en",
+                                  },
+                                  "timezone": IANAZone {
+                                    "valid": true,
+                                    "zoneName": "UTC",
+                                  },
+                                  "units": UnitSystem {
+                                    "length": "km",
+                                    "lengthRepr": Message {
+                                      "en": "km",
+                                      "translations": Object {
+                                        "eo": "km",
+                                      },
+                                    },
+                                    "mass": "kg",
+                                    "massRepr": Message {
+                                      "en": "kg",
+                                      "translations": Object {
+                                        "eo": "kg",
+                                      },
+                                    },
+                                    "sym": "SI",
+                                  },
+                                  "withLanguage": [Function],
+                                  "withTimezone": [Function],
+                                  "withUnits": [Function],
+                                }
+                              }
+                            >
+                              0.00 km
+                            </Component>
+                          </div>
+                          <div>
+                            <Component
+                              duration={"PT0S"}
+                            >
+                              0:00:00
+                            </Component>
+                          </div>
+                        </div>
+                      </Summary>
+                    </div>
+                  </Row>
+                </div>
               </View>
             </div>
           </Card>
