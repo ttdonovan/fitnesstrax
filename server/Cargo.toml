@@ -13,8 +13,7 @@ emseries = { git = "https://github.com/luminescent-dreams/emseries", branch = "s
 iron = "0.6"
 iron-cors = "0.8.0"
 micrologger = { git = "https://github.com/luminescent-dreams/micrologger", branch = "sol" }
-# orizentic = { path = "../../orizentic/rust" }
-orizentic = { git = "https://github.com/luminescent-dreams/orizentic", branch = "sol" }
+orizentic = "1.0.0"
 params = "0.8.0"
 percent-encoding = "1.0.1"
 router = "*"
