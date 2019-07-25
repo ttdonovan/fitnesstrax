@@ -34,6 +34,19 @@ a {
   .l-2-column > div {
     width: 50%;
   }
+
+  .l-main {
+    display: flex;
+    width: 100%;
+  }
+
+  .l-main > .l-sidebar {
+    width: 30%;
+  }
+
+  .l-main > .l-center {
+    width: 70%;
+  }
 }
 
 /* THEME */

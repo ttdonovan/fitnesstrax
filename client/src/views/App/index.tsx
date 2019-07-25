@@ -4,10 +4,11 @@ import React from "react"
 import { connect } from "react-redux"
 
 import CenterPanel from "../../components/CenterPanel"
+import RangePicker from "../../components/RangePicker"
 import Error from "../../components/Error"
 import Navigation from "../../components/Navigation"
 import Controller from "../../controller"
-import { DateTimeTz } from "../../datetimetz"
+import { Date, DateTimeTz } from "../../datetimetz"
 import * as redux from "../../redux"
 import { UserPreferences } from "../../settings"
 import { Range } from "../../types"
@@ -20,6 +21,7 @@ interface Props {
   creds: string | null
   error: string | null
   prefs: UserPreferences
+  range: Range<Date>
   view: redux.Views
   setView: (_: redux.Views) => void
 }
@@ -29,6 +31,7 @@ const App: React.SFC<Props> = ({
   creds,
   error,
   prefs,
+  range,
   view,
   setView,
 }: Props) => (
@@ -40,8 +43,15 @@ const App: React.SFC<Props> = ({
           <div className="logo">Fitnesstrax</div>
           <Navigation prefs={prefs} view={view} setView={setView} />
         </div>
-        <CenterPanel>
-          <div>
+        <div className="l-main">
+          <div className="l-sidebar">
+            <RangePicker
+              range={range}
+              prefs={prefs}
+              setRange={controller.setRange}
+            />
+          </div>
+          <div className="l-center">
             {view === "History" ? (
               <HistoryView controller={controller} />
             ) : (
@@ -51,7 +61,7 @@ const App: React.SFC<Props> = ({
               />
             )}
           </div>
-        </CenterPanel>
+        </div>
       </React.Fragment>
     ) : (
       <LoginView controller={controller} prefs={prefs} token={Option.None()} />
@@ -64,6 +74,7 @@ const AppView = connect(
     creds: redux.getAuthToken(state),
     error: redux.getError(state),
     prefs: redux.getPreferences(state),
+    range: redux.getRange(state),
     view: redux.getCurrentView(state),
   }),
   dispatch => ({

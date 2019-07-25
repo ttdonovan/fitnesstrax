@@ -425,11 +425,18 @@ fn routes(
     bundle_path.push("bundle.js");
     let mut index_path = static_asset_path.clone();
     index_path.push("index.html");
+    let mut calendar_path = static_asset_path.clone();
+    calendar_path.push("icons8-calendar-24.png");
 
     router.get(
         "/static/bundle.js",
         staticfile::StaticHandler::file(bundle_path, "application/javascript".parse().unwrap()),
         "webapp",
+    );
+    router.get(
+        "/static/calendar_icon.png",
+        staticfile::StaticHandler::file(calendar_path, "image/png".parse().unwrap()),
+        "calendar_icon",
     );
     router.get(
         "/",

@@ -1,5 +1,6 @@
 .navigation {
     display: flex;
+    padding-left: 3em;
 }
 
 .navigation > div {

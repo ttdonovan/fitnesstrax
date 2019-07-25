@@ -15,6 +15,7 @@ import Controller from "./controller"
 
 import "./index.html"
 import "./style.css"
+import "./icons8-calendar-24.png"
 
 /*
  * Knowing very little about the application structure thus far...

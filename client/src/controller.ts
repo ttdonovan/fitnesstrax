@@ -3,7 +3,7 @@ import _ from "lodash/fp"
 
 import Client from "./client"
 import * as redux from "./redux"
-import { DateTimeTz } from "./datetimetz"
+import { Date, DateTimeTz } from "./datetimetz"
 import { Range, Record, RecordTypes } from "./types"
 import { UserPreferences } from "./settings"
 
@@ -88,6 +88,15 @@ class Controller {
       )
     }
     return new Promise(r => r())
+  }
+
+  setRange = (range: Range<Date>) => {
+    history.pushState(
+      {},
+      "",
+      `?start=${range.start.toString()}&end=${range.end.toString()}`,
+    )
+    this.store.dispatch(redux.setRange(range))
   }
 
   setPreferences = (prefs: UserPreferences): void => {

@@ -1,28 +1,26 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Navigation renders 1`] = `
-<CenterPanel>
+<div
+  className="navigation"
+>
   <div
-    className="navigation"
+    className="current"
   >
-    <div
-      className="current"
+    <a
+      onClick={[Function]}
     >
-      <a
-        onClick={[Function]}
-      >
-        History
-      </a>
-    </div>
-    <div
-      className=""
-    >
-      <a
-        onClick={[Function]}
-      >
-        Preferences
-      </a>
-    </div>
+      History
+    </a>
   </div>
-</CenterPanel>
+  <div
+    className=""
+  >
+    <a
+      onClick={[Function]}
+    >
+      Preferences
+    </a>
+  </div>
+</div>
 `;
