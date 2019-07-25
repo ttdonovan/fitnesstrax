@@ -22,9 +22,12 @@ interface Props {
 class History extends React.Component<Props, {}> {
   componentDidMount() {
     const { range } = this.props
-    this.props.controller.fetchRecords(
-      range.map(t => DateTimeTz.fromDate(t, this.props.prefs.timezone)),
-    )
+    const start = DateTimeTz.fromDate(range.start, this.props.prefs.timezone)
+    const end = DateTimeTz.fromDate(range.end, this.props.prefs.timezone).plus({
+      days: 1,
+    })
+    const requestRange = new Range(start, end)
+    this.props.controller.fetchRecords(requestRange)
   }
 
   render() {

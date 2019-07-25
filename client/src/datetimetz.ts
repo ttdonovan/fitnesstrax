@@ -1,5 +1,5 @@
 import { Option, Result } from "ld-ambiguity"
-import { DateTime, IANAZone } from "luxon"
+import { DateTime, Duration, IANAZone } from "luxon"
 import pad from "pad-left"
 
 const UTC = IANAZone.create("UTC")
@@ -53,6 +53,10 @@ export class DateTimeTz {
       this.timestamp.month,
       this.timestamp.day,
     )
+  }
+
+  plus(duration: Duration | Object | number): DateTimeTz {
+    return new DateTimeTz(this.timestamp.plus(duration))
   }
 
   map(fn: (_: DateTime) => DateTime): DateTimeTz {
