@@ -172,7 +172,7 @@ export class TimeDistanceRecordEdit extends React.Component<
             options={_.map((activity: types.TimeDistanceActivity) => ({
               value: activity,
               label: activity.repr.tr(prefs.language),
-            }))([types.Cycling, types.Running, types.Walking])}
+            }))([types.Cycling, types.Running, types.Swimming, types.Walking])}
             onChange={(evt: any) => this.onChangeActivity(evt)}
           />
         </div>

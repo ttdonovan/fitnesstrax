@@ -24,6 +24,7 @@ export class TimeDistanceActivity {
 
 export const Cycling = new TimeDistanceActivity(i18n.Cycling)
 export const Running = new TimeDistanceActivity(i18n.Running)
+export const Swimming = new TimeDistanceActivity(i18n.Swimming)
 export const Walking = new TimeDistanceActivity(i18n.Walking)
 
 export const timeDistanceActivityFromString = (
@@ -33,6 +34,8 @@ export const timeDistanceActivityFromString = (
     return Result.Ok(Cycling)
   } else if (str === "Running") {
     return Result.Ok(Running)
+  } else if (str === "Swimming") {
+    return Result.Ok(Swimming)
   } else if (str === "Walking") {
     return Result.Ok(Walking)
   } else {

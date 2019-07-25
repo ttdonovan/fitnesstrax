@@ -40,6 +40,7 @@ export const LoginPlaceholder = new Message("Enter your login token", {
 })
 export const Preferences = new Message("Preferences", { eo: "Agordoj" })
 export const Running = new Message("Running", { eo: "Kurado" })
+export const Swimming = new Message("Swimming", { eo: "Naĝado" })
 export const TimeEntryPlaceholder = new Message("Enter time [hh:mm:ss]", {
   eo: "Eniru tempon [hh:mm:ss]",
 })
