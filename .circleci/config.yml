@@ -39,7 +39,7 @@ jobs:
         paths:
         - ~/.cargo
 
-  build-rust-nix:
+  build-nix:
     working_directory: ~/repo
     parallelism: 1
 
@@ -47,12 +47,26 @@ jobs:
     - image: nixos/nix
 
     steps:
-    - checkout
-    - run:
-        name: build
-        command: |
-          cd server
-          nix-build
+      - checkout
+
+      - restore_cache:
+          key: rust-{{ checksum "server/Cargo.lock" }}
+
+      - run:
+          name: update the build channel
+          command: |
+            nix-channel --add https://nixos.org/channels/nixos-19.03 nixpkgs-19.03
+            nix-channel --update
+
+      - run:
+          name: build
+          command: |
+            nix-build
+
+      - save_cache:
+          key: rust-{{ checksum "server/Cargo.lock" }}
+          paths:
+            - "/nix/store"
 
   test-webapp:
     working_directory: ~/repo
@@ -95,5 +109,8 @@ workflows:
   build_all:
     jobs:
       - build-rust-lfs
-        # - build-rust-nix
       - test-webapp
+      - build-nix:
+          requires:
+            - build-rust-lfs
+            - test-webapp

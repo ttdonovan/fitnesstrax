@@ -7,7 +7,6 @@ extern crate emseries;
 extern crate iron;
 extern crate iron_cors;
 extern crate micrologger;
-extern crate mount;
 extern crate orizentic;
 extern crate params;
 extern crate router;

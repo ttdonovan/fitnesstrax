@@ -1,4 +1,4 @@
-{ mkDerivation, stdenv, fetchurl }:
+{ mkDerivation, stdenv, fetchurl, patchelf }:
 mkDerivation rec {
     ver = "1.33.0";
     name = "rust-${ver}";
@@ -9,14 +9,28 @@ mkDerivation rec {
         else if stdenv.system == "x86_64-darwin" then "864e7c074a0b88e38883c87c169513d072300bb52e1d320a067bd34cf14f66bd"
         else abort "unsupported platform";
 
+    buildInputs = [ patchelf ];
+
     src = fetchurl {
         url = "https://static.rust-lang.org/dist/rust-${ver}-${platform}.tar.gz";
         sha256 = pkgSha;
     };
 
-    phases = ["unpackPhase" "installPhase"];
+    phases = ["unpackPhase" "installPhase" "postInstallPhase" ];
     installPhase = ''
+        patchShebangs .
         mkdir -p $out
         ./install.sh --prefix=$out
-    '';
+        '';
+
+    postInstallPhase = ''
+        patchShebangs $out
+
+        if [ "${stdenv.system}" = "x86_64-linux" ]; then
+          interp="$(cat $NIX_CC/nix-support/dynamic-linker)"
+          patchelf --set-interpreter $interp $out/bin/rustc
+          patchelf --set-interpreter $interp $out/bin/rustdoc
+          patchelf --set-interpreter $interp $out/bin/cargo
+        fi
+        '';
 }

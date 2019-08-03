@@ -7,12 +7,12 @@ authors = ["Savanni D'Gerinel <savanni@luminescent-dreams.com>"]
 chrono = { version = "0.4", features = ["serde"] }
 chrono-tz = { version = "0.4", features = ["serde"] }
 dimensioned = "0.7.0"
-# emseries = "0.3.0"
+emseries = "0.4.0"
 # emseries = { path = "../../emseries" }
-emseries = { git = "https://github.com/luminescent-dreams/emseries", branch = "sol" }
+# emseries = { git = "https://github.com/luminescent-dreams/emseries", branch = "sol" }
 iron = "0.6"
 iron-cors = "0.8.0"
-micrologger = { git = "https://github.com/luminescent-dreams/micrologger", branch = "sol" }
+micrologger = "0.1.0"
 orizentic = "1.0.0"
 params = "0.8.0"
 percent-encoding = "1.0.1"
@@ -20,33 +20,13 @@ router = "*"
 serde = "1"
 serde_derive = "1"
 serde_json = "1.0"
-staticfile = "*"
 structopt = { version = "0.2", default-features = true }
 urlencoding = "1.0.0"
 
-[dependencies.mount]
-
-git = "https://github.com/iron/mount.git"
-
 [[bin]]
-name = "app"
+name = "fitnesstrax-server"
 path = "src/web.rs"
 
 [[bin]]
 name = "load_records"
 path = "src/load_records.rs"
-
-# [[bin]]
-# name = "weight"
-# path = "src/weight.rs"
-#
-# [[bin]]
-# name = "time-distance"
-# path = "src/time-distance.rs"
-
-# [[bin]]
-# name = "gui"
-# path = "src/gui.rs"
-
-# rand = { git = "https://github.com/rust-lang-nursery/rand", branch = "next" }
-# hello_utils = { path = "hello_utils" }
