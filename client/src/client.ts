@@ -111,7 +111,7 @@ const parseRecord = (js: any): Result<Record<RecordTypes>, string> => {
 
     const distance: Result<Option<math.Unit>, string> = js.data.TimeDistance
       .distance
-      ? Result.try(() =>
+      ? Result.try<Option<math.Unit>, Error>(() =>
           Option.Some(math.unit(js.data.TimeDistance.distance, "m")),
         ).mapErr(err => err.toString())
       : Result.Ok(Option.None())
@@ -119,7 +119,7 @@ const parseRecord = (js: any): Result<Record<RecordTypes>, string> => {
 
     const duration: Result<Option<Duration>, string> = js.data.TimeDistance
       .duration
-      ? Result.try(() =>
+      ? Result.try<Option<Duration>, Error>(() =>
           Option.Some(
             Duration.fromObject({ seconds: js.data.TimeDistance.duration }),
           ),

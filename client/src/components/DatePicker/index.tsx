@@ -48,9 +48,10 @@ class DatePicker extends React.Component<Props, State> {
           })}
           locale={prefs.language.sym}
           value={toJSDate(date)}
-          onChange={(d: Date) => {
+          onChange={(d: Date | Date[]) => {
             this.setState({ calendarVisible: false })
-            setBound(fromJSDate(d))
+            if (d instanceof Date) setBound(fromJSDate(d))
+            else setBound(fromJSDate(d[0]))
           }}
         />
       </div>

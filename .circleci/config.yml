@@ -10,7 +10,7 @@ jobs:
       - checkout
 
       - restore_cache:
-          key: rust-{{ checksum "server/Cargo.lock" }}
+          key: rust-nixos-{{ checksum "server/Cargo.lock" }}
 
       - run:
           name: update the build channel
@@ -24,7 +24,7 @@ jobs:
             nix-build
 
       - save_cache:
-          key: rust-{{ checksum "server/Cargo.lock" }}
+          key: rust-nixos-{{ checksum "server/Cargo.lock" }}
           paths:
             - "/nix/store"
 
@@ -33,14 +33,14 @@ jobs:
     parallelism: 1
 
     docker:
-      - image: savannidgerinel/fitnesstrax-ubuntu-build
+      - image: circleci/rust:1.33-node
 
     steps:
       - checkout
 
-        # - restore_cache:
-        #     keys:
-        #       - dep-{{ checksum "server/Cargo.toml" }}-{{ checksum "client/package-lock.json" }}
+      - restore_cache:
+          keys:
+            - dep-ubuntu-{{ checksum "server/Cargo.toml" }}
 
       - run:
           name: build server
@@ -52,6 +52,15 @@ jobs:
             cd server
             mkdir var
             RUST_BACKTRACE=1 cargo test
+
+      - save_cache:
+          key: dep-ubuntu-{{ checksum "server/Cargo.toml" }}
+          paths:
+            - ~/.cargo
+
+      - restore_cache:
+          keys:
+            - dep-{{ checksum "client/package-lock.json" }}
 
       - run:
           name: install javascript dependencies
@@ -66,22 +75,21 @@ jobs:
           command: cd client && npm run test
 
       - save_cache:
-          key: dep-{{ checksum "server/Cargo.toml" }}-{{ checksum "client/package-lock.json" }}
+          key: dep-{{ checksum "client/package-lock.json" }}
           paths:
-          - ~/.cargo
-          - client/node_modules
+            - client/node_modules
 
-      - run:
-          name: copy components
-          command: |
-            mkdir -p dist/opt/fitnesstrax/bin
-            mkdir -p dist/opt/fitnesstrax/client
-            cp server/target/release/app dist/opt/fitnesstrax/bin/fitnesstrax-server
-            cp client/dist/* dist/opt/fitnesstrax/client
+      #- run:
+          #name: copy components
+          #command: |
+            #mkdir -p dist/opt/fitnesstrax/bin
+            #mkdir -p dist/opt/fitnesstrax/client
+            #cp server/target/release/app dist/opt/fitnesstrax/bin/fitnesstrax-server
+            #cp client/dist/* dist/opt/fitnesstrax/client
 
-      - run:
-          name: make deb
-          command: cd dist && fpm -f -s dir -t deb -n fitnesstrax -v `git describe --abbrev=4 HEAD` opt
+      #- run:
+          #name: make deb
+          #command: cd dist && fpm -f -s dir -t deb -n fitnesstrax -v `git describe --abbrev=4 HEAD` opt
 
 workflows:
   version: 2
