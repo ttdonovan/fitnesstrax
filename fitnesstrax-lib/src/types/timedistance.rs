@@ -10,10 +10,8 @@ pub enum ActivityType {
     Walking,
 }
 
-pub type TimeDistanceRecord = TimeDistance;
-
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
-pub struct TimeDistance {
+pub struct TimeDistanceRecord {
     #[serde(rename = "date")]
     timestamp: DateTimeTz,
     activity: ActivityType,
@@ -22,15 +20,15 @@ pub struct TimeDistance {
     comments: Option<String>,
 }
 
-impl TimeDistance {
+impl TimeDistanceRecord {
     pub fn new(
         timestamp: DateTimeTz,
         activity: ActivityType,
         distance: Option<Meter<f64>>,
         duration: Option<Second<f64>>,
         comments: Option<String>,
-    ) -> TimeDistance {
-        TimeDistance {
+    ) -> TimeDistanceRecord {
+        TimeDistanceRecord {
             timestamp,
             activity,
             distance,
@@ -40,7 +38,7 @@ impl TimeDistance {
     }
 }
 
-impl Recordable for TimeDistance {
+impl Recordable for TimeDistanceRecord {
     fn timestamp(&self) -> DateTimeTz {
         self.timestamp.clone()
     }
@@ -58,20 +56,20 @@ impl Recordable for TimeDistance {
 
 #[cfg(test)]
 mod test {
-    use super::{ActivityType, TimeDistance};
+    use super::{ActivityType, TimeDistanceRecord};
     use dimensioned::si::{M, S};
 
     #[test]
     pub fn deserialize_time_distance() {
         let cycling_track_str = "{\"data\":{\"distance\":12200,\"date\":\"2017-10-28T19:27:00Z\",\"activity\":\"Cycling\",\"comments\":null,\"duration\":3120},\"id\":\"27ca887e-72c7-4d51-b7e4-6dca849a8f72\"}";
-        let cycle_track: emseries::Record<TimeDistance> =
+        let cycle_track: emseries::Record<TimeDistanceRecord> =
             serde_json::from_str(cycling_track_str).unwrap();
         assert_eq!(cycle_track.data.activity, ActivityType::Cycling);
         assert_eq!(cycle_track.data.distance, Some(12200. * M));
         assert_eq!(cycle_track.data.duration, Some(3120. * S));
 
         let running_track_str = "{\"data\":{\"distance\":3630,\"date\":\"2018-11-12T18:30:00Z\",\"activity\":\"Running\",\"comments\":null,\"duration\":1800}, \"id\":\"680c3306-991c-4edf-9635-c9d2fd72686f\"}";
-        let running_track: Result<emseries::Record<TimeDistance>, serde_json::Error> =
+        let running_track: Result<emseries::Record<TimeDistanceRecord>, serde_json::Error> =
             serde_json::from_str(running_track_str);
         match running_track {
             Ok(track) => {

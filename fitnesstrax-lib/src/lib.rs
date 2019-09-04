@@ -1,66 +1,24 @@
 extern crate dimensioned;
 extern crate emseries;
 extern crate serde;
+#[macro_use]
 extern crate serde_derive;
 extern crate serde_json;
 
 use dimensioned::si::{Kilogram, Meter, Second};
 use emseries::DateTimeTz;
-use std::error;
-use std::fmt;
 use std::path;
-use std::result;
 
-pub mod types;
-pub use self::types::comments;
-pub use self::types::repduration;
-pub use self::types::setrep;
-pub use self::types::steps;
-pub use self::types::timedistance;
-pub use self::types::weight;
-
-#[derive(Debug)]
-pub enum Error {
-    InvalidParameter,
-    NoSeries,
-    SeriesError(emseries::Error),
-}
-
-impl From<emseries::Error> for Error {
-    fn from(error: emseries::Error) -> Self {
-        Error::SeriesError(error)
-    }
-}
-
-impl fmt::Display for Error {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        match self {
-            Error::InvalidParameter => write!(f, "Invalid parameter"),
-            Error::NoSeries => write!(f, "Series is not open"),
-            Error::SeriesError(err) => write!(f, "Series Error: {}", err),
-        }
-    }
-}
-
-impl error::Error for Error {
-    fn description(&self) -> &str {
-        match self {
-            Error::InvalidParameter => "Invalid parameter",
-            Error::NoSeries => "Series is not open",
-            Error::SeriesError(err) => err.description(),
-        }
-    }
-
-    fn cause(&self) -> Option<&error::Error> {
-        match self {
-            Error::InvalidParameter => None,
-            Error::NoSeries => None,
-            Error::SeriesError(ref err) => Some(err),
-        }
-    }
-}
-
-pub type Result<A> = result::Result<A, Error>;
+pub mod error;
+mod types;
+mod utils;
+pub use error::{Error, Result};
+pub use types::comments;
+pub use types::repduration;
+pub use types::setrep;
+pub use types::steps;
+pub use types::timedistance;
+pub use types::weight;
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub enum TraxRecord {
@@ -211,13 +169,14 @@ impl Trax {
 
 #[cfg(test)]
 mod tests {
-    use super::super::utils::CleanupFile;
     use super::*;
     use chrono::TimeZone;
     use chrono_tz::Etc::UTC;
     use dimensioned::si::{KG, M, S};
+    use utils::CleanupFile;
 
-    use trax::types;
+    use types::timedistance;
+    use types::weight;
 
     fn standard_app(filename: &str) -> (Trax, CleanupFile) {
         let series_path = path::PathBuf::from(format!("var/{}", filename));
@@ -272,7 +231,7 @@ mod tests {
         let (mut app, _cleanup) = standard_app("it_handles_both_record_types.series");
 
         let date = DateTimeTz(UTC.ymd(2019, 5, 15).and_hms(12, 0, 0).with_timezone(&UTC));
-        let td_record = timedistance::TimeDistance::new(
+        let td_record = timedistance::TimeDistanceRecord::new(
             date.clone(),
             timedistance::ActivityType::Running,
             Some(25.0 * M),
@@ -375,14 +334,14 @@ mod tests {
         let (mut app, _cleanup) = standard_app("it_updates_a_time_distance.series");
 
         let date = DateTimeTz(UTC.ymd(2019, 5, 15).and_hms(12, 0, 0).with_timezone(&UTC));
-        let record = timedistance::TimeDistance::new(
+        let record = timedistance::TimeDistanceRecord::new(
             date.clone(),
             timedistance::ActivityType::Running,
             Some(25.0 * M),
             Some(15.0 * S),
             Some(String::from("just some notes")),
         );
-        let record_ = timedistance::TimeDistance::new(
+        let record_ = timedistance::TimeDistanceRecord::new(
             date,
             timedistance::ActivityType::Running,
             Some(27.0 * M),

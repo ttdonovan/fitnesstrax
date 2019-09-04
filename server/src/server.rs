@@ -28,9 +28,9 @@ use std::path;
 use std::result;
 use std::sync::{Arc, RwLock};
 
+use fitnesstrax;
 use middleware::logging;
 use middleware::staticfile;
-use trax;
 
 type Result<A> = result::Result<A, Error>;
 #[derive(Debug)]
@@ -40,14 +40,14 @@ enum Error {
     MissingParameter,
     NotAuthorized,
     NotFound,
-    RuntimeError(trax::Error),
+    RuntimeError(fitnesstrax::Error),
     SerdeError(serde_json::error::Error),
     TimeParseError(chrono::ParseError),
     TimeSeriesError(emseries::Error),
 }
 
-impl From<trax::Error> for Error {
-    fn from(error: trax::Error) -> Self {
+impl From<fitnesstrax::Error> for Error {
+    fn from(error: fitnesstrax::Error) -> Self {
         Error::RuntimeError(error)
     }
 }
@@ -211,7 +211,7 @@ where
 }
 
 struct GetHandler {
-    app: Arc<RwLock<trax::Trax>>,
+    app: Arc<RwLock<fitnesstrax::Trax>>,
 }
 impl Handler for GetHandler {
     fn handle(&self, req: &mut Request) -> IronResult<Response> {
@@ -227,7 +227,7 @@ impl Handler for GetHandler {
             match (*self.app).read().unwrap().get_record(&uuid) {
                 Ok(Some(record)) => Ok(record),
                 Ok(None) => Err(Error::NotFound),
-                Err(trax::Error::NoSeries) => Err(Error::NotFound),
+                Err(fitnesstrax::Error::NoSeries) => Err(Error::NotFound),
                 err => panic!(format!("request failed {:?}", err)),
             }
         };
@@ -236,51 +236,48 @@ impl Handler for GetHandler {
 }
 
 struct NewRecordHandler {
-    app: Arc<RwLock<trax::Trax>>,
+    app: Arc<RwLock<fitnesstrax::Trax>>,
     type_: RecordType,
 }
 impl Handler for NewRecordHandler {
     fn handle(&self, req: &mut Request) -> IronResult<Response> {
-        let mut run = || {
-            let mut body: Vec<u8> = Vec::new();
-            req.body.read_to_end(&mut body).map_err(Error::IOError)?;
-            let record_result = match self.type_ {
-                RecordType::Comments => {
-                    serde_json::from_slice(&body).map(|v| trax::TraxRecord::Comments(v))
-                }
-                RecordType::RepDuration => {
-                    serde_json::from_slice(&body).map(|v| trax::TraxRecord::RepDuration(v))
-                }
-                RecordType::SetRep => {
-                    serde_json::from_slice(&body).map(|v| trax::TraxRecord::SetRep(v))
-                }
-                RecordType::Steps => {
-                    serde_json::from_slice(&body).map(|v| trax::TraxRecord::Steps(v))
-                }
-                RecordType::TimeDistance => {
-                    serde_json::from_slice(&body).map(|v| trax::TraxRecord::TimeDistance(v))
-                }
-                RecordType::Weight => {
-                    serde_json::from_slice(&body).map(|v| trax::TraxRecord::Weight(v))
+        let mut run =
+            || {
+                let mut body: Vec<u8> = Vec::new();
+                req.body.read_to_end(&mut body).map_err(Error::IOError)?;
+                let record_result =
+                    match self.type_ {
+                        RecordType::Comments => serde_json::from_slice(&body)
+                            .map(|v| fitnesstrax::TraxRecord::Comments(v)),
+                        RecordType::RepDuration => serde_json::from_slice(&body)
+                            .map(|v| fitnesstrax::TraxRecord::RepDuration(v)),
+                        RecordType::SetRep => serde_json::from_slice(&body)
+                            .map(|v| fitnesstrax::TraxRecord::SetRep(v)),
+                        RecordType::Steps => {
+                            serde_json::from_slice(&body).map(|v| fitnesstrax::TraxRecord::Steps(v))
+                        }
+                        RecordType::TimeDistance => serde_json::from_slice(&body)
+                            .map(|v| fitnesstrax::TraxRecord::TimeDistance(v)),
+                        RecordType::Weight => serde_json::from_slice(&body)
+                            .map(|v| fitnesstrax::TraxRecord::Weight(v)),
+                    };
+                match record_result {
+                    Ok(rec) => self
+                        .app
+                        .write()
+                        .unwrap()
+                        .add_record(rec)
+                        .map_err(Error::from),
+                    Err(err) => Err(Error::SerdeError(err)),
                 }
             };
-            match record_result {
-                Ok(rec) => self
-                    .app
-                    .write()
-                    .unwrap()
-                    .add_record(rec)
-                    .map_err(Error::from),
-                Err(err) => Err(Error::SerdeError(err)),
-            }
-        };
 
         app_to_iron(run())
     }
 }
 
 struct UpdateRecordHandler {
-    app: Arc<RwLock<trax::Trax>>,
+    app: Arc<RwLock<fitnesstrax::Trax>>,
 }
 impl Handler for UpdateRecordHandler {
     fn handle(&self, req: &mut Request) -> IronResult<Response> {
@@ -308,7 +305,7 @@ impl Handler for UpdateRecordHandler {
 }
 
 struct DeleteHandler {
-    app: Arc<RwLock<trax::Trax>>,
+    app: Arc<RwLock<fitnesstrax::Trax>>,
 }
 impl Handler for DeleteHandler {
     fn handle(&self, req: &mut Request) -> IronResult<Response> {
@@ -334,7 +331,7 @@ impl Handler for DeleteHandler {
 }
 
 struct GetHistoryHandler {
-    app: Arc<RwLock<trax::Trax>>,
+    app: Arc<RwLock<fitnesstrax::Trax>>,
 }
 impl Handler for GetHistoryHandler {
     fn handle(&self, req: &mut Request) -> IronResult<Response> {
@@ -370,7 +367,7 @@ impl Handler for GetHistoryHandler {
     }
 }
 
-fn api_routes(app_rc: Arc<RwLock<trax::Trax>>) -> Router {
+fn api_routes(app_rc: Arc<RwLock<fitnesstrax::Trax>>) -> Router {
     let mut router = Router::new();
 
     router.get(
@@ -458,7 +455,7 @@ fn routes(
     host: &str,
     static_asset_path: &path::PathBuf,
     app_name: &str,
-    app_rc: Arc<RwLock<trax::Trax>>,
+    app_rc: Arc<RwLock<fitnesstrax::Trax>>,
     orizentic_ctx: Arc<orizentic::OrizenticCtx>,
 ) -> Chain {
     let mut router = Router::new();
@@ -499,7 +496,7 @@ fn routes(
 
 pub fn start_server(
     config: Configuration,
-    trax: trax::Trax,
+    trax: fitnesstrax::Trax,
     orizentic_ctx: orizentic::OrizenticCtx,
 ) -> iron::Listening {
     let app_rc = Arc::new(RwLock::new(trax));

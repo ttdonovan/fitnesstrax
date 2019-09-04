@@ -31,7 +31,7 @@ struct LegacyWeightRecord {
 struct LegacyTimeDistanceRecord {
     distance: Option<f64>,
     date: DateTime<Utc>,
-    activity: fitnesstrax::trax::timedistance::ActivityType,
+    activity: fitnesstrax::timedistance::ActivityType,
     comments: Option<String>,
     duration: Option<f64>,
 }

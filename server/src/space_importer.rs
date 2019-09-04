@@ -91,7 +91,7 @@ fn main() {
 
     match args.get(1) {
         Some(val) => {
-            let mut series: emseries::Series<fitnesstrax::trax::TraxRecord> =
+            let mut series: emseries::Series<fitnesstrax::TraxRecord> =
                 emseries::Series::open(val).unwrap();
 
             let stdin = io::stdin();
@@ -123,7 +123,7 @@ fn main() {
                         let duration = parse_duration(&params[0]).unwrap();
                         Some(fitnesstrax::TraxRecord::timedistance(
                             date_,
-                            fitnesstrax::trax::timedistance::ActivityType::Rowing,
+                            fitnesstrax::timedistance::ActivityType::Rowing,
                             None,
                             Some(duration),
                             None,
@@ -137,7 +137,7 @@ fn main() {
                             .unwrap();
                         Some(fitnesstrax::TraxRecord::repduration(
                             date_,
-                            fitnesstrax::trax::repduration::ActivityType::Planks,
+                            fitnesstrax::repduration::ActivityType::Planks,
                             durations,
                             None,
                         ))
@@ -151,7 +151,7 @@ fn main() {
                         Some(
                             fitnesstrax::TraxRecord::setrep(
                                 date_,
-                                fitnesstrax::trax::setrep::ActivityType::Pushups,
+                                fitnesstrax::setrep::ActivityType::Pushups,
                                 sets,
                                 None,
                             )
@@ -167,7 +167,7 @@ fn main() {
                         Some(
                             fitnesstrax::TraxRecord::setrep(
                                 date_,
-                                fitnesstrax::trax::setrep::ActivityType::Situps,
+                                fitnesstrax::setrep::ActivityType::Situps,
                                 sets,
                                 None,
                             )
@@ -183,7 +183,7 @@ fn main() {
                         Some(
                             fitnesstrax::TraxRecord::setrep(
                                 date_,
-                                fitnesstrax::trax::setrep::ActivityType::Squats,
+                                fitnesstrax::setrep::ActivityType::Squats,
                                 sets,
                                 None,
                             )
@@ -198,7 +198,7 @@ fn main() {
                         let duration = parse_duration(&params[0]).unwrap();
                         Some(fitnesstrax::TraxRecord::repduration(
                             date_,
-                            fitnesstrax::trax::repduration::ActivityType::MartialArts,
+                            fitnesstrax::repduration::ActivityType::MartialArts,
                             vec![duration],
                             None,
                         ))

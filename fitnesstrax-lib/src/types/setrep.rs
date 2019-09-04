@@ -1,5 +1,5 @@
+use crate::error::{Error, Result};
 use emseries::{DateTimeTz, Recordable};
-use trax::Error;
 
 #[derive(Clone, Debug, PartialEq, Deserialize, Serialize)]
 pub enum ActivityType {
@@ -11,10 +11,10 @@ pub enum ActivityType {
 #[derive(Clone, Debug, PartialEq, Deserialize, Serialize)]
 pub struct SetRepRecord {
     #[serde(rename = "date")]
-    pub timestamp: DateTimeTz,
-    pub activity: ActivityType,
-    pub sets: Vec<u32>,
-    pub comments: Option<String>,
+    timestamp: DateTimeTz,
+    activity: ActivityType,
+    sets: Vec<u32>,
+    comments: Option<String>,
 }
 
 impl SetRepRecord {
@@ -23,7 +23,7 @@ impl SetRepRecord {
         activity: ActivityType,
         sets: Vec<u32>,
         comments: Option<String>,
-    ) -> Result<SetRepRecord, Error> {
+    ) -> Result<SetRepRecord> {
         if sets.iter().all(|&x| x > 0) {
             Ok(SetRepRecord {
                 timestamp,

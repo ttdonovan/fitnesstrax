@@ -21,7 +21,7 @@ let
     };
   };
 
-  fitnesstrax_crate = (cargo.fitnesstrax {}).override {
+  fitnesstrax_server_crate = (cargo.fitnesstrax_server {}).override {
     crateOverrides = pkgs.defaultCrateOverrides // {
       mime_guess = attrs: { buildInputs = darwin_frameworks; };
       orizentic = attrs: { buildInputs = darwin_frameworks; };
@@ -32,7 +32,7 @@ let
 in pkgs.stdenv.mkDerivation rec {
   name = "fitnesstrax-server";
 
-  buildInputs = [ fitnesstrax_crate ];
+  buildInputs = [ fitnesstrax_server_crate ];
 
   src = ./.;
 
@@ -40,6 +40,6 @@ in pkgs.stdenv.mkDerivation rec {
 
   installPhase = ''
     mkdir -p $out/bin
-    cp ${fitnesstrax_crate.out}/bin/fitnesstrax-server $out/bin/fitnesstrax-server
+    cp ${fitnesstrax_server_crate.out}/bin/fitnesstrax-server $out/bin/fitnesstrax-server
     '';
 }

@@ -1,5 +1,5 @@
 [package]
-name = "fitnesstrax"
+name = "fitnesstrax-server"
 version = "0.1.0"
 authors = ["Savanni D'Gerinel <savanni@luminescent-dreams.com>"]
 
@@ -8,19 +8,16 @@ chrono = { version = "0.4", features = ["serde"] }
 chrono-tz = { version = "0.4", features = ["serde"] }
 dimensioned = "0.7.0"
 emseries = "0.4.0"
-# emseries = { path = "../../emseries" }
-# emseries = { git = "https://github.com/luminescent-dreams/emseries", branch = "sol" }
+fitnesstrax = { path = "../fitnesstrax-lib" }
 iron = "0.6"
 iron-cors = "0.8.0"
 micrologger = "0.1.0"
 orizentic = "1.0.0"
 params = "0.8.0"
-percent-encoding = "1.0.1"
 router = "*"
 serde = "1"
 serde_derive = "1"
 serde_json = "1.0"
-structopt = { version = "0.2", default-features = true }
 urlencoding = "1.0.0"
 
 [[bin]]

@@ -12,14 +12,14 @@ extern crate params;
 extern crate router;
 extern crate serde;
 
-extern crate fitnesstrax;
+extern crate fitnesstrax_server;
 
 //use iron_cors::CorsMiddleware;
 use serde_json::Value;
 use std::collections::HashMap;
 use std::env;
 
-use fitnesstrax::{start_server, Configuration};
+use fitnesstrax_server::{start_server, Configuration};
 
 fn usage() {
     println!(
