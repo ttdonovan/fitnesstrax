@@ -6,6 +6,22 @@ import * as i18n from "../i18n"
 import { DateTimeTz } from "../datetimetz"
 export * from "./range"
 
+export class StepRecord {
+  constructor(readonly date: DateTimeTz, readonly steps: number) {}
+
+  equals(other: StepRecord) {
+    return this.date.equals(other.date) && this.steps == other.steps
+  }
+
+  clone() {
+    return new StepRecord(this.date, this.steps)
+  }
+
+  withSteps(steps: number) {
+    return new StepRecord(this.date, steps)
+  }
+}
+
 export class WeightRecord {
   constructor(readonly date: DateTimeTz, readonly weight: math.Unit) {}
 
@@ -73,8 +89,10 @@ export class TimeDistanceRecord {
   }
 }
 
-export type RecordTypes = TimeDistanceRecord | WeightRecord
+export type RecordTypes = StepRecord | TimeDistanceRecord | WeightRecord
 
+export const isStepRecord = (rec: RecordTypes): rec is StepRecord =>
+  (<StepRecord>rec).steps !== undefined
 export const isTimeDistanceRecord = (
   rec: RecordTypes,
 ): rec is TimeDistanceRecord => (<TimeDistanceRecord>rec).distance !== undefined

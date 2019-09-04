@@ -10,6 +10,7 @@ import { UserPreferences } from "../../settings"
 import Card from "../Card"
 import Row from "../Row"
 import Summary from "./Summary"
+import { StepRecordEdit, StepRecordView } from "./Steps"
 import { TimeDistanceRecordEdit, TimeDistanceRecordView } from "./TimeDistance"
 import { WeightRecordEdit, WeightRecordView } from "./Weight"
 import { Date } from "../../datetimetz"
@@ -29,9 +30,12 @@ const View: React.SFC<ViewProps> = ({
   records,
   startEdit,
 }: ViewProps) => {
-  const weights = _.filter(
-    (r: types.Record<types.RecordTypes>): boolean =>
-      types.isWeightRecord(r.data),
+  const steps = first(_.filter((r: types.Record<types.RecordTypes>): boolean =>
+    types.isStepRecord(r.data),
+  )(records) as Array<types.Record<types.StepRecord>>)
+
+  const weights = _.filter((r: types.Record<types.RecordTypes>): boolean =>
+    types.isWeightRecord(r.data),
   )(records) as Array<types.Record<types.WeightRecord>>
   const weight = first(weights)
 
@@ -47,6 +51,13 @@ const View: React.SFC<ViewProps> = ({
           .map(w => (
             <div className="record">
               <WeightRecordView prefs={prefs} record={w} />
+            </div>
+          ))
+          .unwrap_()}
+        {steps
+          .map(s => (
+            <div className="record">
+              <StepRecordView prefs={prefs} record={s} />
             </div>
           ))
           .unwrap_()}
@@ -120,9 +131,11 @@ class Edit extends React.Component<EditProps, EditState> {
 
   render = () => {
     const { date, prefs, records } = this.props
-    const weights = _.filter(
-      (r: types.Record<types.RecordTypes>): boolean =>
-        types.isWeightRecord(r.data),
+    const steps = _.filter((r: types.Record<types.RecordTypes>): boolean =>
+      types.isStepRecord(r.data),
+    )(records) as Array<types.Record<types.StepRecord>>
+    const weights = _.filter((r: types.Record<types.RecordTypes>): boolean =>
+      types.isWeightRecord(r.data),
     )(records) as Array<types.Record<types.WeightRecord>>
 
     const timeDistances = _.filter(
@@ -137,6 +150,17 @@ class Edit extends React.Component<EditProps, EditState> {
             date={date}
             prefs={prefs}
             record={first(weights)}
+            onUpdateNew={(uuid: string, data: types.RecordTypes) =>
+              this.updateNewRecord(uuid, data)
+            }
+            onUpdate={record => this.updateRecord(record.id, record)}
+          />
+        </div>
+        <div className="record">
+          <StepRecordEdit
+            date={date}
+            prefs={prefs}
+            record={first(steps)}
             onUpdateNew={(uuid: string, data: types.RecordTypes) =>
               this.updateNewRecord(uuid, data)
             }

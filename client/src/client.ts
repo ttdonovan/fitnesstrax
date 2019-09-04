@@ -9,13 +9,36 @@ import { Option, Result, sequenceResult } from "ld-ambiguity"
 import {
   Record,
   RecordTypes,
+  StepRecord,
   TimeDistanceRecord,
   WeightRecord,
   timeDistanceActivityFromString,
   isRecord,
-  isWeightRecord,
+  isStepRecord,
   isTimeDistanceRecord,
+  isWeightRecord,
 } from "./types"
+
+interface StepJS {
+  Steps: {
+    date: string
+    steps: number
+  }
+}
+
+const toStepJS = (record: StepRecord): StepJS => ({
+  Steps: {
+    date: record.date.toString(),
+    steps: record.steps,
+  },
+})
+
+const toStepRecord = (js: StepJS): Result<StepRecord, string> => {
+  const date = DateTimeTz.fromString(js.Steps.date)
+  if (!date.isOk()) return Result.Err(date.unwrapErr())
+
+  return Result.Ok(new StepRecord(date.unwrap(), js.Steps.steps))
+}
 
 interface WeightJS {
   Weight: {
@@ -30,6 +53,15 @@ const toWeightJS = (record: WeightRecord): WeightJS => ({
     weight: record.weight.toNumber("kg"),
   },
 })
+
+const toWeightRecord = (js: WeightJS): Result<WeightRecord, string> => {
+  const date = DateTimeTz.fromString(js.Weight.date)
+  if (!date.isOk()) return Result.Err(date.unwrapErr())
+
+  const val = math.unit(js.Weight.weight, "kg")
+
+  return Result.Ok(new WeightRecord(date.unwrap(), val))
+}
 
 interface TimeDistanceJS {
   TimeDistance: {
@@ -51,7 +83,10 @@ const toTimeDistanceJS = (record: TimeDistanceRecord): TimeDistanceJS => ({
   },
 })
 
-type RecordJSTypes = TimeDistanceJS | WeightJS
+type RecordJSTypes = StepJS | TimeDistanceJS | WeightJS
+
+const isStepJS = (val: RecordJSTypes): val is StepJS =>
+  (<StepJS>val).Steps !== undefined
 
 const isWeightJS = (val: RecordJSTypes): val is WeightJS =>
   (<WeightJS>val).Weight !== undefined
@@ -68,7 +103,9 @@ const toRecordJS = (record: Record<RecordTypes>): RecordJS => {
   const data = record.data
   let dataJS = null
 
-  if (isTimeDistanceRecord(data)) {
+  if (isStepRecord(data)) {
+    dataJS = toStepJS(data)
+  } else if (isTimeDistanceRecord(data)) {
     dataJS = toTimeDistanceJS(data)
   } else if (isWeightRecord(data)) {
     dataJS = toWeightJS(data)
@@ -88,17 +125,12 @@ const parseRecord = (js: any): Result<Record<RecordTypes>, string> => {
   if ((<RecordJS>js).data === undefined)
     return Result.Err("invalid record: no data field available")
 
-  if (js.data.Weight) {
-    const date = DateTimeTz.fromString(js.data.Weight.date)
-    if (!date.isOk()) return Result.Err(date.unwrapErr())
-
-    const val = Option.fromNaN(parseFloat(js.data.Weight.weight)).map(w =>
-      math.unit(w, "kg"),
-    )
-    if (!val.isSome()) return Result.Err("missing or invalid weight value")
-
-    return Result.Ok(
-      new Record(js.id, new WeightRecord(date.unwrap(), val.unwrap())),
+  //console.log(JSON.stringify(js.data))
+  if (isStepJS(js.data)) {
+    return toStepRecord(js.data).map((r: StepRecord) => new Record(js.id, r))
+  } else if (isWeightJS(js.data)) {
+    return toWeightRecord(js.data).map(
+      (r: WeightRecord) => new Record(js.id, r),
     )
   } else if (js.data.TimeDistance) {
     const date = DateTimeTz.fromString(js.data.TimeDistance.date)
@@ -140,7 +172,7 @@ const parseRecord = (js: any): Result<Record<RecordTypes>, string> => {
       ),
     )
   } else {
-    throw new Error("Unhandled response")
+    throw new Error(`Unhandled response: ${JSON.stringify(js)}`)
   }
 }
 
@@ -202,7 +234,9 @@ class Client {
 
     if (isRecord(record)) {
       let data = null
-      if (isWeightRecord(record.data)) {
+      if (isStepRecord(record.data)) {
+        data = toStepJS(record.data)
+      } else if (isWeightRecord(record.data)) {
         data = toWeightJS(record.data)
       } else if (isTimeDistanceRecord(record.data)) {
         data = toTimeDistanceJS(record.data)
@@ -220,27 +254,29 @@ class Client {
         .then(js => Result.Ok(record))
         .catch(err => Result.Err(err.toString()))
     } else {
-      if (isWeightRecord(record)) {
-        return fetch(`${this.appUrl}/api/record/weight`, {
-          ...commonOptions,
-          mode: "cors",
-          method: "PUT",
-          body: JSON.stringify(toWeightJS(record).Weight),
-        })
-          .then(r => r.json())
-          .then(uuid => Result.Ok(new Record(uuid, record)))
-          .catch(err => Result.Err(err.toString()))
+      let url = ""
+      let js = ""
+
+      if (isStepRecord(record)) {
+        url = `${this.appUrl}/api/record/steps`
+        js = JSON.stringify(toStepJS(record).Steps)
       } else if (isTimeDistanceRecord(record)) {
-        return fetch(`${this.appUrl}/api/record/timedistance`, {
-          ...commonOptions,
-          mode: "cors",
-          method: "PUT",
-          body: JSON.stringify(toTimeDistanceJS(record).TimeDistance),
-        })
-          .then(r => r.json())
-          .then(uuid => Result.Ok(new Record(uuid, record)))
-          .catch(err => Result.Err(err.toString()))
+        url = `${this.appUrl}/api/record/timedistance`
+        js = JSON.stringify(toTimeDistanceJS(record).TimeDistance)
+      } else if (isWeightRecord(record)) {
+        url = `${this.appUrl}/api/record/weight`
+        js = JSON.stringify(toWeightJS(record).Weight)
       }
+
+      return fetch(url, {
+        ...commonOptions,
+        mode: "cors",
+        method: "PUT",
+        body: js,
+      })
+        .then(r => r.json())
+        .then(uuid => Result.Ok(new Record(uuid, record)))
+        .catch(err => Result.Err(err.toString()))
     }
 
     throw new Error("unhandled record type")
