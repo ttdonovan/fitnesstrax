@@ -1,5 +1,6 @@
-mod time_distance;
-mod weight;
-
-pub use trax::types::time_distance::{ActivityType, TimeDistance, TimeDistanceRecord};
-pub use trax::types::weight::{Weight, WeightRecord};
+pub mod comments;
+pub mod repduration;
+pub mod setrep;
+pub mod steps;
+pub mod timedistance;
+pub mod weight;

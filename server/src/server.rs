@@ -188,6 +188,10 @@ impl BeforeMiddleware for AuthMiddleware {
 }
 
 enum RecordType {
+    Comments,
+    RepDuration,
+    SetRep,
+    Steps,
     TimeDistance,
     Weight,
 }
@@ -241,6 +245,18 @@ impl Handler for NewRecordHandler {
             let mut body: Vec<u8> = Vec::new();
             req.body.read_to_end(&mut body).map_err(Error::IOError)?;
             let record_result = match self.type_ {
+                RecordType::Comments => {
+                    serde_json::from_slice(&body).map(|v| trax::TraxRecord::Comments(v))
+                }
+                RecordType::RepDuration => {
+                    serde_json::from_slice(&body).map(|v| trax::TraxRecord::RepDuration(v))
+                }
+                RecordType::SetRep => {
+                    serde_json::from_slice(&body).map(|v| trax::TraxRecord::SetRep(v))
+                }
+                RecordType::Steps => {
+                    serde_json::from_slice(&body).map(|v| trax::TraxRecord::Steps(v))
+                }
                 RecordType::TimeDistance => {
                     serde_json::from_slice(&body).map(|v| trax::TraxRecord::TimeDistance(v))
                 }
@@ -365,12 +381,36 @@ fn api_routes(app_rc: Arc<RwLock<trax::Trax>>) -> Router {
         "get_record",
     );
     router.put(
-        "/api/record/weight",
+        "/api/record/comments",
         NewRecordHandler {
             app: app_rc.clone(),
-            type_: RecordType::Weight,
+            type_: RecordType::Comments,
         },
-        "put_weight_record",
+        "put_comment_record",
+    );
+    router.put(
+        "/api/record/repduration",
+        NewRecordHandler {
+            app: app_rc.clone(),
+            type_: RecordType::RepDuration,
+        },
+        "put_repduration_record",
+    );
+    router.put(
+        "/api/record/setrep",
+        NewRecordHandler {
+            app: app_rc.clone(),
+            type_: RecordType::SetRep,
+        },
+        "put_setrep_record",
+    );
+    router.put(
+        "/api/record/steps",
+        NewRecordHandler {
+            app: app_rc.clone(),
+            type_: RecordType::Steps,
+        },
+        "put_step_record",
     );
     router.put(
         "/api/record/timedistance",
@@ -379,6 +419,14 @@ fn api_routes(app_rc: Arc<RwLock<trax::Trax>>) -> Router {
             type_: RecordType::TimeDistance,
         },
         "put_timedistance_record",
+    );
+    router.put(
+        "/api/record/weight",
+        NewRecordHandler {
+            app: app_rc.clone(),
+            type_: RecordType::Weight,
+        },
+        "put_weight_record",
     );
     router.post(
         "/api/record/:uuid",

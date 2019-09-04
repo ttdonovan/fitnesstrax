@@ -31,7 +31,7 @@ struct LegacyWeightRecord {
 struct LegacyTimeDistanceRecord {
     distance: Option<f64>,
     date: DateTime<Utc>,
-    activity: fitnesstrax::ActivityType,
+    activity: fitnesstrax::trax::timedistance::ActivityType,
     comments: Option<String>,
     duration: Option<f64>,
 }
@@ -61,10 +61,7 @@ fn main() {
 
                     let updated = emseries::Record {
                         id: legacy.id.clone(),
-                        data: fitnesstrax::TraxRecord::Weight(fitnesstrax::WeightRecord {
-                            date: date_,
-                            weight: fitnesstrax::Weight::new(legacy.data.weight * KG),
-                        }),
+                        data: fitnesstrax::TraxRecord::weight(date_, legacy.data.weight * KG),
                     };
                     println!("{}", serde_json::to_string(&updated).unwrap());
                 }
@@ -84,13 +81,13 @@ fn main() {
 
                     let updated = emseries::Record {
                         id: legacy.id.clone(),
-                        data: fitnesstrax::TraxRecord::TimeDistance(fitnesstrax::TimeDistance {
-                            activity: legacy.data.activity.clone(),
-                            comments: legacy.data.comments.clone(),
-                            distance: legacy.data.distance.map(|d| d * M),
-                            duration: legacy.data.duration.map(|d| d * S),
-                            timestamp: date_,
-                        }),
+                        data: fitnesstrax::TraxRecord::timedistance(
+                            date_,
+                            legacy.data.activity.clone(),
+                            legacy.data.distance.map(|d| d * M),
+                            legacy.data.duration.map(|d| d * S),
+                            legacy.data.comments.clone(),
+                        ),
                     };
                     println!("{}", serde_json::to_string(&updated).unwrap());
                 }

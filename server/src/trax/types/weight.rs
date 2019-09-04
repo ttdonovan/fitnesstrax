@@ -2,19 +2,16 @@
 use dimensioned::si::Kilogram;
 use emseries::{DateTimeTz, Recordable};
 
-#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
-pub struct Weight(Kilogram<f64>);
-
-impl Weight {
-    pub fn new(val: Kilogram<f64>) -> Weight {
-        Weight(val)
-    }
-}
-
 #[derive(Clone, Debug, PartialEq, Deserialize, Serialize)]
 pub struct WeightRecord {
-    pub date: DateTimeTz,
-    pub weight: Weight,
+    date: DateTimeTz,
+    weight: Kilogram<f64>,
+}
+
+impl WeightRecord {
+    pub fn new(date: DateTimeTz, weight: Kilogram<f64>) -> WeightRecord {
+        WeightRecord { date, weight }
+    }
 }
 
 impl Recordable for WeightRecord {

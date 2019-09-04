@@ -30,3 +30,7 @@ path = "src/web.rs"
 [[bin]]
 name = "load_records"
 path = "src/load_records.rs"
+
+[[bin]]
+name = "space_importer"
+path = "src/space_importer.rs"

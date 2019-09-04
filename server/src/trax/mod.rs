@@ -4,6 +4,7 @@ extern crate serde;
 extern crate serde_derive;
 extern crate serde_json;
 
+use dimensioned::si::{Kilogram, Meter, Second};
 use emseries::DateTimeTz;
 use std::error;
 use std::fmt;
@@ -11,10 +12,16 @@ use std::path;
 use std::result;
 
 pub mod types;
-pub use self::types::{ActivityType, TimeDistanceRecord, WeightRecord};
+pub use self::types::comments;
+pub use self::types::repduration;
+pub use self::types::setrep;
+pub use self::types::steps;
+pub use self::types::timedistance;
+pub use self::types::weight;
 
 #[derive(Debug)]
 pub enum Error {
+    InvalidParameter,
     NoSeries,
     SeriesError(emseries::Error),
 }
@@ -28,6 +35,7 @@ impl From<emseries::Error> for Error {
 impl fmt::Display for Error {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
+            Error::InvalidParameter => write!(f, "Invalid parameter"),
             Error::NoSeries => write!(f, "Series is not open"),
             Error::SeriesError(err) => write!(f, "Series Error: {}", err),
         }
@@ -37,6 +45,7 @@ impl fmt::Display for Error {
 impl error::Error for Error {
     fn description(&self) -> &str {
         match self {
+            Error::InvalidParameter => "Invalid parameter",
             Error::NoSeries => "Series is not open",
             Error::SeriesError(err) => err.description(),
         }
@@ -44,6 +53,7 @@ impl error::Error for Error {
 
     fn cause(&self) -> Option<&error::Error> {
         match self {
+            Error::InvalidParameter => None,
             Error::NoSeries => None,
             Error::SeriesError(ref err) => Some(err),
         }
@@ -54,13 +64,64 @@ pub type Result<A> = result::Result<A, Error>;
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub enum TraxRecord {
-    TimeDistance(TimeDistanceRecord),
-    Weight(WeightRecord),
+    Comments(comments::Comments),
+    RepDuration(repduration::RepDurationRecord),
+    SetRep(setrep::SetRepRecord),
+    Steps(steps::StepRecord),
+    TimeDistance(timedistance::TimeDistanceRecord),
+    Weight(weight::WeightRecord),
+}
+
+impl TraxRecord {
+    pub fn steps(timestamp: DateTimeTz, value: u32) -> TraxRecord {
+        TraxRecord::Steps(steps::StepRecord::new(timestamp, value))
+    }
+
+    pub fn repduration(
+        timestamp: DateTimeTz,
+        activity: repduration::ActivityType,
+        reps: Vec<Second<f64>>,
+        comments: Option<String>,
+    ) -> TraxRecord {
+        TraxRecord::RepDuration(repduration::RepDurationRecord::new(
+            timestamp, activity, reps, comments,
+        ))
+    }
+
+    pub fn setrep(
+        timestamp: DateTimeTz,
+        activity: setrep::ActivityType,
+        sets: Vec<u32>,
+        comments: Option<String>,
+    ) -> Result<TraxRecord> {
+        setrep::SetRepRecord::new(timestamp, activity, sets, comments)
+            .map(|r| TraxRecord::SetRep(r))
+    }
+
+    pub fn timedistance(
+        timestamp: DateTimeTz,
+        activity: timedistance::ActivityType,
+        distance: Option<Meter<f64>>,
+        duration: Option<Second<f64>>,
+        comments: Option<String>,
+    ) -> TraxRecord {
+        TraxRecord::TimeDistance(timedistance::TimeDistanceRecord::new(
+            timestamp, activity, distance, duration, comments,
+        ))
+    }
+
+    pub fn weight(timestamp: DateTimeTz, weight: Kilogram<f64>) -> TraxRecord {
+        TraxRecord::Weight(weight::WeightRecord::new(timestamp, weight))
+    }
 }
 
 impl emseries::Recordable for TraxRecord {
     fn timestamp(&self) -> DateTimeTz {
         match self {
+            TraxRecord::Comments(rec) => rec.timestamp(),
+            TraxRecord::RepDuration(rec) => rec.timestamp(),
+            TraxRecord::SetRep(rec) => rec.timestamp(),
+            TraxRecord::Steps(rec) => rec.timestamp(),
             TraxRecord::TimeDistance(rec) => rec.timestamp(),
             TraxRecord::Weight(rec) => rec.timestamp(),
         }
@@ -68,6 +129,10 @@ impl emseries::Recordable for TraxRecord {
 
     fn tags(&self) -> Vec<String> {
         match self {
+            TraxRecord::Comments(rec) => rec.tags(),
+            TraxRecord::RepDuration(rec) => rec.tags(),
+            TraxRecord::SetRep(rec) => rec.tags(),
+            TraxRecord::Steps(rec) => rec.tags(),
             TraxRecord::TimeDistance(rec) => rec.tags(),
             TraxRecord::Weight(rec) => rec.tags(),
         }
@@ -152,7 +217,7 @@ mod tests {
     use chrono_tz::Etc::UTC;
     use dimensioned::si::{KG, M, S};
 
-    use trax::types::{ActivityType, TimeDistance, Weight, WeightRecord};
+    use trax::types;
 
     fn standard_app(filename: &str) -> (Trax, CleanupFile) {
         let series_path = path::PathBuf::from(format!("var/{}", filename));
@@ -169,10 +234,7 @@ mod tests {
         let (mut app, _cleanup) = standard_app("it_records_and_retrieves_a_new_weight.series");
 
         let date = DateTimeTz(UTC.ymd(2019, 5, 15).and_hms(12, 0, 0).with_timezone(&UTC));
-        let record = WeightRecord {
-            date,
-            weight: Weight::new(85.0 * KG),
-        };
+        let record = weight::WeightRecord::new(date, 85.0 * KG);
 
         let uuid = app
             .add_record(TraxRecord::Weight(record.clone()))
@@ -188,13 +250,13 @@ mod tests {
         let (mut app, _cleanup) = standard_app("it_records_and_retrieves_new_time_distance.series");
 
         let date = DateTimeTz(UTC.ymd(2019, 5, 15).and_hms(12, 0, 0).with_timezone(&UTC));
-        let record = TimeDistance {
-            timestamp: date,
-            comments: Some(String::from("just some notes")),
-            distance: Some(25.0 * M),
-            duration: Some(15.0 * S),
-            activity: ActivityType::Running,
-        };
+        let record = timedistance::TimeDistanceRecord::new(
+            date,
+            timedistance::ActivityType::Running,
+            Some(25.0 * M),
+            Some(15.0 * S),
+            Some(String::from("just some notes")),
+        );
 
         let uuid = app
             .add_record(TraxRecord::TimeDistance(record.clone()))
@@ -210,17 +272,14 @@ mod tests {
         let (mut app, _cleanup) = standard_app("it_handles_both_record_types.series");
 
         let date = DateTimeTz(UTC.ymd(2019, 5, 15).and_hms(12, 0, 0).with_timezone(&UTC));
-        let td_record = TimeDistance {
-            timestamp: date.clone(),
-            comments: Some(String::from("just some notes")),
-            distance: Some(25.0 * M),
-            duration: Some(15.0 * S),
-            activity: ActivityType::Running,
-        };
-        let w_record = WeightRecord {
-            date,
-            weight: Weight::new(85.0 * KG),
-        };
+        let td_record = timedistance::TimeDistance::new(
+            date.clone(),
+            timedistance::ActivityType::Running,
+            Some(25.0 * M),
+            Some(15.0 * S),
+            Some(String::from("just some notes")),
+        );
+        let w_record = weight::WeightRecord::new(date, 85.0 * KG);
 
         let td_id = app
             .add_record(TraxRecord::TimeDistance(td_record.clone()))
@@ -251,17 +310,14 @@ mod tests {
             })
             .expect("the app to be created");
 
-            let td_record = TimeDistance {
-                timestamp: date.clone(),
-                comments: Some(String::from("just some notes")),
-                distance: Some(25.0 * M),
-                duration: Some(15.0 * S),
-                activity: ActivityType::Running,
-            };
-            let w_record = WeightRecord {
-                date: date.clone(),
-                weight: Weight::new(85.0 * KG),
-            };
+            let td_record = timedistance::TimeDistanceRecord::new(
+                date.clone(),
+                timedistance::ActivityType::Running,
+                Some(25.0 * M),
+                Some(15.0 * S),
+                Some(String::from("just some notes")),
+            );
+            let w_record = weight::WeightRecord::new(date.clone(), 85.0 * KG);
 
             let td_id = trax
                 .add_record(TraxRecord::TimeDistance(td_record))
@@ -279,24 +335,18 @@ mod tests {
         .expect("the app to load again");
 
         let w_record = trax.get_record(&w_id).unwrap();
-        assert_eq!(
-            w_record,
-            Some(TraxRecord::Weight(WeightRecord {
-                date: date.clone(),
-                weight: Weight::new(85.0 * KG)
-            }))
-        );
+        assert_eq!(w_record, Some(TraxRecord::weight(date.clone(), 85.0 * KG)));
 
         let td_record = trax.get_record(&td_id).unwrap();
         assert_eq!(
             td_record,
-            Some(TraxRecord::TimeDistance(TimeDistance {
-                timestamp: date,
-                comments: Some(String::from("just some notes")),
-                distance: Some(25.0 * M),
-                duration: Some(15.0 * S),
-                activity: ActivityType::Running
-            }))
+            Some(TraxRecord::timedistance(
+                date,
+                timedistance::ActivityType::Running,
+                Some(25.0 * M),
+                Some(15.0 * S),
+                Some(String::from("just some notes")),
+            ))
         );
     }
 
@@ -305,14 +355,8 @@ mod tests {
         let (mut app, _cleanup) = standard_app("it_updates_a_weight.series");
 
         let date = DateTimeTz(UTC.ymd(2019, 5, 15).and_hms(12, 0, 0).with_timezone(&UTC));
-        let record = WeightRecord {
-            date: date.clone(),
-            weight: Weight::new(85.0 * KG),
-        };
-        let record_ = WeightRecord {
-            date,
-            weight: Weight::new(87.0 * KG),
-        };
+        let record = weight::WeightRecord::new(date.clone(), 85.0 * KG);
+        let record_ = weight::WeightRecord::new(date, 87.0 * KG);
 
         let uuid = app
             .add_record(TraxRecord::Weight(record.clone()))
@@ -331,20 +375,20 @@ mod tests {
         let (mut app, _cleanup) = standard_app("it_updates_a_time_distance.series");
 
         let date = DateTimeTz(UTC.ymd(2019, 5, 15).and_hms(12, 0, 0).with_timezone(&UTC));
-        let record = TimeDistance {
-            timestamp: date.clone(),
-            comments: Some(String::from("just some notes")),
-            distance: Some(25.0 * M),
-            duration: Some(15.0 * S),
-            activity: ActivityType::Running,
-        };
-        let record_ = TimeDistance {
-            timestamp: date,
-            comments: Some(String::from("just some notes")),
-            distance: Some(27.0 * M),
-            duration: Some(15.0 * S),
-            activity: ActivityType::Running,
-        };
+        let record = timedistance::TimeDistance::new(
+            date.clone(),
+            timedistance::ActivityType::Running,
+            Some(25.0 * M),
+            Some(15.0 * S),
+            Some(String::from("just some notes")),
+        );
+        let record_ = timedistance::TimeDistance::new(
+            date,
+            timedistance::ActivityType::Running,
+            Some(27.0 * M),
+            Some(15.0 * S),
+            Some(String::from("just some notes")),
+        );
 
         let uuid = app
             .add_record(TraxRecord::TimeDistance(record.clone()))
