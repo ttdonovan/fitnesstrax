@@ -1,45 +1,22 @@
-{ pkgs, rustc }:
+{ pkgs ? import <nixpkgs> {},
+  rustc ? pkgs.rustc }:
 let
-  buildRustCrate = pkgs.buildRustCrate.override {
-    inherit rustc;
-  };
-
-  darwin_frameworks = if pkgs.stdenv.buildPlatform.system == "x86_64-darwin"
-    then with pkgs.darwin.apple_sdk.frameworks; [
-        Security
-      ]
+  security = if pkgs.stdenv.isDarwin
+    then [ pkgs.darwin.apple_sdk.frameworks.Security ]
     else [];
-
+  cratesIO = import ./crates-io.nix {
+    inherit (pkgs) lib buildRustCrate buildRustCrateHelpers;
+  };
   cargo = import ./Cargo.nix {
-    inherit buildRustCrate;
-    inherit (pkgs) lib buildPlatform fetchgit;
-    inherit (pkgs) buildRustCrateHelpers;
-    cratesIO = import ./crates-io.nix {
-      inherit (pkgs) lib;
-      inherit (pkgs) buildRustCrateHelpers;
-      inherit buildRustCrate;
-    };
+    inherit (pkgs) lib buildPlatform buildRustCrate buildRustCrateHelpers fetchgit;
+    inherit cratesIO;
   };
-
-  fitnesstrax_server_crate = (cargo.fitnesstrax_server {}).override {
+in (cargo.fitnesstrax_server {}).override {
+    rust = rustc;
+    buildInputs = [ security ];
     crateOverrides = pkgs.defaultCrateOverrides // {
-      mime_guess = attrs: { buildInputs = darwin_frameworks; };
-      orizentic = attrs: { buildInputs = darwin_frameworks; };
-      fitnesstrax = attrs: { buildInputs = darwin_frameworks; };
+      mime_guess = attrs: { buildInputs = [ security ]; };
+      orizentic = attrs: { buildInputs = [ security ]; };
+      fitnesstrax = attrs: { buildInputs = [ security ]; };
     };
-  };
-
-in pkgs.stdenv.mkDerivation rec {
-  name = "fitnesstrax-server";
-
-  buildInputs = [ fitnesstrax_server_crate ];
-
-  src = ./.;
-
-  phases = [ "installPhase" ];
-
-  installPhase = ''
-    mkdir -p $out/bin
-    cp ${fitnesstrax_server_crate.out}/bin/fitnesstrax-server $out/bin/fitnesstrax-server
-    '';
-}
+  }

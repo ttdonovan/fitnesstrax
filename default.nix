@@ -1,13 +1,8 @@
-{ pkgs ? import <nixpkgs-19.03> {} }:
+{ pkgs ? import <nixpkgs-19.03> {},
+  ld ? import <luminescent-dreams> {} }:
 let
-  rustc = import nixpkgs/rust-1.33.nix {
-    inherit (pkgs.stdenv) mkDerivation;
-    inherit (pkgs) stdenv fetchurl patchelf;
-  };
-  nodejs = import nixpkgs/node10.nix { pkgs = pkgs; };
-
-  server = import server/default.nix { pkgs = pkgs; rustc = rustc; };
-  client = import client/default.nix { pkgs = pkgs; nodejs = nodejs; };
+  server = import server/default.nix { pkgs = pkgs; rustc = ld.rust_1_33_0; };
+  client = import client/default.nix { pkgs = pkgs; nodejs = ld.nodejs_10_15_3; };
 
   wrapper = pkgs.writeScript "fitnesstrax"
     ''

@@ -1,11 +1,7 @@
 let
     pkgs = import <nixpkgs-19.03> {};
+    ld = import <luminescent-dreams> {};
     frameworks = pkgs.darwin.apple_sdk.frameworks;
-    rust = import ./nixpkgs/rust-1.33.nix {
-      inherit (pkgs.stdenv) mkDerivation;
-      inherit (pkgs) fetchurl stdenv patchelf;
-    };
-    node = import ./nixpkgs/node10.nix { pkgs = pkgs; };
 
     darwin_frameworks = if pkgs.stdenv.buildPlatform.system == "x86_64-darwin"
       then with pkgs.darwin.apple_sdk.frameworks; [
@@ -13,13 +9,15 @@ let
         ]
       else [];
 
-in pkgs.stdenv.mkDerivation {
+in pkgs.mkShell {
     name = "fitnesstrax";
 
-    buildInputs = [ node
+    buildInputs = [ ld.nodejs_10_15_3
                     pkgs.carnix
-                    rust
+                    ld.rust_1_33_0
                   ] ++ darwin_frameworks;
 
     RUST_BACKTRACE = "full";
+
+    shellHook = ''if [ -e ~/.nixpkgs/shellhook.sh ]; then . ~/.nixpkgs/shellhook.sh; fi'';
 }
