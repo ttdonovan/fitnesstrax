@@ -21,12 +21,17 @@
   width: 50%;
 }
 
-.weight {
-  display: flex;
-  align-items: center;
+.placeholder {
+  color: gray;
 }
 
-.weight input {
+.weight .view, .steps .view {
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid gray;
+}
+
+.weight input, .steps input {
   width: 5em;
   font-size: inherit;
 }
@@ -99,4 +104,9 @@
   font-size: inherit;
   width: 6em;
   padding: 5px;
+}
+
+.add-workout {
+  padding: 10px;
+  max-width: 250px;
 }

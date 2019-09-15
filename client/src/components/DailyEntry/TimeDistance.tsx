@@ -4,7 +4,6 @@ import * as luxon from "luxon"
 import math from "mathjs"
 import React from "react"
 import Select from "react-select"
-import uuidv4 from "uuid/v4"
 
 import { classnames, ClassNames } from "../../classnames"
 import { renderDistance } from "../../common"
@@ -19,12 +18,15 @@ import ValidatedInputField from "../ValidatedInputField"
 
 import trace from "../../trace"
 
-interface Props {
+interface ViewProps {
   prefs: UserPreferences
   record: types.Record<types.TimeDistanceRecord>
 }
 
-export const TimeDistanceRecordView: React.SFC<Props> = ({ prefs, record }) => (
+export const TimeDistanceRecordView: React.SFC<ViewProps> = ({
+  prefs,
+  record,
+}) => (
   <div className="timedistance-view">
     <div className="date">
       {record.data.date
@@ -50,16 +52,18 @@ export const TimeDistanceRecordView: React.SFC<Props> = ({ prefs, record }) => (
 
 interface EditProps {
   prefs: UserPreferences
-  date: Date
-  record: Option<types.Record<types.TimeDistanceRecord>>
-  onUpdateNew: (uuid: string, data: types.TimeDistanceRecord) => void
-  onUpdate: (record: types.Record<types.TimeDistanceRecord>) => void
+  uuid: Option<string>
+  record: types.TimeDistanceRecord
+  save: (
+    uuid: Option<string>,
+    data: types.RecordTypes,
+  ) => Promise<Result<null, string>>
+  cancel: () => void
 }
 
 interface EditState {
-  uuid: string
   time: Option<DateTimeTz>
-  activity: Option<types.TimeDistanceActivity>
+  activity: types.TimeDistanceActivity
   distance: Option<math.Unit>
   duration: Option<luxon.Duration>
 }
@@ -71,68 +75,54 @@ export class TimeDistanceRecordEdit extends React.Component<
   constructor(props: EditProps) {
     super(props)
     this.state = {
-      uuid: props.record.map(r => r.id).or(uuidv4()),
-      time: props.record.map(r => r.data.date),
-      activity: props.record.map(r => r.data.activity),
-      distance: props.record.andThen(r => r.data.distance),
-      duration: props.record.andThen(r => r.data.duration),
+      time: props.uuid.isSome()
+        ? Option.Some(props.record.date)
+        : Option.None(),
+      activity: props.record.activity,
+      distance: props.record.distance,
+      duration: props.record.duration,
     }
   }
 
-  stateIsValid(st: EditState): boolean {
-    return st.time.isSome() && st.activity.isSome()
-  }
+  isStateValid = (st: EditState) => this.state.time.isSome()
 
-  sendRecord(st: EditState) {
-    const { record, onUpdate, onUpdateNew } = this.props
-    const { uuid } = this.state
-
-    console.log("sendRecord", st)
-
-    if (this.stateIsValid(st)) {
+  onSave = () => {
+    if (this.isStateValid(this.state)) {
       const td = new types.TimeDistanceRecord(
-        st.time.unwrap(),
-        st.activity.unwrap(),
-        st.distance,
-        st.duration,
+        this.state.time.unwrap(),
+        this.state.activity,
+        this.state.distance,
+        this.state.duration,
         Option.None(),
       )
-      if (record.isSome()) {
-        this.props.onUpdate(new types.Record(record.unwrap().id, td))
-      } else {
-        onUpdateNew(uuid, td)
-      }
+
+      this.props
+        .save(this.props.uuid, td)
+        .then(result => (result.isOk() ? this.props.cancel() : null))
     }
   }
 
   onChangeTime(inp: Option<DateTimeTz>) {
-    const newState = { ...this.state, time: inp }
     this.setState({ time: inp })
-    this.sendRecord(newState)
   }
   onChangeActivity(inp: { label: string; value: types.TimeDistanceActivity }) {
-    const newState = { ...this.state, activity: Option.Some(inp.value) }
-    this.setState({ activity: Option.Some(inp.value) })
-    this.sendRecord(newState)
+    this.setState({ activity: inp.value })
   }
   onChangeDistance(inp: Option<math.Unit>) {
-    const newState = { ...this.state, distance: inp }
     this.setState({ distance: inp })
-    this.sendRecord(newState)
   }
   onChangeDuration(inp: Option<luxon.Duration>) {
-    const newState = { ...this.state, duration: inp }
     this.setState({ duration: inp })
-    this.sendRecord(newState)
   }
 
   render() {
-    const { date, prefs, record } = this.props
+    const { prefs, record } = this.props
+    console.log(`render: ${JSON.stringify(this.state)}`)
     return (
       <div className="timedistance-edit">
         <div className="date">
           <ValidatedInputField
-            value={record.map(r => r.data.date)}
+            value={Option.Some(record.date)}
             placeholder={i18n.TimeEntryPlaceholder.tr(prefs.language)}
             render={v =>
               v.map(dt => dt.setZone(prefs.timezone)).toFormat("HH:mm:ss")
@@ -140,19 +130,18 @@ export class TimeDistanceRecordEdit extends React.Component<
             parse={(inp: string): Result<Option<DateTimeTz>, string> => {
               if (inp === "") return Result.Ok(Option.None())
               return parseTime(inp).map(t =>
-                t.map(
-                  t_ =>
-                    new DateTimeTz(
-                      luxon.DateTime.fromObject({
-                        year: date.year,
-                        month: date.month,
-                        day: date.day,
-                        hour: t_.hours,
-                        minute: t_.minutes,
-                        second: t_.seconds,
-                        zone: prefs.timezone,
-                      }),
-                    ),
+                t.map(t_ =>
+                  record.date.map(ts =>
+                    luxon.DateTime.fromObject({
+                      year: ts.year,
+                      month: ts.month,
+                      day: ts.day,
+                      hour: t_.hours,
+                      minute: t_.minutes,
+                      second: t_.seconds,
+                      zone: prefs.timezone,
+                    }),
+                  ),
                 ),
               )
             }}
@@ -163,12 +152,10 @@ export class TimeDistanceRecordEdit extends React.Component<
           <Select
             style={{ width: "100%" }}
             name="activity-selection"
-            defaultValue={record
-              .map(r => ({
-                label: r.data.activity.repr.tr(prefs.language),
-                value: r.data.activity,
-              }))
-              .unwrap_()}
+            defaultValue={{
+              label: this.state.activity.repr.tr(prefs.language),
+              value: this.state.activity,
+            }}
             options={_.map((activity: types.TimeDistanceActivity) => ({
               value: activity,
               label: activity.repr.tr(prefs.language),
@@ -178,19 +165,67 @@ export class TimeDistanceRecordEdit extends React.Component<
         </div>
         <div className="distance">
           <DistanceEdit
-            distance={record.andThen(r => r.data.distance)}
+            distance={record.distance}
             onChange={inp => this.onChangeDistance(inp)}
             prefs={prefs}
           />
         </div>
         <div className="duration">
           <DurationEdit
-            duration={record.andThen(r => r.data.duration)}
+            duration={record.duration}
             onChange={inp => this.onChangeDuration(inp)}
             prefs={prefs}
           />
+        </div>
+        <div>
+          <button onClick={this.onSave}>{i18n.Save.tr(prefs.language)}</button>
+          <button onClick={this.props.cancel}>
+            {i18n.Cancel.tr(prefs.language)}
+          </button>
         </div>
       </div>
     )
   }
 }
+
+interface Props {
+  prefs: UserPreferences
+  record: types.Record<types.TimeDistanceRecord>
+  save: (
+    uuid: Option<string>,
+    data: types.RecordTypes,
+  ) => Promise<Result<null, string>>
+}
+
+interface State {
+  editing: boolean
+}
+
+class TimeDistanceRecordComponent extends React.Component<Props, State> {
+  constructor(props: Props) {
+    super(props)
+    this.state = { editing: false }
+  }
+
+  cancel = () => this.setState({ editing: false })
+
+  render = () => {
+    const { prefs, record, save } = this.props
+    const { editing } = this.state
+    return editing ? (
+      <TimeDistanceRecordEdit
+        prefs={prefs}
+        uuid={Option.Some(record.id)}
+        record={record.data}
+        save={save}
+        cancel={this.cancel}
+      />
+    ) : (
+      <div onClick={() => this.setState({ editing: true })}>
+        <TimeDistanceRecordView prefs={prefs} record={record} />
+      </div>
+    )
+  }
+}
+
+export default TimeDistanceRecordComponent

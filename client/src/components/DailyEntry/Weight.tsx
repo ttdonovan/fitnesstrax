@@ -14,14 +14,20 @@ import Weight from "../Weight"
 
 interface ViewProps {
   prefs: UserPreferences
-  record: types.Record<types.WeightRecord>
+  record: Option<types.Record<types.WeightRecord>>
 }
 
 export const WeightRecordView: React.SFC<ViewProps> = ({ prefs, record }) => (
-  <div className="weight">
-    <div>
-      <Weight weight={record.data.weight} prefs={prefs} />
-    </div>
+  <div
+    className={classnames({
+      weight: true,
+      view: true,
+      placeholder: record.isNone(),
+    })}
+  >
+    {record
+      .map(r => <Weight weight={r.data.weight} prefs={prefs} />)
+      .or(<span>{i18n.Weight.tr(prefs.language)}</span>)}
   </div>
 )
 
@@ -29,52 +35,38 @@ interface EditProps {
   prefs: UserPreferences
   date: Date
   record: Option<types.Record<types.WeightRecord>>
-  onUpdateNew: (uuid: string, data: types.WeightRecord) => void
-  onUpdate: (record: types.Record<types.WeightRecord>) => void
+  save: (
+    uuid: Option<string>,
+    data: types.RecordTypes,
+  ) => Promise<Result<null, string>>
+  cancel: () => void
 }
 
-interface State {
-  uuid: Option<string>
+interface EditState {
   weight: Option<math.Unit>
 }
 
-interface Event {
-  value: string
-}
-
-export class WeightRecordEdit extends React.Component<EditProps, State> {
+export class WeightRecordEdit extends React.Component<EditProps, EditState> {
   constructor(props: EditProps) {
     super(props)
     this.state = {
-      uuid: Option.None(),
       weight: this.props.record.map(w => w.data.weight),
     }
   }
 
-  onChange = (inp: Option<math.Unit>) => {
-    const { date, prefs, record, onUpdate, onUpdateNew } = this.props
-    const { uuid, weight } = this.state
+  onSave = () => {
+    const weight = this.state.weight.unwrap_()
 
-    const uuid_ = uuid.or(uuidv4())
-    this.setState({ uuid: Option.Some(uuid_) })
-
-    if (inp.isSome()) {
-      if (record.isSome()) {
-        this.props.onUpdate(
-          new types.Record(
-            record.unwrap().id,
-            record.unwrap().data.withWeight(inp.unwrap()),
-          ),
-        )
-      } else {
-        this.props.onUpdateNew(
-          uuid_,
+    if (weight) {
+      this.props
+        .save(
+          this.props.record.map(r => r.id),
           new types.WeightRecord(
-            DateTimeTz.fromDate(date, prefs.timezone),
-            inp.unwrap(),
+            DateTimeTz.fromDate(this.props.date, this.props.prefs.timezone),
+            weight,
           ),
         )
-      }
+        .then(result => (result.isOk() ? this.props.cancel() : null))
     }
   }
 
@@ -84,7 +76,7 @@ export class WeightRecordEdit extends React.Component<EditProps, State> {
       <div className="weight">
         <ValidatedInputField
           value={record.map(r => r.data.weight)}
-          placeholder={i18n.WeightEntryPlaceholder.tr(prefs.language)}
+          placeholder={i18n.Weight.tr(prefs.language)}
           render={(val: math.Unit): string =>
             math.format(val.toNumber(prefs.units.mass), {
               notation: "fixed",
@@ -96,10 +88,57 @@ export class WeightRecordEdit extends React.Component<EditProps, State> {
               v.map(v_ => math.unit(v_, this.props.prefs.units.mass)),
             )
           }
-          onChange={this.onChange}
+          onChange={inp => this.setState({ weight: inp })}
         />
-        <div> {prefs.units.massRepr.tr(prefs.language)} </div>
+        {prefs.units.massRepr.tr(prefs.language)}
+        <button onClick={this.onSave}>Save</button>
+        <button onClick={this.props.cancel}>Cancel</button>
       </div>
     )
   }
 }
+
+interface Props {
+  prefs: UserPreferences
+  date: Date
+  record: Option<types.Record<types.WeightRecord>>
+  save: (
+    uuid: Option<string>,
+    data: types.RecordTypes,
+  ) => Promise<Result<null, string>>
+}
+
+interface State {
+  editing: boolean
+}
+
+class WeightRecordComponent extends React.Component<Props, State> {
+  constructor(props: Props) {
+    super(props)
+    this.state = { editing: false }
+  }
+
+  cancel = () => {
+    this.setState({ editing: false })
+  }
+
+  render = () => {
+    const { prefs, date, record, save } = this.props
+    const { editing } = this.state
+    return editing ? (
+      <WeightRecordEdit
+        date={date}
+        prefs={prefs}
+        record={record}
+        save={save}
+        cancel={this.cancel}
+      />
+    ) : (
+      <div onClick={() => this.setState({ editing: true })}>
+        <WeightRecordView prefs={prefs} record={record} />
+      </div>
+    )
+  }
+}
+
+export default WeightRecordComponent

@@ -15,6 +15,10 @@ export class Message {
   }
 }
 
+export const AddWorkout = new Message("Add Workout", {
+  eo: "Aldonu Entrenamiento",
+})
+export const Cancel = new Message("Cancel", { eo: "Nuligi" })
 export const Cycling = new Message("Cycling", { eo: "Biciklado" })
 export const DistanceEntryPlaceholder = new Message(
   "Enter distance [hh:mm:ss]",
@@ -41,13 +45,14 @@ export const LoginPlaceholder = new Message("Enter your login token", {
 export const Preferences = new Message("Preferences", { eo: "Agordoj" })
 export const Steps = new Message("Steps", { eo: "Paŝoj" })
 export const Running = new Message("Running", { eo: "Kurado" })
+export const Save = new Message("Save", { eo: "Ŝpari" })
 export const Swimming = new Message("Swimming", { eo: "Naĝado" })
 export const TimeEntryPlaceholder = new Message("Enter time [hh:mm:ss]", {
   eo: "Eniru tempon [hh:mm:ss]",
 })
 export const Timezone = new Message("Timezone", { eo: "Horzono" })
 export const Walking = new Message("Walking", { eo: "Promenadi" })
-export const WeightEntryPlaceholder = new Message("Weight", {
+export const Weight = new Message("Weight", {
   eo: "Pezon",
 })
 export const kilograms = new Message("kg", { eo: "kg" })

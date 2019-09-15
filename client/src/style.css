@@ -35,6 +35,15 @@ a {
     width: 50%;
   }
 
+  .l-4-column {
+    display: flex;
+    width: 100%;
+  }
+
+  .l-4-column > div {
+    width: 25%;
+  }
+
   .l-main {
     display: flex;
     width: 100%;

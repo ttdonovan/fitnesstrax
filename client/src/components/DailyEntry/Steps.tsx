@@ -1,6 +1,5 @@
 import { Option, Result } from "ld-ambiguity"
 import React from "react"
-import uuidv4 from "uuid/v4"
 
 import { classnames, ClassNames } from "../../classnames"
 import { DateTimeTz, Date } from "../../datetimetz"
@@ -12,12 +11,20 @@ import ValidatedInputField from "../ValidatedInputField"
 
 interface ViewProps {
   prefs: UserPreferences
-  record: types.Record<types.StepRecord>
+  record: Option<types.Record<types.StepRecord>>
 }
 
-export const StepRecordView: React.SFC<ViewProps> = ({ prefs, record }) => (
-  <div className="seps">
-    {record.data.steps} {i18n.Steps.tr(prefs.language)}
+const StepRecordView: React.SFC<ViewProps> = ({ prefs, record }) => (
+  <div
+    className={classnames({
+      steps: true,
+      view: true,
+      placeholder: record.isNone(),
+    })}
+  >
+    {record
+      .map(r => `${r.data.steps} ${i18n.Steps.tr(prefs.language)}`)
+      .or(i18n.Steps.tr(prefs.language))}
   </div>
 )
 
@@ -25,12 +32,14 @@ interface EditProps {
   prefs: UserPreferences
   date: Date
   record: Option<types.Record<types.StepRecord>>
-  onUpdateNew: (uuid: string, data: types.StepRecord) => void
-  onUpdate: (record: types.Record<types.StepRecord>) => void
+  save: (
+    uuid: Option<string>,
+    data: types.RecordTypes,
+  ) => Promise<Result<null, string>>
+  cancel: () => void
 }
 
-interface State {
-  uuid: Option<string>
+interface EditState {
   steps: Option<number>
 }
 
@@ -38,39 +47,27 @@ interface Event {
   value: string
 }
 
-export class StepRecordEdit extends React.Component<EditProps, State> {
+class StepRecordEdit extends React.Component<EditProps, EditState> {
   constructor(props: EditProps) {
     super(props)
     this.state = {
-      uuid: Option.None(),
       steps: this.props.record.map(r => r.data.steps),
     }
   }
 
-  onChange = (inp: Option<number>) => {
-    const { date, prefs, record, onUpdate, onUpdateNew } = this.props
-    const { uuid, steps } = this.state
+  onSave = () => {
+    const steps = this.state.steps.unwrap_()
 
-    const uuid_ = uuid.or(uuidv4())
-    this.setState({ uuid: Option.Some(uuid_) })
-
-    if (inp.isSome()) {
-      if (record.isSome()) {
-        this.props.onUpdate(
-          new types.Record(
-            record.unwrap().id,
-            record.unwrap().data.withSteps(inp.unwrap()),
-          ),
-        )
-      } else {
-        this.props.onUpdateNew(
-          uuid_,
+    if (steps) {
+      this.props
+        .save(
+          this.props.record.map(r => r.id),
           new types.StepRecord(
-            DateTimeTz.fromDate(date, prefs.timezone),
-            inp.unwrap(),
+            DateTimeTz.fromDate(this.props.date, this.props.prefs.timezone),
+            steps,
           ),
         )
-      }
+        .then(result => (result.isOk() ? this.props.cancel() : null))
     }
   }
 
@@ -85,9 +82,56 @@ export class StepRecordEdit extends React.Component<EditProps, State> {
           parse={(inp: string): Result<Option<number>, string> =>
             parseNumber(inp)
           }
-          onChange={this.onChange}
+          onChange={inp => this.setState({ steps: inp })}
         />
+        <button onClick={this.onSave}>Save</button>
+        <button onClick={() => this.props.cancel()}>Cancel</button>
       </div>
     )
   }
 }
+
+interface Props {
+  prefs: UserPreferences
+  date: Date
+  record: Option<types.Record<types.StepRecord>>
+  save: (
+    uuid: Option<string>,
+    data: types.RecordTypes,
+  ) => Promise<Result<null, string>>
+}
+
+interface State {
+  editing: boolean
+}
+
+class StepRecordComponent extends React.Component<Props, State> {
+  constructor(props: Props) {
+    super(props)
+    this.state = { editing: false }
+  }
+
+  cancel = () => {
+    this.setState({ editing: false })
+  }
+
+  render = () => {
+    const { prefs, date, record, save } = this.props
+    const { editing } = this.state
+    return editing ? (
+      <StepRecordEdit
+        date={date}
+        prefs={prefs}
+        record={record}
+        save={save}
+        cancel={this.cancel}
+      />
+    ) : (
+      <div onClick={() => this.setState({ editing: true })}>
+        <StepRecordView prefs={prefs} record={record} />
+      </div>
+    )
+  }
+}
+
+export default StepRecordComponent
