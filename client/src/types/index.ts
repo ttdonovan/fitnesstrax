@@ -35,7 +35,10 @@ export class WeightRecord {
 }
 
 export class TimeDistanceActivity {
-  constructor(readonly repr: i18n.Message) {}
+  readonly isTimeDistanceActivity: boolean
+  constructor(readonly repr: i18n.Message) {
+    this.isTimeDistanceActivity = true
+  }
 }
 
 export const Cycling = new TimeDistanceActivity(i18n.Cycling)
@@ -89,10 +92,69 @@ export class TimeDistanceRecord {
   }
 }
 
-export type RecordTypes = StepRecord | TimeDistanceRecord | WeightRecord
+export class SetRepActivity {
+  readonly isSetRepActivity: boolean
+  constructor(readonly repr: i18n.Message) {
+    this.isSetRepActivity = true
+  }
+}
+
+export const Situps = new SetRepActivity(i18n.Situps)
+export const Pushups = new SetRepActivity(i18n.Pushups)
+
+export const setRepActivityFromString = (
+  str: string,
+): Result<SetRepActivity, string> => {
+  if (str === "Pushups") {
+    return Result.Ok(Pushups)
+  } else if (str === "Situps") {
+    return Result.Ok(Situps)
+  } else {
+    return Result.Err("unrecognized activity type")
+  }
+}
+
+export class SetRepRecord {
+  constructor(
+    readonly date: DateTimeTz,
+    readonly activity: SetRepActivity,
+    readonly sets: Array<number>,
+  ) {}
+
+  equals(other: SetRepRecord) {
+    return (
+      this.date.equals(other.date) &&
+      this.activity === other.activity &&
+      this.sets === other.sets
+    )
+  }
+
+  clone() {
+    return new SetRepRecord(this.date, this.activity, this.sets)
+  }
+}
+
+export type ActivityTypes = TimeDistanceActivity | SetRepActivity
+
+export const isSetRepActivity = (
+  activity: ActivityTypes,
+): activity is SetRepActivity => (<SetRepActivity>activity).isSetRepActivity
+
+export const isTimeDistanceActivity = (
+  activity: ActivityTypes,
+): activity is TimeDistanceActivity =>
+  (<TimeDistanceActivity>activity).isTimeDistanceActivity
+
+export type RecordTypes =
+  | StepRecord
+  | TimeDistanceRecord
+  | WeightRecord
+  | SetRepRecord
 
 export const isStepRecord = (rec: RecordTypes): rec is StepRecord =>
   (<StepRecord>rec).steps !== undefined
+export const isSetRepRecord = (rec: RecordTypes): rec is SetRepRecord =>
+  (<SetRepRecord>rec).sets !== undefined
 export const isTimeDistanceRecord = (
   rec: RecordTypes,
 ): rec is TimeDistanceRecord => (<TimeDistanceRecord>rec).distance !== undefined
@@ -105,64 +167,3 @@ export class Record<A> {
 
 export const isRecord = (rec: any): rec is Record<any> =>
   (<Record<any>>rec).id !== undefined
-
-/*
-export class HistoryEntry {
-  date: moment.Moment
-  weight: WeightSample | null
-  timeDistance: Array<TimeDistanceSample> | null
-  setRep: Array<any> | null
-
-  constructor({ date, weight, timeDistance, setRep }) {
-    this.date = date
-    this.weight = weight
-    this.timeDistance = timeDistance
-    this.setRep = setRep
-  }
-
-  isEmpty() {
-    return (
-      !isSomething(this.weight) &&
-      this.timeDistance.length == 0 &&
-      this.setRep.length == 0
-    )
-  }
-}
-
-export class HistoryData {
-  entries_: Array<HistoryEntry>
-
-  constructor(entries) {
-    this.entries_ = entries
-    this.entries_.sort(
-      (lside, rside) =>
-        lside.date < rside.date ? -1 : lside.date > rside.date ? 1 : 0,
-    )
-  }
-
-  weights() {
-    return this.entries_.map(e => e.weight)
-  }
-  timeDistanceWorkouts() {
-    return [].concat.apply([], this.entries_.map(e => e.timeDistance))
-  }
-  setRepWorkouts() {
-    return [].concat.apply([], this.entries_.map(e => e["set-rep"]))
-  }
-
-  entries() {
-    return this.entries_
-  }
-
-  entry(date) {
-    return firstFn(e => e.date.isSame(date))(this.entries_)
-  }
-
-  startRange() {
-    return first(this.entries_.slice().reverse()).date
-  }
-  endRange() {
-    return first(this.entries_).date
-  }
-}
-   */

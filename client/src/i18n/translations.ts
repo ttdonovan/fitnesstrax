@@ -42,10 +42,12 @@ export const LogIn = new Message("Log In", { eo: "Ensaluti" })
 export const LoginPlaceholder = new Message("Enter your login token", {
   eo: "Eniru vian ensalutan ĵetono",
 })
+export const Pushups = new Message("Pushups", { eo: "Supraj Puŝoj" })
 export const Preferences = new Message("Preferences", { eo: "Agordoj" })
-export const Steps = new Message("Steps", { eo: "Paŝoj" })
 export const Running = new Message("Running", { eo: "Kurado" })
+export const Steps = new Message("Steps", { eo: "Paŝoj" })
 export const Save = new Message("Save", { eo: "Ŝpari" })
+export const Situps = new Message("Situps", { eo: "Sidiĝoj" })
 export const Swimming = new Message("Swimming", { eo: "Naĝado" })
 export const TimeEntryPlaceholder = new Message("Enter time [hh:mm:ss]", {
   eo: "Eniru tempon [hh:mm:ss]",

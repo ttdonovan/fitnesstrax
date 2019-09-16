@@ -20,7 +20,14 @@ const AddWorkout: React.SFC<Props> = ({ prefs, onSelect }: Props) => (
       options={_.map((activity: any) => ({
         value: activity,
         label: activity.repr.tr(prefs.language),
-      }))([types.Cycling, types.Running, types.Swimming, types.Walking])}
+      }))([
+        types.Cycling,
+        types.Running,
+        types.Swimming,
+        types.Walking,
+        types.Situps,
+        types.Pushups,
+      ])}
       onChange={onSelect}
     />
   </div>

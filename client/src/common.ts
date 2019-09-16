@@ -210,3 +210,16 @@ export const toUTC = t => t.clone().utc()
 export const toTz = (t, offset) => t.clone().utcOffset(offset)
 export const midnight = t => t.clone().set({ hour: 0, minute: 0, second: 0 })
    */
+
+export const sequenceOption = <A>(lst: Array<Option<A>>): Option<Array<A>> => {
+  let res: Array<A> = []
+  for (let v of lst) {
+    if (v.isSome()) {
+      res.push(v.unwrap())
+    } else {
+      return Option.None()
+    }
+  }
+
+  return Option.Some(res)
+}

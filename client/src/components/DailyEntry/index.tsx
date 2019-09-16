@@ -7,18 +7,14 @@ import { classnames, ClassNames } from "../../classnames"
 import { first } from "../../common"
 import * as types from "../../types"
 import { UserPreferences } from "../../settings"
+import { DateTimeTz, Date } from "../../datetimetz"
 import Card from "../Card"
 import Row from "../Row"
-import { DateTimeTz } from "../../datetimetz"
+import { Workout, NewWorkout } from "../Workout"
 import AddWorkout from "./AddWorkout"
 import Summary from "./Summary"
 import StepRecordComponent from "./Steps"
-import TimeDistanceRecordComponent, {
-  TimeDistanceRecordEdit,
-  TimeDistanceRecordView,
-} from "./TimeDistance"
 import WeightRecordComponent from "./Weight"
-import { Date } from "../../datetimetz"
 
 import "./style.css"
 
@@ -32,7 +28,7 @@ interface Props {
 }
 
 interface State {
-  newRecord: Option<types.TimeDistanceRecord>
+  newRecord: Option<types.RecordTypes>
 }
 
 class DailyEntry extends React.Component<Props, State> {
@@ -53,11 +49,6 @@ class DailyEntry extends React.Component<Props, State> {
       types.isStepRecord(r.data),
     )(this.props.records) as Array<types.Record<types.StepRecord>>)
 
-  timeDistanceRecords = (): Array<types.Record<types.TimeDistanceRecord>> =>
-    _.filter((r: types.Record<types.RecordTypes>): boolean =>
-      types.isTimeDistanceRecord(r.data),
-    )(this.props.records) as Array<types.Record<types.TimeDistanceRecord>>
-
   save = (
     uuid: Option<string>,
     data: types.RecordTypes,
@@ -72,17 +63,29 @@ class DailyEntry extends React.Component<Props, State> {
   cancelWorkout = () => this.setState({ newRecord: Option.None() })
 
   addWorkout = (value: any) => {
-    this.setState({
-      newRecord: Option.Some(
-        new types.TimeDistanceRecord(
-          DateTimeTz.fromDate(this.props.date, this.props.prefs.timezone),
-          value.value,
-          Option.None(),
-          Option.None(),
-          Option.None(),
+    if (types.isSetRepActivity(value.value)) {
+      this.setState({
+        newRecord: Option.Some(
+          new types.SetRepRecord(
+            DateTimeTz.fromDate(this.props.date, this.props.prefs.timezone),
+            value.value,
+            [],
+          ),
         ),
-      ),
-    })
+      })
+    } else if (types.isTimeDistanceActivity(value.value)) {
+      this.setState({
+        newRecord: Option.Some(
+          new types.TimeDistanceRecord(
+            DateTimeTz.fromDate(this.props.date, this.props.prefs.timezone),
+            value.value,
+            Option.None(),
+            Option.None(),
+            Option.None(),
+          ),
+        ),
+      })
+    }
   }
 
   render = () => {
@@ -106,26 +109,19 @@ class DailyEntry extends React.Component<Props, State> {
             <Summary prefs={this.props.prefs} records={this.props.records} />
           </Row>
 
-          {this.timeDistanceRecords().length > 0 ? (
-            <React.Fragment>
-              <div className="activity-header">Activities</div>
-              {_.map((r: types.Record<types.TimeDistanceRecord>) => (
-                <div className="record">
-                  <TimeDistanceRecordComponent
-                    prefs={this.props.prefs}
-                    record={r}
-                    save={this.save}
-                  />
-                </div>
-              ))(this.timeDistanceRecords())}
-            </React.Fragment>
-          ) : null}
+          <React.Fragment>
+            <div className="activity-header">Activities</div>
+            {_.map((r: types.Record<types.RecordTypes>) => (
+              <div className="record">
+                <Workout prefs={this.props.prefs} record={r} save={this.save} />
+              </div>
+            ))(this.props.records)}
+          </React.Fragment>
 
           {this.state.newRecord.isSome() ? (
             <React.Fragment>
-              <TimeDistanceRecordEdit
+              <NewWorkout
                 prefs={this.props.prefs}
-                uuid={Option.None()}
                 record={this.state.newRecord.unwrap()}
                 save={this.save}
                 cancel={this.cancelWorkout}

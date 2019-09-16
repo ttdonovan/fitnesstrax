@@ -9,14 +9,17 @@ import { Option, Result, sequenceResult } from "ld-ambiguity"
 import {
   Record,
   RecordTypes,
+  SetRepRecord,
   StepRecord,
   TimeDistanceRecord,
   WeightRecord,
-  timeDistanceActivityFromString,
   isRecord,
+  isSetRepRecord,
   isStepRecord,
   isTimeDistanceRecord,
   isWeightRecord,
+  setRepActivityFromString,
+  timeDistanceActivityFromString,
 } from "./types"
 
 interface StepJS {
@@ -63,6 +66,36 @@ const toWeightRecord = (js: WeightJS): Result<WeightRecord, string> => {
   return Result.Ok(new WeightRecord(date.unwrap(), val))
 }
 
+interface SetRepJS {
+  SetRep: {
+    date: string
+    activity: string
+    sets: Array<number>
+    comments: string | null
+  }
+}
+
+const toSetRepJS = (record: SetRepRecord): SetRepJS => ({
+  SetRep: {
+    date: record.date.toString(),
+    activity: record.activity.repr.en,
+    sets: record.sets,
+    comments: null,
+  },
+})
+
+const toSetRepRecord = (js: SetRepJS): Result<SetRepRecord, string> => {
+  const date = DateTimeTz.fromString(js.SetRep.date)
+  if (!date.isOk()) return Result.Err(date.unwrapErr())
+
+  const activity = setRepActivityFromString(js.SetRep.activity)
+  if (!activity.isOk()) return Result.Err(activity.unwrapErr())
+
+  return Result.Ok(
+    new SetRepRecord(date.unwrap(), activity.unwrap(), js.SetRep.sets),
+  )
+}
+
 interface TimeDistanceJS {
   TimeDistance: {
     activity: string
@@ -83,7 +116,10 @@ const toTimeDistanceJS = (record: TimeDistanceRecord): TimeDistanceJS => ({
   },
 })
 
-type RecordJSTypes = StepJS | TimeDistanceJS | WeightJS
+type RecordJSTypes = SetRepJS | StepJS | TimeDistanceJS | WeightJS
+
+const isSetRepJS = (val: RecordJSTypes): val is SetRepJS =>
+  (<SetRepJS>val).SetRep !== undefined
 
 const isStepJS = (val: RecordJSTypes): val is StepJS =>
   (<StepJS>val).Steps !== undefined
@@ -125,8 +161,11 @@ const parseRecord = (js: any): Result<Record<RecordTypes>, string> => {
   if ((<RecordJS>js).data === undefined)
     return Result.Err("invalid record: no data field available")
 
-  //console.log(JSON.stringify(js.data))
-  if (isStepJS(js.data)) {
+  if (isSetRepJS(js.data)) {
+    return toSetRepRecord(js.data).map(
+      (r: SetRepRecord) => new Record(js.id, r),
+    )
+  } else if (isStepJS(js.data)) {
     return toStepRecord(js.data).map((r: StepRecord) => new Record(js.id, r))
   } else if (isWeightJS(js.data)) {
     return toWeightRecord(js.data).map(
@@ -234,12 +273,14 @@ class Client {
 
     if (isRecord(record)) {
       let data = null
-      if (isStepRecord(record.data)) {
+      if (isSetRepRecord(record.data)) {
+        data = toSetRepJS(record.data)
+      } else if (isStepRecord(record.data)) {
         data = toStepJS(record.data)
-      } else if (isWeightRecord(record.data)) {
-        data = toWeightJS(record.data)
       } else if (isTimeDistanceRecord(record.data)) {
         data = toTimeDistanceJS(record.data)
+      } else if (isWeightRecord(record.data)) {
+        data = toWeightJS(record.data)
       } else {
         throw new Error("unhandled record type")
       }
@@ -257,7 +298,10 @@ class Client {
       let url = ""
       let js = ""
 
-      if (isStepRecord(record)) {
+      if (isSetRepRecord(record)) {
+        url = `${this.appUrl}/api/record/setrep`
+        js = JSON.stringify(toSetRepJS(record).SetRep)
+      } else if (isStepRecord(record)) {
         url = `${this.appUrl}/api/record/steps`
         js = JSON.stringify(toStepJS(record).Steps)
       } else if (isTimeDistanceRecord(record)) {

@@ -16,8 +16,6 @@ import { DistanceView, DistanceEdit } from "../Distance"
 import { DurationView, DurationEdit } from "../Duration"
 import ValidatedInputField from "../ValidatedInputField"
 
-import trace from "../../trace"
-
 interface ViewProps {
   prefs: UserPreferences
   record: types.Record<types.TimeDistanceRecord>
