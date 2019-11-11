@@ -14,10 +14,10 @@ pub enum ActivityType {
 pub struct TimeDistanceRecord {
     #[serde(rename = "date")]
     timestamp: DateTimeTz,
-    activity: ActivityType,
-    distance: Option<Meter<f64>>,
-    duration: Option<Second<f64>>,
-    comments: Option<String>,
+    pub activity: ActivityType,
+    pub distance: Option<Meter<f64>>,
+    pub duration: Option<Second<f64>>,
+    pub comments: Option<String>,
 }
 
 impl TimeDistanceRecord {
