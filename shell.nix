@@ -1,5 +1,5 @@
 let
-    pkgs = import <nixpkgs-19.03> {};
+    pkgs = import <nixpkgs-19.09> {};
     ld = import <luminescent-dreams> {};
     frameworks = pkgs.darwin.apple_sdk.frameworks;
 
@@ -14,7 +14,8 @@ in pkgs.mkShell {
 
     buildInputs = [ ld.nodejs_10_15_3
                     pkgs.carnix
-                    ld.rust_1_33_0
+                    pkgs.gtk3-x11
+                    ld.rust_1_39
                   ] ++ darwin_frameworks;
 
     RUST_BACKTRACE = "full";

@@ -1,6 +1,5 @@
 .DS_Store
-fitnesstrax-lib/target/
-server/target/
+**/target/
 **/*.rs.bk
 Cargo.lock
 var/
