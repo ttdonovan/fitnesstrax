@@ -36,13 +36,6 @@ impl Configuration {
     }
 }
 
-fn day_widget(date: chrono::Date<chrono_tz::Tz>, data: Vec<fitnesstrax::TraxRecord>) -> gtk::Box {
-    let container = gtk::Box::new(gtk::Orientation::Horizontal, 5);
-    let date_label = gtk::Label::new(Some(&(format!("{}", date.format("%B %e, %Y")))));
-    container.add(&date_label);
-    return container;
-}
-
 fn main() {
     let config = Configuration::load_from_environment();
 
@@ -74,21 +67,32 @@ fn main() {
         main_box.add(&left_panel);
         main_box.add(&history_panel);
 
-        let history = app_rc
-            .read()
-            .unwrap()
-            .get_history(
-                emseries::DateTimeTz(config.timezone.ymd(2019, 9, 1).and_hms(0, 0, 0)),
-                emseries::DateTimeTz(config.timezone.ymd(2019, 9, 30).and_hms(0, 0, 0)),
-            )
-            .unwrap();
+        let history = fitnesstrax_gtk::group_by_date(
+            fitnesstrax_gtk::Range::new(
+                config.timezone.ymd(2019, 9, 1),
+                config.timezone.ymd(2019, 9, 30),
+            ),
+            app_rc
+                .read()
+                .unwrap()
+                .get_history(
+                    emseries::DateTimeTz(config.timezone.ymd(2019, 9, 1).and_hms(0, 0, 0)),
+                    emseries::DateTimeTz(config.timezone.ymd(2019, 9, 30).and_hms(0, 0, 0)),
+                )
+                .unwrap(),
+        );
 
-        let history_boxes = history
-            .into_iter()
-            .map(|record| day_widget(record.timestamp().0.date(), vec![]));
+        let mut dates = fitnesstrax_gtk::dates_in_range(fitnesstrax_gtk::Range::new(
+            config.timezone.ymd(2019, 9, 1),
+            config.timezone.ymd(2019, 9, 30),
+        ));
+        dates.sort();
 
-        for b in history_boxes {
-            history_panel.add(&b);
+        for date in dates.into_iter() {
+            history_panel.add(&fitnesstrax_gtk::day_c(
+                &date,
+                history.get(&date).unwrap_or(&vec![]),
+            ));
         }
 
         window.add(&main_box);
