@@ -2,9 +2,8 @@ use dimensioned;
 use emseries::*;
 use gtk::prelude::*;
 
+use super::basics::{distance_c, duration_c, time_c};
 use fitnesstrax;
-
-use super::date_and_time::time_c;
 
 fn activity_c(activity: &fitnesstrax::timedistance::ActivityType) -> gtk::Label {
     gtk::Label::new(match activity {
@@ -14,14 +13,6 @@ fn activity_c(activity: &fitnesstrax::timedistance::ActivityType) -> gtk::Label 
         fitnesstrax::timedistance::ActivityType::Swimming => Some("Swimming"),
         fitnesstrax::timedistance::ActivityType::Walking => Some("Walking"),
     })
-}
-
-fn distance_c(distance: &dimensioned::si::Meter<f64>) -> gtk::Label {
-    gtk::Label::new(Some(&format!("{} m", distance.value_unsafe)))
-}
-
-fn duration_c(duration: &dimensioned::si::Second<f64>) -> gtk::Label {
-    gtk::Label::new(Some(&format!("{} s", duration.value_unsafe)))
 }
 
 pub fn time_distance_c(record: &fitnesstrax::timedistance::TimeDistanceRecord) -> gtk::Box {

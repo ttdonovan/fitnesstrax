@@ -1,6 +1,8 @@
 use gtk::prelude::*;
 
-use super::date_and_time::date_c;
+use super::basics::date_c;
+use super::rep_duration::rep_duration_c;
+use super::set_rep::set_rep_c;
 use super::steps::steps_c;
 use super::time_distance::time_distance_c;
 use super::weight::weight_record_c;
@@ -17,23 +19,35 @@ pub fn day_c(
 
     let mut weight_component = None;
     let mut step_component = None;
+    let mut rep_duration_components: Vec<gtk::Box> = Vec::new();
+    let mut set_rep_components: Vec<gtk::Box> = Vec::new();
     let mut time_distance_components: Vec<gtk::Box> = Vec::new();
     for record in data {
         match record.data {
-            fitnesstrax::TraxRecord::Weight(ref rec) => {
-                weight_component = Some(weight_record_c(&rec))
+            fitnesstrax::TraxRecord::Comments(ref _rec) => (),
+            fitnesstrax::TraxRecord::RepDuration(ref rec) => {
+                rep_duration_components.push(rep_duration_c(&rec))
             }
+            fitnesstrax::TraxRecord::SetRep(ref rec) => set_rep_components.push(set_rep_c(&rec)),
             fitnesstrax::TraxRecord::Steps(ref rec) => step_component = Some(steps_c(&rec)),
             fitnesstrax::TraxRecord::TimeDistance(ref rec) => {
                 time_distance_components.push(time_distance_c(&rec))
             }
-            _ => (),
+            fitnesstrax::TraxRecord::Weight(ref rec) => {
+                weight_component = Some(weight_record_c(&rec))
+            }
         }
     }
 
     weight_component.map(|c| first_row.add(&c));
     step_component.map(|c| first_row.add(&c));
     for component in time_distance_components {
+        container.add(&component);
+    }
+    for component in set_rep_components {
+        container.add(&component);
+    }
+    for component in rep_duration_components {
         container.add(&component);
     }
 

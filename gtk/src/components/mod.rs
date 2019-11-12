@@ -1,5 +1,7 @@
-mod date_and_time;
+mod basics;
 mod day;
+mod rep_duration;
+mod set_rep;
 mod steps;
 mod time_distance;
 mod weight;
