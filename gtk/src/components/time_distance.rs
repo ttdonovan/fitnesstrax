@@ -18,19 +18,25 @@ fn activity_c(activity: &fitnesstrax::timedistance::ActivityType) -> gtk::Label 
 pub fn time_distance_c(record: &fitnesstrax::timedistance::TimeDistanceRecord) -> gtk::Box {
     let container = gtk::Box::new(gtk::Orientation::Horizontal, 5);
 
-    container.add(&time_c(&record.timestamp().0.time()));
-    container.add(&activity_c(&record.activity));
-    container.add(
+    container.pack_start(&time_c(&record.timestamp().0.time()), false, false, 5);
+    container.pack_start(&activity_c(&record.activity), false, false, 5);
+    container.pack_start(
         &record
             .distance
             .map(|r| distance_c(&r))
             .unwrap_or(gtk::Label::new(Some("---"))),
+        false,
+        false,
+        5,
     );
-    container.add(
+    container.pack_start(
         &record
             .duration
             .map(|r| duration_c(&r))
             .unwrap_or(gtk::Label::new(Some("---"))),
+        false,
+        false,
+        5,
     );
 
     return container;

@@ -1,4 +1,5 @@
 use gtk::prelude::*;
+//use gtk::StateFlags;
 
 use super::basics::date_c;
 use super::rep_duration::rep_duration_c;
@@ -12,10 +13,23 @@ pub fn day_c(
     data: &Vec<emseries::Record<fitnesstrax::TraxRecord>>,
 ) -> gtk::Box {
     let container = gtk::Box::new(gtk::Orientation::Vertical, 5);
-    container.add(&date_c(&date));
+
+    /*
+    println!("{:?}", container.get_style_context());
+    println!(
+        "{:?}",
+        container
+            .get_style_context()
+            .get_background_color(StateFlags::NORMAL)
+    );
+    */
+
+    let header = gtk::Box::new(gtk::Orientation::Horizontal, 5);
+    header.pack_start(&date_c(&date), false, false, 5);
+    container.pack_start(&header, false, false, 5);
 
     let first_row = gtk::Box::new(gtk::Orientation::Horizontal, 5);
-    container.add(&first_row);
+    container.pack_start(&first_row, false, false, 5);
 
     let mut weight_component = None;
     let mut step_component = None;
@@ -39,16 +53,16 @@ pub fn day_c(
         }
     }
 
-    weight_component.map(|c| first_row.add(&c));
-    step_component.map(|c| first_row.add(&c));
+    weight_component.map(|c| first_row.pack_start(&c, false, false, 5));
+    step_component.map(|c| first_row.pack_start(&c, false, false, 5));
     for component in time_distance_components {
-        container.add(&component);
+        container.pack_start(&component, false, false, 5);
     }
     for component in set_rep_components {
-        container.add(&component);
+        container.pack_start(&component, false, false, 5);
     }
     for component in rep_duration_components {
-        container.add(&component);
+        container.pack_start(&component, false, false, 5);
     }
 
     return container;

@@ -9,6 +9,7 @@ use chrono_tz::Tz;
 use emseries::*;
 use gio::prelude::*;
 use gtk::prelude::*;
+use gtk::BoxExt;
 use std::env;
 use std::path;
 use std::sync::{Arc, RwLock};
@@ -61,30 +62,31 @@ fn main() {
         let left_panel = gtk::Box::new(gtk::Orientation::Vertical, 5);
         left_panel.add(&gtk::Label::new(Some("date select panel")));
 
+        let no_adjustment: Option<&gtk::Adjustment> = None;
+        let scrolling_history = gtk::ScrolledWindow::new(no_adjustment, no_adjustment);
         let history_panel = gtk::Box::new(gtk::Orientation::Vertical, 5);
-
-        history_panel.add(&gtk::Label::new(Some("history panel")));
+        scrolling_history.add(&history_panel);
 
         main_box.add(&left_panel);
-        main_box.add(&history_panel);
+        main_box.pack_end(&scrolling_history, true, true, 5);
 
         let history = fitnesstrax_gtk::group_by_date(
             fitnesstrax_gtk::Range::new(
-                config.timezone.ymd(2019, 9, 15),
+                config.timezone.ymd(2019, 9, 1),
                 config.timezone.ymd(2019, 9, 30),
             ),
             app_rc
                 .read()
                 .unwrap()
                 .get_history(
-                    emseries::DateTimeTz(config.timezone.ymd(2019, 9, 15).and_hms(0, 0, 0)),
+                    emseries::DateTimeTz(config.timezone.ymd(2019, 9, 1).and_hms(0, 0, 0)),
                     emseries::DateTimeTz(config.timezone.ymd(2019, 9, 30).and_hms(0, 0, 0)),
                 )
                 .unwrap(),
         );
 
         let mut dates = fitnesstrax_gtk::dates_in_range(fitnesstrax_gtk::Range::new(
-            config.timezone.ymd(2019, 9, 15),
+            config.timezone.ymd(2019, 9, 1),
             config.timezone.ymd(2019, 9, 30),
         ));
         dates.sort();
