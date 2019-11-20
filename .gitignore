@@ -10,3 +10,4 @@ client/build
 client/index.js
 server/db.series
 result
+config.yaml

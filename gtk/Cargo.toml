@@ -5,13 +5,15 @@ authors = ["savanni"]
 edition = "2018"
 
 [dependencies]
-chrono = { version = "0.4", features = ["serde"] }
 chrono-tz = { version = "0.4", features = ["serde"] }
+chrono = { version = "0.4", features = ["serde"] }
 dimensioned = "0.7.0"
 emseries = "0.4.0"
 fitnesstrax = { path = "../fitnesstrax-lib" }
-gtk = { version = "0.7.0", features = ["v3_16"] }
 gio = { version = "", features = ["v2_44"] }
+gtk = { version = "0.7.0", features = ["v3_16"] }
+serde = { version = "1.0.102", features = ["derive"] }
+serde_yaml = "*"
 tzdata = "0.4.1"
 
 [[bin]]

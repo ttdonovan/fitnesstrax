@@ -3,48 +3,92 @@ extern crate chrono_tz;
 extern crate emseries;
 extern crate gio;
 extern crate gtk;
+extern crate serde;
 
 use chrono::TimeZone;
-use chrono_tz::Tz;
-use emseries::*;
 use gio::prelude::*;
 use gtk::prelude::*;
 use gtk::BoxExt;
+use serde::{Deserialize, Serialize};
 use std::env;
+use std::error;
+use std::fmt;
+use std::fs::File;
 use std::path;
+use std::result;
 use std::sync::{Arc, RwLock};
 
 use fitnesstrax;
 use fitnesstrax_gtk;
 
 #[derive(Debug)]
-struct Configuration {
-    series_path: path::PathBuf,
-    timezone: chrono_tz::Tz,
+pub enum Error {
+    NoError,
 }
 
-impl Configuration {
-    fn load_from_environment() -> Configuration {
-        let series_path = env::var("SERIES_PATH").expect("SERIES_PATH to be specified");
-        let timezone = env::var("TZ")
-            .expect("TZ to be specified")
-            .parse()
-            .expect("a valid timezone");
-        Configuration {
-            series_path: path::PathBuf::from(series_path),
-            timezone,
+impl fmt::Display for Error {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            Error::NoError => write!(f, "no errors are currently supported"),
         }
     }
 }
 
-fn main() {
-    let config = Configuration::load_from_environment();
+impl error::Error for Error {
+    fn description(&self) -> &str {
+        match self {
+            Error::NoError => "no errors",
+        }
+    }
 
-    let trax = fitnesstrax::Trax::new(fitnesstrax::Params {
-        series_path: config.series_path.clone(),
-    })
-    .unwrap();
-    let app_rc = Arc::new(RwLock::new(trax));
+    fn cause(&self) -> Option<&(dyn error::Error + 'static)> {
+        match self {
+            Error::NoError => None,
+        }
+    }
+}
+
+type Result<A> = result::Result<A, Error>;
+
+#[derive(Debug, Serialize, Deserialize)]
+struct Configuration {
+    series_path: path::PathBuf,
+    timezone: chrono_tz::Tz,
+    language: String,
+}
+
+impl Configuration {
+    fn load_from_yaml() -> Configuration {
+        let config_path = env::var("CONFIG").unwrap_or("config.yaml".to_string());
+        let config_file = File::open(config_path.clone())
+            .expect(&format!("cannot open configuration file: {}", &config_path));
+        serde_yaml::from_reader(config_file).expect("invalid configuration file")
+    }
+}
+
+struct AppContext {
+    config: Configuration,
+    trax: Arc<RwLock<fitnesstrax::Trax>>,
+}
+
+impl AppContext {
+    fn new() -> Result<AppContext> {
+        let config = Configuration::load_from_yaml();
+
+        let trax = fitnesstrax::Trax::new(fitnesstrax::Params {
+            series_path: config.series_path.clone(),
+        })
+        .unwrap();
+        let trax_rc = Arc::new(RwLock::new(trax));
+        Ok(AppContext {
+            config,
+            trax: trax_rc,
+        })
+    }
+}
+
+fn main() {
+    let ctx = AppContext::new().unwrap();
 
     let application = gtk::Application::new(
         Some("com.github.luminescent-dreams.fitnesstrax"),
@@ -72,22 +116,22 @@ fn main() {
 
         let history = fitnesstrax_gtk::group_by_date(
             fitnesstrax_gtk::Range::new(
-                config.timezone.ymd(2019, 9, 1),
-                config.timezone.ymd(2019, 9, 30),
+                ctx.config.timezone.ymd(2019, 9, 1),
+                ctx.config.timezone.ymd(2019, 9, 30),
             ),
-            app_rc
+            ctx.trax
                 .read()
                 .unwrap()
                 .get_history(
-                    emseries::DateTimeTz(config.timezone.ymd(2019, 9, 1).and_hms(0, 0, 0)),
-                    emseries::DateTimeTz(config.timezone.ymd(2019, 9, 30).and_hms(0, 0, 0)),
+                    emseries::DateTimeTz(ctx.config.timezone.ymd(2019, 9, 1).and_hms(0, 0, 0)),
+                    emseries::DateTimeTz(ctx.config.timezone.ymd(2019, 9, 30).and_hms(0, 0, 0)),
                 )
                 .unwrap(),
         );
 
         let mut dates = fitnesstrax_gtk::dates_in_range(fitnesstrax_gtk::Range::new(
-            config.timezone.ymd(2019, 9, 1),
-            config.timezone.ymd(2019, 9, 30),
+            ctx.config.timezone.ymd(2019, 9, 1),
+            ctx.config.timezone.ymd(2019, 9, 30),
         ));
         dates.sort();
 
