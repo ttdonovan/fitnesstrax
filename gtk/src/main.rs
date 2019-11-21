@@ -11,50 +11,39 @@ use gtk::BoxExt;
 use std::sync::{Arc, RwLock};
 
 #[derive(Clone)]
-struct AppContext {
+struct AppContext<F: Fn(u32) + 'static> {
     count: u32,
+    change_listeners: Vec<F>,
 }
 
-impl AppContext {
-    fn new() -> AppContext {
-        AppContext { count: 0 }
+impl<F: Fn(u32) + 'static> AppContext<F> {
+    fn new() -> AppContext<F> {
+        AppContext {
+            count: 0,
+            change_listeners: Vec::new(),
+        }
     }
 
     fn increment(&mut self) {
         self.count = self.count + 1;
         println!("new value: {}", self.count);
+        self.change_listeners
+            .iter()
+            .for_each(|listener| listener(self.count));
     }
 
     fn decrement(&mut self) {
         self.count = self.count - 1;
         println!("new value: {}", self.count);
+        self.change_listeners
+            .iter()
+            .for_each(|listener| listener(self.count));
+    }
+
+    fn register_listener(&mut self, listener: F) {
+        self.change_listeners.push(listener);
     }
 }
-
-/*
-struct IncCtx {
-    ctx: AppContext,
-}
-
-impl Fn<Args> for IncCtx
-where
-    Args: Display,
-{
-    fn call(&self, args: Args) {
-        self.ctx.increment();
-    }
-}
-
-struct DecCtx {
-    ctx: AppContext,
-}
-
-impl DecCtx {
-    fn run(&mut self) {
-        self.ctx.decrement();
-    }
-}
-*/
 
 fn main() {
     let ctx = Arc::new(RwLock::new(AppContext::new()));
@@ -66,8 +55,6 @@ fn main() {
     .expect("failed to initialize GTK application");
 
     application.connect_activate(move |app| {
-        let dec_ctx = ctx.clone();
-        let inc_ctx = ctx.clone();
         let window = gtk::ApplicationWindow::new(app);
         window.set_title("Counter");
         window.set_default_size(350, 70);
@@ -76,10 +63,17 @@ fn main() {
         window.add(&main_panel);
 
         let counter_label = gtk::Label::new(Some("0"));
+        let label_clone = counter_label.clone();
+        ctx.write().unwrap().register_listener(move |new_value| {
+            label_clone.set_markup(&format!("{}", new_value));
+        });
+
         let dec_button = gtk::Button::new_with_label("-1");
+        let dec_ctx = ctx.clone();
         dec_button.connect_clicked(move |_f| dec_ctx.write().unwrap().decrement());
 
         let inc_button = gtk::Button::new_with_label("+1");
+        let inc_ctx = ctx.clone();
         inc_button.connect_clicked(move |_f| inc_ctx.write().unwrap().increment());
 
         main_panel.pack_start(&counter_label, true, true, 5);
