@@ -22,10 +22,12 @@ impl AppContext {
 
     fn increment(&mut self) {
         self.count = self.count + 1;
+        println!("new value: {}", self.count);
     }
 
     fn decrement(&mut self) {
-        self.count = self.count - 1
+        self.count = self.count - 1;
+        println!("new value: {}", self.count);
     }
 }
 
@@ -56,8 +58,6 @@ impl DecCtx {
 
 fn main() {
     let ctx = Arc::new(RwLock::new(AppContext::new()));
-    let dec_ctx = ctx.clone();
-    let inc_ctx = ctx.clone();
 
     let application = gtk::Application::new(
         Some("com.github.luminescent-dreams.fitnesstrax"),
@@ -65,7 +65,9 @@ fn main() {
     )
     .expect("failed to initialize GTK application");
 
-    application.connect_activate(|app| {
+    application.connect_activate(move |app| {
+        let dec_ctx = ctx.clone();
+        let inc_ctx = ctx.clone();
         let window = gtk::ApplicationWindow::new(app);
         window.set_title("Counter");
         window.set_default_size(350, 70);
@@ -75,10 +77,10 @@ fn main() {
 
         let counter_label = gtk::Label::new(Some("0"));
         let dec_button = gtk::Button::new_with_label("-1");
-        dec_button.connect_clicked(|_f| dec_ctx.write().unwrap().decrement());
+        dec_button.connect_clicked(move |_f| dec_ctx.write().unwrap().decrement());
 
         let inc_button = gtk::Button::new_with_label("+1");
-        inc_button.connect_clicked(|_f| inc_ctx.write().unwrap().increment());
+        inc_button.connect_clicked(move |_f| inc_ctx.write().unwrap().increment());
 
         main_panel.pack_start(&counter_label, true, true, 5);
         let button_box = gtk::Box::new(gtk::Orientation::Horizontal, 5);
