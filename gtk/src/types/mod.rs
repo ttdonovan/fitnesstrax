@@ -11,6 +11,7 @@ use std::collections::HashMap;
 use emseries::Recordable;
 pub use fitnesstrax::{Params, Result, Trax, TraxRecord};
 
+#[derive(Clone, Debug)]
 pub struct Range<A> {
     pub start: A,
     pub end: A,
@@ -122,4 +123,17 @@ mod test {
             Some(0)
         );
     }
+
+    /*
+    #[test]
+    fn it_shows_various_dates_and_times() {
+        let today = chrono::Utc::today();
+        println!("{}", today);
+        println!("{}", today.with_timezone(&chrono_tz::America::Los_Angeles));
+        println!("{}", today.with_timezone(&chrono_tz::America::New_York));
+        println!("{}", today.with_timezone(&chrono_tz::Australia::Melbourne));
+
+        assert_eq!(false, true);
+    }
+    */
 }

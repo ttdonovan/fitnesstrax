@@ -5,7 +5,7 @@ extern crate gio;
 extern crate gtk;
 extern crate serde;
 
-use chrono::TimeZone;
+use chrono::{TimeZone, Utc};
 use gio::prelude::*;
 use gtk::prelude::*;
 use gtk::BoxExt;
@@ -14,6 +14,7 @@ use std::env;
 use std::error;
 use std::fmt;
 use std::fs::File;
+use std::io;
 use std::path;
 use std::result;
 use std::sync::{Arc, RwLock};
@@ -23,13 +24,27 @@ use fitnesstrax_gtk;
 
 #[derive(Debug)]
 pub enum Error {
-    NoError,
+    TraxError(fitnesstrax::Error),
+    IOError(io::Error),
+}
+
+impl From<fitnesstrax::Error> for Error {
+    fn from(error: fitnesstrax::Error) -> Self {
+        Error::TraxError(error)
+    }
+}
+
+impl From<io::Error> for Error {
+    fn from(error: io::Error) -> Self {
+        Error::IOError(error)
+    }
 }
 
 impl fmt::Display for Error {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
-            Error::NoError => write!(f, "no errors are currently supported"),
+            Error::TraxError(err) => write!(f, "Trax encountered an error: {}", err),
+            Error::IOError(err) => write!(f, "IO Error: {}", err),
         }
     }
 }
@@ -37,65 +52,100 @@ impl fmt::Display for Error {
 impl error::Error for Error {
     fn description(&self) -> &str {
         match self {
-            Error::NoError => "no errors",
+            Error::TraxError(err) => err.description(),
+            Error::IOError(err) => err.description(),
         }
     }
 
     fn cause(&self) -> Option<&(dyn error::Error + 'static)> {
         match self {
-            Error::NoError => None,
+            Error::TraxError(ref err) => Some(err),
+            Error::IOError(ref err) => Some(err),
         }
     }
 }
 
 type Result<A> = result::Result<A, Error>;
 
-#[derive(Debug, Serialize, Deserialize)]
-struct Configuration {
-    series_path: path::PathBuf,
-    timezone: chrono_tz::Tz,
-    language: String,
-}
-
-impl Configuration {
-    fn load_from_yaml() -> Configuration {
-        let config_path = env::var("CONFIG").unwrap_or("config.yaml".to_string());
-        let config_file = File::open(config_path.clone())
-            .expect(&format!("cannot open configuration file: {}", &config_path));
-        serde_yaml::from_reader(config_file).expect("invalid configuration file")
-    }
-}
-
+#[derive(Clone)]
 struct AppContext {
-    config: Configuration,
-    trax: Arc<RwLock<fitnesstrax::Trax>>,
+    count: Arc<RwLock<u32>>,
 }
 
 impl AppContext {
-    fn new() -> Result<AppContext> {
-        let config = Configuration::load_from_yaml();
+    fn new() -> AppContext {
+        AppContext {
+            count: Arc::new(RwLock::new(0)),
+        }
+    }
 
-        let trax = fitnesstrax::Trax::new(fitnesstrax::Params {
-            series_path: config.series_path.clone(),
-        })
-        .unwrap();
-        let trax_rc = Arc::new(RwLock::new(trax));
-        Ok(AppContext {
-            config,
-            trax: trax_rc,
-        })
+    fn increment(&mut self) {
+        let mut val = self.count.write().unwrap();
+        *val = *val + 1;
+    }
+
+    fn decrement(&mut self) {
+        let mut val = self.count.write().unwrap();
+        *val = *val - 1;
+    }
+}
+
+struct IncCtx {
+    ctx: AppContext,
+}
+
+impl Fn for IncCtx {
+    fn call(&self, args: Args) {
+        self.ctx.increment();
+    }
+}
+
+struct DecCtx {
+    ctx: AppContext,
+}
+
+impl DecCtx {
+    fn run(&mut self) {
+        self.ctx.decrement();
     }
 }
 
 fn main() {
-    let ctx = AppContext::new().unwrap();
-
     let application = gtk::Application::new(
         Some("com.github.luminescent-dreams.fitnesstrax"),
         Default::default(),
     )
     .expect("failed to initialize GTK application");
 
+    application.connect_activate(|app| {
+        let ctx = AppContext::new();
+        let mut dec_ctx = DecCtx { ctx: ctx.clone() };
+        let mut inc_ctx = IncCtx { ctx: ctx.clone() };
+
+        let window = gtk::ApplicationWindow::new(app);
+        window.set_title("Counter");
+        window.set_default_size(350, 70);
+
+        let main_panel = gtk::Box::new(gtk::Orientation::Vertical, 5);
+        window.add(&main_panel);
+
+        let counter_label = gtk::Label::new(Some("0"));
+        let dec_button = gtk::Button::new_with_label("-1");
+        dec_button.connect_clicked(dec_ctx);
+
+        let inc_button = gtk::Button::new_with_label("+1");
+        inc_button.connect_clicked(inc_ctx);
+
+        main_panel.pack_start(&counter_label, true, true, 5);
+        let button_box = gtk::Box::new(gtk::Orientation::Horizontal, 5);
+        button_box.pack_start(&dec_button, true, true, 5);
+        button_box.pack_start(&inc_button, true, true, 5);
+        main_panel.pack_start(&button_box, true, true, 5);
+
+        window.show_all();
+    });
+
+    /*
     application.connect_activate(move |app| {
         let window = gtk::ApplicationWindow::new(app);
         window.set_title("Fitnesstrax");
@@ -114,25 +164,20 @@ fn main() {
         main_box.add(&left_panel);
         main_box.pack_end(&scrolling_history, true, true, 5);
 
+        let range = (*ctx.range.read().unwrap()).clone();
         let history = fitnesstrax_gtk::group_by_date(
-            fitnesstrax_gtk::Range::new(
-                ctx.config.timezone.ymd(2019, 9, 1),
-                ctx.config.timezone.ymd(2019, 9, 30),
-            ),
+            range.clone(),
             ctx.trax
                 .read()
                 .unwrap()
                 .get_history(
-                    emseries::DateTimeTz(ctx.config.timezone.ymd(2019, 9, 1).and_hms(0, 0, 0)),
-                    emseries::DateTimeTz(ctx.config.timezone.ymd(2019, 9, 30).and_hms(0, 0, 0)),
+                    emseries::DateTimeTz(range.start.and_hms(0, 0, 0)),
+                    emseries::DateTimeTz(range.end.and_hms(0, 0, 0)),
                 )
                 .unwrap(),
         );
 
-        let mut dates = fitnesstrax_gtk::dates_in_range(fitnesstrax_gtk::Range::new(
-            ctx.config.timezone.ymd(2019, 9, 1),
-            ctx.config.timezone.ymd(2019, 9, 30),
-        ));
+        let mut dates = fitnesstrax_gtk::dates_in_range(range);
         dates.sort();
 
         for date in dates.into_iter() {
@@ -146,6 +191,7 @@ fn main() {
 
         window.show_all();
     });
+    */
 
     application.run(&[]);
 }
