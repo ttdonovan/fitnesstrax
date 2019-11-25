@@ -1,6 +1,6 @@
 extern crate chrono;
 extern crate chrono_tz;
-extern crate emseries;
+extern crate fitnesstrax;
 extern crate gio;
 extern crate gtk;
 extern crate serde;
@@ -10,43 +10,15 @@ use gtk::prelude::*;
 use gtk::BoxExt;
 use std::sync::{Arc, RwLock};
 
-#[derive(Clone)]
-struct AppContext<F: Fn(u32) + 'static> {
-    count: u32,
-    change_listeners: Vec<F>,
-}
-
-impl<F: Fn(u32) + 'static> AppContext<F> {
-    fn new() -> AppContext<F> {
-        AppContext {
-            count: 0,
-            change_listeners: Vec::new(),
-        }
-    }
-
-    fn increment(&mut self) {
-        self.count = self.count + 1;
-        println!("new value: {}", self.count);
-        self.change_listeners
-            .iter()
-            .for_each(|listener| listener(self.count));
-    }
-
-    fn decrement(&mut self) {
-        self.count = self.count - 1;
-        println!("new value: {}", self.count);
-        self.change_listeners
-            .iter()
-            .for_each(|listener| listener(self.count));
-    }
-
-    fn register_listener(&mut self, listener: F) {
-        self.change_listeners.push(listener);
-    }
-}
+mod components;
+mod config;
+pub(crate) mod context;
+mod errors;
+mod range;
+mod types;
 
 fn main() {
-    let ctx = Arc::new(RwLock::new(AppContext::new()));
+    let ctx = Arc::new(RwLock::new(context::AppContext::new().unwrap()));
 
     let application = gtk::Application::new(
         Some("com.github.luminescent-dreams.fitnesstrax"),
@@ -64,10 +36,17 @@ fn main() {
 
         let counter_label = gtk::Label::new(Some("0"));
         let label_clone = counter_label.clone();
-        ctx.write().unwrap().register_listener(move |new_value| {
-            label_clone.set_markup(&format!("{}", new_value));
-        });
+        ctx.write()
+            .unwrap()
+            .register_listener(Box::new(move |new_value| {
+                label_clone.set_markup(&format!("{:?}", new_value));
+            }));
 
+        let history = components::History::new(ctx.clone());
+
+        main_panel.pack_start(history.render(), true, true, 5);
+
+        /*
         let dec_button = gtk::Button::new_with_label("-1");
         let dec_ctx = ctx.clone();
         dec_button.connect_clicked(move |_f| dec_ctx.write().unwrap().decrement());
@@ -81,6 +60,7 @@ fn main() {
         button_box.pack_start(&dec_button, true, true, 5);
         button_box.pack_start(&inc_button, true, true, 5);
         main_panel.pack_start(&button_box, true, true, 5);
+        */
 
         window.show_all();
     });

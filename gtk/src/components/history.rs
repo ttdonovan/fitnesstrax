@@ -1,20 +1,30 @@
-use gtk::prelude::*;
+//use super::basics::day_c;
+use std::sync::{Arc, RwLock};
 
-use super::basics::day_c;
+use crate::context::{AppContext, Message};
 
-pub struct History<'ctx> {
-    ctx: &'ctx AppContext,
+pub struct History {
+    ctx: Arc<RwLock<AppContext>>,
     widget: gtk::Box,
 }
 
-impl<'ctx> History<'ctx> {
-    pub fn new(ctx: &'ctx AppContext) -> History<'ctx> {
-        ctx.register_range_listener()
+impl History {
+    pub fn new(ctx: Arc<RwLock<AppContext>>) -> History {
+        ctx.write().unwrap().register_listener(Box::new(|message| {
+            println!("Message received: {:?}", message)
+        }));
+
+        History {
+            ctx,
+            widget: gtk::Box::new(gtk::Orientation::Vertical, 5),
+        }
     }
 
+    /*
     fn range_update(&self, new_range: &DateRange) {
         println!("{:?}", new_range);
     }
+    */
 
     pub fn render(&self) -> &gtk::Box {
         &self.widget
