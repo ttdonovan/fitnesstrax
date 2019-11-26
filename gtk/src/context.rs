@@ -1,4 +1,4 @@
-use chrono::TimeZone;
+use chrono::{DateTime, TimeZone};
 use chrono_tz;
 use serde::{Deserialize, Serialize};
 use std::env;
@@ -9,7 +9,8 @@ use std::path;
 use super::config::Configuration;
 use super::errors::Result;
 use super::range::Range;
-use emseries::Record;
+use crate::errors::Error;
+use emseries::{DateTimeTz, Record};
 use fitnesstrax::{Trax, TraxRecord};
 
 type DateRange = Range<chrono::Date<chrono_tz::Tz>>;
@@ -55,6 +56,34 @@ impl AppContext {
             range,
             listeners: Vec::new(),
         })
+    }
+
+    pub fn get_range(&self) -> DateRange {
+        self.range.clone()
+    }
+
+    pub fn get_history(&self) -> Result<Vec<Record<TraxRecord>>> {
+        let start_time = DateTimeTz(
+            self.range
+                .start
+                .and_hms(0, 0, 0)
+                .with_timezone(&self.config.timezone),
+        );
+        let end_time = DateTimeTz(
+            self.range
+                .end
+                .and_hms(0, 0, 0)
+                .with_timezone(&self.config.timezone),
+        );
+        println!(
+            "getting times: {} -> {}",
+            start_time.to_string(),
+            end_time.to_string()
+        );
+
+        self.trax
+            .get_history(start_time, end_time)
+            .map_err(|err| Error::TraxError(err))
     }
 
     fn send_notifications(&self, msg: Message) {
