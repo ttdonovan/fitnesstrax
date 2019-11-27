@@ -12,7 +12,7 @@ use std::sync::{Arc, RwLock};
 
 mod components;
 mod config;
-pub(crate) mod context;
+mod context;
 mod errors;
 mod range;
 mod types;
@@ -28,24 +28,16 @@ fn main() {
 
     application.connect_activate(move |app| {
         let window = gtk::ApplicationWindow::new(app);
-        window.set_title("Counter");
+        window.set_title("Fitnesstrax");
         window.set_default_size(350, 70);
 
         let main_panel = gtk::Box::new(gtk::Orientation::Vertical, 5);
         window.add(&main_panel);
 
-        /*
-        let counter_label = gtk::Label::new(Some("0"));
-        let label_clone = counter_label.clone();
-        ctx.write()
-            .unwrap()
-            .register_listener(Box::new(move |new_value| {
-                label_clone.set_markup(&format!("{:?}", new_value));
-            }));
-            */
-
+        let menubar = components::MenuBar::new(ctx.clone());
         let history = components::History::new(ctx.clone());
 
+        main_panel.pack_start(menubar.render(), false, false, 5);
         main_panel.pack_start(history.render(), true, true, 5);
 
         window.show_all();
