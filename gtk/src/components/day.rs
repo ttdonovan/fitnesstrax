@@ -65,5 +65,6 @@ pub fn day_c(
         container.pack_start(&component, false, false, 5);
     }
 
+    container.show_all();
     return container;
 }

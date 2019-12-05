@@ -7,6 +7,9 @@ use crate::range::group_by_date;
 
 pub struct History {
     widget: gtk::Box,
+    range_bar: RangeBar,
+    scrolling_history: gtk::ScrolledWindow,
+    history_box: gtk::Box,
 }
 
 impl History {
@@ -19,6 +22,7 @@ impl History {
         let no_adjustment: Option<&gtk::Adjustment> = None;
         let scrolling_history = gtk::ScrolledWindow::new(no_adjustment, no_adjustment);
         scrolling_history.add(&history_box);
+        scrolling_history.show();
 
         widget.pack_start(range_bar.render(), false, false, 25);
         widget.pack_start(&scrolling_history, true, true, 5);
@@ -30,14 +34,21 @@ impl History {
 
         let dates = history.keys();
         dates.for_each(|date| {
-            history_box.pack_start(&day_c(date, history.get(date).unwrap()), true, true, 25)
+            let day = day_c(date, history.get(date).unwrap());
+            day.show_all();
+            history_box.pack_start(&day, true, true, 25);
         });
 
         ctx.write().unwrap().register_listener(Box::new(|message| {
             println!("Message received: {:?}", message)
         }));
 
-        History { widget }
+        History {
+            widget,
+            range_bar,
+            scrolling_history,
+            history_box,
+        }
     }
 
     /*
@@ -45,6 +56,12 @@ impl History {
         println!("{:?}", new_range);
     }
     */
+
+    pub fn show(&self) {
+        self.widget.show();
+        self.range_bar.show();
+        self.history_box.show();
+    }
 
     pub fn render(&self) -> &gtk::Box {
         &self.widget

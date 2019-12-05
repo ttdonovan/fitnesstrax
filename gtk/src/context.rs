@@ -86,7 +86,16 @@ impl AppContext {
             .map_err(|err| Error::TraxError(err))
     }
 
+    pub fn set_range(&mut self, range: DateRange) {
+        self.range = range;
+        self.send_notifications(Message::ChangeRange {
+            range: self.range.clone(),
+            records: Vec::new(),
+        })
+    }
+
     fn send_notifications(&self, msg: Message) {
+        println!("dispatching message: {:?}", msg);
         self.listeners.iter().for_each(|f| f(msg.clone()))
     }
 

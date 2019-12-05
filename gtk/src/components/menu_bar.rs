@@ -17,6 +17,10 @@ impl MenuBar {
         MenuBar { widget }
     }
 
+    pub fn show(&self) {
+        self.widget.show_all();
+    }
+
     pub fn render(&self) -> &gtk::Box {
         &self.widget
     }

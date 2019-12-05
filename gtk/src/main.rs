@@ -40,7 +40,10 @@ fn main() {
         main_panel.pack_start(menubar.render(), false, false, 5);
         main_panel.pack_start(history.render(), true, true, 5);
 
-        window.show_all();
+        main_panel.show();
+        history.show();
+        menubar.show();
+        window.show();
     });
 
     application.run(&[]);
