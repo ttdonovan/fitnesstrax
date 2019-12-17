@@ -2,6 +2,7 @@ extern crate chrono;
 extern crate chrono_tz;
 extern crate fitnesstrax;
 extern crate gio;
+extern crate glib;
 extern crate gtk;
 extern crate serde;
 
@@ -18,8 +19,6 @@ mod range;
 mod types;
 
 fn main() {
-    let ctx = Arc::new(RwLock::new(context::AppContext::new().unwrap()));
-
     let application = gtk::Application::new(
         Some("com.github.luminescent-dreams.fitnesstrax"),
         Default::default(),
@@ -27,23 +26,44 @@ fn main() {
     .expect("failed to initialize GTK application");
 
     application.connect_activate(move |app| {
-        let window = gtk::ApplicationWindow::new(app);
-        window.set_title("Fitnesstrax");
-        window.set_default_size(350, 70);
+        let (tx, rx) = glib::MainContext::channel(glib::PRIORITY_DEFAULT);
 
-        let main_panel = gtk::Box::new(gtk::Orientation::Vertical, 5);
-        window.add(&main_panel);
+        let mut ctx = Arc::new(RwLock::new(context::AppContext::new(tx).unwrap()));
+        let mut gui = Arc::new(RwLock::new(components::MainWindow::new(ctx.clone())));
 
-        let menubar = components::MenuBar::new(ctx.clone());
-        let history = components::History::new(ctx.clone());
+        let ctx_clone = ctx.clone();
+        let gui_clone = gui.clone();
+        rx.attach(None, move |msg| {
+            println!("Message received in GTK: {:?}", msg);
+            gui_clone
+                .write()
+                .unwrap()
+                .update_from(&*ctx_clone.read().unwrap());
+            glib::Continue(true)
+        });
 
-        main_panel.pack_start(menubar.render(), false, false, 5);
-        main_panel.pack_start(history.render(), true, true, 5);
+        /*
+        {
+            let ctx_clone = ctx.clone();
+            let gui_clone = gui.clone();
+            gui.write()
+                .unwrap()
+                .start_selector
+                .connect_change(Box::new(move |new_date| {
+                    let mut ctx_ = ctx_clone.write().unwrap();
+                    let range = ctx_.get_range();
+                    ctx_.set_range(types::DateRange {
+                        start: new_date,
+                        end: range.end.clone(),
+                    });
 
-        main_panel.show();
-        history.show();
-        menubar.show();
-        window.show();
+                    gui_clone.write().unwrap().update_from(&ctx_);
+                }));
+        }
+                */
+
+        let g = gui.read().unwrap();
+        g.render(&app)
     });
 
     application.run(&[]);

@@ -1,25 +1,21 @@
 use chrono::{DateTime, TimeZone};
 use chrono_tz;
+use glib::Sender;
 use serde::{Deserialize, Serialize};
-use std::env;
-use std::error;
-use std::fs::File;
-use std::path;
 
 use super::config::Configuration;
 use super::errors::Result;
 use super::range::Range;
 use crate::errors::Error;
+use crate::types::DateRange;
 use emseries::{DateTimeTz, Record};
 use fitnesstrax::{Trax, TraxRecord};
-
-type DateRange = Range<chrono::Date<chrono_tz::Tz>>;
 
 #[derive(Clone, Debug)]
 pub enum Message {
     ChangeRange {
         range: DateRange,
-        records: Vec<Record<TraxRecord>>,
+        //records: Vec<Record<TraxRecord>>,
     },
     ChangeLanguage,
     ChangeTimezone(chrono_tz::Tz),
@@ -29,12 +25,11 @@ pub struct AppContext {
     config: Configuration,
     trax: Trax,
     range: DateRange,
-
-    listeners: Vec<Box<dyn Fn(Message)>>,
+    channel: Sender<Message>,
 }
 
 impl AppContext {
-    pub fn new() -> Result<AppContext> {
+    pub fn new(channel: Sender<Message>) -> Result<AppContext> {
         let config = Configuration::load_from_yaml();
 
         let trax = fitnesstrax::Trax::new(fitnesstrax::Params {
@@ -54,8 +49,12 @@ impl AppContext {
             config,
             trax,
             range,
-            listeners: Vec::new(),
+            channel,
         })
+    }
+
+    pub fn get_timezone(&self) -> chrono_tz::Tz {
+        self.config.timezone
     }
 
     pub fn get_range(&self) -> DateRange {
@@ -75,31 +74,26 @@ impl AppContext {
                 .and_hms(0, 0, 0)
                 .with_timezone(&self.config.timezone),
         );
-        println!(
-            "getting times: {} -> {}",
-            start_time.to_string(),
-            end_time.to_string()
-        );
-
         self.trax
             .get_history(start_time, end_time)
             .map_err(|err| Error::TraxError(err))
     }
 
     pub fn set_range(&mut self, range: DateRange) {
-        self.range = range;
-        self.send_notifications(Message::ChangeRange {
-            range: self.range.clone(),
-            records: Vec::new(),
-        })
+        self.range = range.clone();
+        self.send_notifications(Message::ChangeRange { range });
     }
 
     fn send_notifications(&self, msg: Message) {
         println!("dispatching message: {:?}", msg);
-        self.listeners.iter().for_each(|f| f(msg.clone()))
+        self.channel.send(msg).unwrap();
     }
 
-    pub fn register_listener(&mut self, listener: Box<dyn Fn(Message)>) {
-        self.listeners.push(listener);
+    /*
+    pub fn register_listener(&mut self) -> Receiver<Message> {
+        let (tx, rx) = channel();
+        self.listeners.push(tx);
+        rx
     }
+    */
 }

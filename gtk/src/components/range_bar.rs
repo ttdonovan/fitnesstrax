@@ -1,67 +1,59 @@
 use gtk::prelude::*;
-use std::sync::{Arc, RwLock};
+use std::sync::Arc;
 
-use super::DateSelector;
-use crate::context::AppContext;
-use crate::range::Range;
+use crate::components::DateSelector;
+use crate::types::DateRange;
 
 pub struct RangeBar {
-    ctx: Arc<RwLock<AppContext>>,
-    widget: gtk::Box,
-    start_time: DateSelector,
-    end_time: DateSelector,
+    start_selector: DateSelector,
+    end_selector: DateSelector,
+    range: DateRange,
+    on_change: Option<Box<dyn Fn(DateRange)>>,
 }
 
 impl RangeBar {
-    pub fn new(ctx: Arc<RwLock<AppContext>>) -> RangeBar {
-        let widget = gtk::Box::new(gtk::Orientation::Vertical, 5);
+    pub fn new(range: DateRange) -> RangeBar {
+        let start_date = range.start.clone();
+        let end_date = range.end.clone();
 
-        let range = ctx.read().unwrap().get_range();
+        let start_selector = DateSelector::new(range.start.clone());
 
-        let ctx_start_clone = ctx.clone();
-        let start_time = DateSelector::new(
-            range.start.clone(),
-            Box::new(move |new_date| {
-                let mut ctx_ref = ctx_start_clone.write().unwrap();
-                let range = ctx_ref.get_range();
-                ctx_ref.set_range(Range {
+        let end_selector = DateSelector::new(range.end.clone());
+
+        let mut s = RangeBar {
+            start_selector,
+            end_selector,
+            range,
+            on_change: None,
+        };
+
+        s.start_selector.connect_change(Box::new(move |new_date| {
+            println!("new start date: {:?}", new_date);
+            s.on_change.map(|f| {
+                f(DateRange {
                     start: new_date,
-                    end: range.end,
+                    end: s.range.end,
                 })
-            }),
-        );
+            });
+        }));
 
-        let ctx_end_clone = ctx.clone();
-        let end_time = DateSelector::new(
-            range.end.clone(),
-            Box::new(move |new_date| {
-                let mut ctx_ref = ctx_end_clone.write().unwrap();
-                let range = ctx_ref.get_range();
-                ctx_ref.set_range(Range {
-                    start: range.start,
-                    end: new_date,
-                })
-            }),
-        );
-
-        widget.pack_start(start_time.render(), false, false, 5);
-        widget.pack_start(end_time.render(), false, false, 5);
-
-        RangeBar {
-            ctx,
-            widget,
-            start_time,
-            end_time,
-        }
+        s
     }
 
-    pub fn show(&self) {
-        self.widget.show();
-        self.start_time.show();
-        self.end_time.show();
+    /*
+    pub fn update_from(&mut self, range: DateRange) {
+        self.start_time.update_from(range.start.clone());
+        self.end_time.update_from(range.end);
     }
+    */
 
-    pub fn render(&self) -> &gtk::Box {
-        &self.widget
+    //pub fn set_handler(&mut self,
+
+    pub fn render(&self) -> gtk::Box {
+        let widget = gtk::Box::new(gtk::Orientation::Vertical, 5);
+        widget.pack_start(&self.start_selector.render(), false, false, 5);
+        widget.pack_start(&self.end_selector.render(), false, false, 5);
+
+        widget
     }
 }

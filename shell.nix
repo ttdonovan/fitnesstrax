@@ -13,7 +13,9 @@ in pkgs.mkShell {
     name = "fitnesstrax";
 
     buildInputs = [ ld.nodejs_10_15_3
+                    pkgs.pkgconfig
                     pkgs.carnix
+                    pkgs.glib
                     pkgs.gtk3-x11
                     ld.rust_1_39
                   ] ++ darwin_frameworks;
