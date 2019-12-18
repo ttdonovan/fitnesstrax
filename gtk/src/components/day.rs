@@ -1,14 +1,74 @@
 use gtk::prelude::*;
-//use gtk::StateFlags;
+use std::sync::{Arc, RwLock};
 
-use super::basics::date_c;
-use super::rep_duration::rep_duration_c;
-use super::set_rep::set_rep_c;
-use super::steps::steps_c;
-use super::time_distance::time_distance_c;
-use super::weight::weight_record_c;
+use crate::components::basics::date_c;
+use crate::components::rep_duration::rep_duration_c;
+use crate::components::set_rep::set_rep_c;
+use crate::components::steps::steps_c;
+use crate::components::time_distance::time_distance_c;
+use crate::components::weight::{weight_record_c, weight_record_edit_c};
 
-pub fn day_c(
+pub struct Day {
+    pub widget: gtk::Box,
+    visible_component: Arc<RwLock<gtk::Box>>,
+    edit: Arc<RwLock<bool>>,
+    date: chrono::Date<chrono_tz::Tz>,
+    records: Arc<RwLock<Vec<emseries::Record<fitnesstrax::TraxRecord>>>>,
+}
+
+impl Day {
+    pub fn new(
+        date: chrono::Date<chrono_tz::Tz>,
+        records: Vec<emseries::Record<fitnesstrax::TraxRecord>>,
+    ) -> Day {
+        let widget = gtk::Box::new(gtk::Orientation::Vertical, 5);
+
+        let header = gtk::Box::new(gtk::Orientation::Horizontal, 5);
+        header.pack_start(&date_c(&date), false, false, 5);
+
+        widget.pack_start(&header, false, false, 5);
+
+        let visible = day_c(&date, &records);
+        widget.pack_start(&visible, true, true, 5);
+
+        let w = Day {
+            widget,
+            visible_component: Arc::new(RwLock::new(visible)),
+            edit: Arc::new(RwLock::new(false)),
+            date,
+            records: Arc::new(RwLock::new(records)),
+        };
+
+        {
+            let widget_ = w.widget.clone();
+            let visible_ = w.visible_component.clone();
+            let edit_button = gtk::Button::new_with_label("Edit");
+            let records_ = w.records.clone();
+            header.pack_start(&edit_button, false, false, 5);
+            edit_button.connect_clicked(move |_| {
+                let mut v = visible_.write().unwrap();
+                widget_.remove(&*v);
+                *v = day_edit_c(&date, &records_.read().unwrap());
+                widget_.pack_start(&*v, true, true, 5);
+            });
+        }
+
+        w
+    }
+
+    pub fn update_from(
+        &self,
+        date: chrono::Date<chrono_tz::Tz>,
+        records: Vec<emseries::Record<fitnesstrax::TraxRecord>>,
+    ) {
+    }
+
+    pub fn show(&self) {
+        self.widget.show_all();
+    }
+}
+
+fn day_c(
     date: &chrono::Date<chrono_tz::Tz>,
     data: &Vec<emseries::Record<fitnesstrax::TraxRecord>>,
 ) -> gtk::Box {
@@ -23,10 +83,6 @@ pub fn day_c(
             .get_background_color(StateFlags::NORMAL)
     );
     */
-
-    let header = gtk::Box::new(gtk::Orientation::Horizontal, 5);
-    header.pack_start(&date_c(&date), false, false, 5);
-    container.pack_start(&header, false, false, 5);
 
     let first_row = gtk::Box::new(gtk::Orientation::Horizontal, 5);
     container.pack_start(&first_row, false, false, 5);
@@ -67,4 +123,29 @@ pub fn day_c(
 
     container.show_all();
     return container;
+}
+
+fn day_edit_c(
+    date: &chrono::Date<chrono_tz::Tz>,
+    data: &Vec<emseries::Record<fitnesstrax::TraxRecord>>,
+) -> gtk::Box {
+    let container = gtk::Box::new(gtk::Orientation::Vertical, 5);
+
+    container.pack_start(&gtk::Label::new(Some("edit mode")), false, false, 5);
+    let first_row = gtk::Box::new(gtk::Orientation::Horizontal, 5);
+    container.pack_start(&first_row, false, false, 5);
+
+    let mut weight_component = None;
+    for record in data {
+        match record.data {
+            fitnesstrax::TraxRecord::Weight(ref rec) => {
+                weight_component = Some(weight_record_edit_c(&rec))
+            }
+            _ => (),
+        }
+    }
+    weight_component.map(|c| first_row.pack_start(&c, false, false, 5));
+
+    container.show_all();
+    container
 }

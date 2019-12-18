@@ -12,7 +12,7 @@ mod time_distance;
 mod weight;
 
 pub use date_selector::DateSelector;
-pub use day::day_c;
+pub use day::Day;
 pub use history::History;
 pub use main_window::MainWindow;
 pub use menu_bar::MenuBar;

@@ -5,7 +5,7 @@ use fitnesstrax::TraxRecord;
 use gtk::prelude::*;
 use std::sync::{Arc, RwLock};
 
-use crate::components::{day_c, RangeSelector};
+use crate::components::{Day, RangeSelector};
 use crate::context::AppContext;
 use crate::range::group_by_date;
 use crate::types::DateRange;
@@ -65,9 +65,9 @@ impl History {
         dates.sort_unstable();
         dates.reverse();
         dates.iter().for_each(|date| {
-            let day = day_c(date, grouped_history.get(date).unwrap());
-            day.show_all();
-            self.history_box.pack_start(&day, true, true, 25);
+            let day = Day::new((*date).clone(), grouped_history.get(date).unwrap().clone());
+            day.show();
+            self.history_box.pack_start(&day.widget, true, true, 25);
         });
     }
 
