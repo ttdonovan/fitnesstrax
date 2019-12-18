@@ -15,7 +15,7 @@ use fitnesstrax::{Trax, TraxRecord};
 pub enum Message {
     ChangeRange {
         range: DateRange,
-        //records: Vec<Record<TraxRecord>>,
+        records: Vec<Record<TraxRecord>>,
     },
     ChangeLanguage,
     ChangeTimezone(chrono_tz::Tz),
@@ -81,7 +81,11 @@ impl AppContext {
 
     pub fn set_range(&mut self, range: DateRange) {
         self.range = range.clone();
-        self.send_notifications(Message::ChangeRange { range });
+        let history = self.get_history().unwrap();
+        self.send_notifications(Message::ChangeRange {
+            range,
+            records: history,
+        });
     }
 
     fn send_notifications(&self, msg: Message) {

@@ -4,11 +4,11 @@ use std::sync::{Arc, RwLock};
 use crate::context::AppContext;
 
 pub struct MenuBar {
-    widget: gtk::Box,
+    pub widget: gtk::Box,
 }
 
 impl MenuBar {
-    pub fn new(ctx: Arc<RwLock<AppContext>>) -> MenuBar {
+    pub fn new() -> MenuBar {
         let widget = gtk::Box::new(gtk::Orientation::Horizontal, 5);
 
         widget.pack_start(&gtk::Label::new(Some("History")), false, false, 50);
@@ -19,9 +19,5 @@ impl MenuBar {
 
     pub fn show(&self) {
         self.widget.show_all();
-    }
-
-    pub fn render(&self) -> &gtk::Box {
-        &self.widget
     }
 }

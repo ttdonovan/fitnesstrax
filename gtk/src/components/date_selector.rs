@@ -5,6 +5,7 @@ use gtk::prelude::*;
 use std::sync::{Arc, RwLock};
 
 pub struct DateSelector {
+    pub widget: gtk::Box,
     button: gtk::Button,
     calendar: gtk::Calendar,
     date: Arc<RwLock<Date<Tz>>>,
@@ -13,29 +14,28 @@ pub struct DateSelector {
 
 impl DateSelector {
     pub fn new(date: Date<Tz>, on_change: Option<Box<dyn Fn(Date<Tz>)>>) -> DateSelector {
-        let button = gtk::Button::new_with_label(&format!("{}", date.format("%B %e, %Y")));
-        let calendar = gtk::Calendar::new();
-        calendar.select_month(date.month0(), date.year() as u32);
-        calendar.select_day(date.day());
-
-        let mut s = DateSelector {
-            button,
-            calendar,
+        let mut w = DateSelector {
+            widget: gtk::Box::new(gtk::Orientation::Vertical, 5),
+            button: gtk::Button::new_with_label(&format!("{}", date.format("%B %e, %Y"))),
+            calendar: gtk::Calendar::new(),
             date: Arc::new(RwLock::new(date)),
             on_change: Arc::new(RwLock::new(on_change)),
         };
 
+        w.calendar.select_month(date.month0(), date.year() as u32);
+        w.calendar.select_day(date.day());
+
         {
-            let cal = s.calendar.clone();
-            s.button.connect_clicked(move |_| cal.show());
+            let cal = w.calendar.clone();
+            w.button.connect_clicked(move |_| cal.show());
         }
 
         {
-            let change_handler = s.on_change.clone();
-            let button = s.button.clone();
-            let date = s.date.clone();
+            let change_handler = w.on_change.clone();
+            let button = w.button.clone();
+            let date = w.date.clone();
 
-            s.calendar.connect_day_selected(move |cal| {
+            w.calendar.connect_day_selected(move |cal| {
                 let (year, month0, day) = cal.get_date();
                 *date.write().unwrap() = Utc.ymd(year as i32, month0 + 1, day).with_timezone(&UTC);
                 button.set_label(&format!("{}", date.read().unwrap().format("%B %e, %Y")));
@@ -46,31 +46,22 @@ impl DateSelector {
             });
         }
 
-        s
+        w.widget.pack_start(&w.button, false, false, 5);
+        w.widget.pack_start(&w.calendar, false, false, 5);
+        w.calendar.hide();
+
+        w.show();
+
+        w
     }
 
     pub fn connect_change(&mut self, on_change: Box<dyn Fn(Date<Tz>)>) {
         *self.on_change.write().unwrap() = Some(on_change);
     }
 
-    /*
     pub fn show(&self) {
         self.widget.show();
         self.button.show();
-    }
-    */
-
-    pub fn render(&self) -> gtk::Box {
-        let widget = gtk::Box::new(gtk::Orientation::Vertical, 5);
-
-        widget.pack_start(&self.button, false, false, 5);
-        widget.pack_start(&self.calendar, false, false, 5);
-        self.calendar.hide();
-
-        self.button.show();
-        widget.show();
-
-        widget
     }
 
     pub fn update_from(&mut self, date: Date<Tz>) {

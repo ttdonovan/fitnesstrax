@@ -29,7 +29,7 @@ fn main() {
         let (tx, rx) = glib::MainContext::channel(glib::PRIORITY_DEFAULT);
 
         let mut ctx = Arc::new(RwLock::new(context::AppContext::new(tx).unwrap()));
-        let mut gui = Arc::new(RwLock::new(components::MainWindow::new(ctx.clone())));
+        let mut gui = Arc::new(RwLock::new(components::MainWindow::new(ctx.clone(), app)));
 
         let ctx_clone = ctx.clone();
         let gui_clone = gui.clone();
@@ -63,7 +63,7 @@ fn main() {
                 */
 
         let g = gui.read().unwrap();
-        g.render(&app)
+        g.show()
     });
 
     application.run(&[]);
