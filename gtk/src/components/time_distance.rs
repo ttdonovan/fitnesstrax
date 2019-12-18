@@ -1,4 +1,3 @@
-use dimensioned;
 use emseries::*;
 use gtk::prelude::*;
 

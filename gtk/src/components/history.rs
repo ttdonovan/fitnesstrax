@@ -1,16 +1,18 @@
+use chrono::Date;
+use chrono_tz::Tz;
 use emseries::Record;
 use fitnesstrax::TraxRecord;
 use gtk::prelude::*;
 use std::sync::{Arc, RwLock};
 
-use crate::components::{day_c, RangeBar};
+use crate::components::{day_c, RangeSelector};
 use crate::context::AppContext;
 use crate::range::group_by_date;
 use crate::types::DateRange;
 
 pub struct History {
     pub widget: gtk::Box,
-    range_bar: RangeBar,
+    range_bar: RangeSelector,
     scrolling_history: gtk::ScrolledWindow,
     history_box: gtk::Box,
 }
@@ -22,7 +24,7 @@ impl History {
 
         let range_bar = {
             let ctx_ = ctx.clone();
-            RangeBar::new(
+            RangeSelector::new(
                 ctx.read().unwrap().get_range().clone(),
                 Some(Box::new(move |new_range| {
                     ctx_.write().unwrap().set_range(new_range)
@@ -59,9 +61,10 @@ impl History {
 
         self.history_box.foreach(|child| child.destroy());
 
-        let dates = grouped_history.keys();
-        dates.for_each(|date| {
-            println!("populating {:?}", date);
+        let mut dates = grouped_history.keys().collect::<Vec<&Date<Tz>>>();
+        dates.sort_unstable();
+        dates.reverse();
+        dates.iter().for_each(|date| {
             let day = day_c(date, grouped_history.get(date).unwrap());
             day.show_all();
             self.history_box.pack_start(&day, true, true, 25);

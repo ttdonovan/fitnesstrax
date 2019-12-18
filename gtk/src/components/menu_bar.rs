@@ -1,7 +1,4 @@
 use gtk::prelude::*;
-use std::sync::{Arc, RwLock};
-
-use crate::context::AppContext;
 
 pub struct MenuBar {
     pub widget: gtk::Box,

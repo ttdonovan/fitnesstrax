@@ -1,24 +1,8 @@
-use crate::context::AppContext;
-use chrono::{DateTime, TimeZone};
-use chrono_tz;
+use crate::context::{AppContext, Message};
 use gtk::prelude::*;
 use std::sync::{Arc, RwLock};
-use std::thread;
 
 use crate::components::*;
-use crate::types::DateRange;
-
-/*
-pub struct Handlers {
-    range_change: Option<Box<dyn Fn(DateRange)>>,
-}
-
-impl Default for Handlers {
-    fn default() -> Handlers {
-        Handlers { range_change: None }
-    }
-}
-*/
 
 pub struct MainWindow {
     pub widget: gtk::ApplicationWindow,
@@ -35,15 +19,6 @@ impl MainWindow {
         let widget = gtk::ApplicationWindow::new(app);
         let menubar = MenuBar::new();
         let history = History::new(ctx.clone());
-
-        //main_panel.pack_start(menubar.render(), false, false, 5);
-
-        //main_panel.show();
-        //history.show();
-        //menubar.show();
-        //widget.show_all();
-
-        let range = ctx.read().unwrap().get_range();
 
         let w = MainWindow {
             widget,
@@ -64,14 +39,11 @@ impl MainWindow {
         w
     }
 
-    //pub fn update_handlers(&mut self, handlers: Handlers) {}
-
-    pub fn update_from(&mut self, ctx: &AppContext) {
-        let range = ctx.get_range();
-        let records = ctx.get_history().unwrap();
-        self.history.update_from(range, records);
-        //self.start_selector.update_from(range.start.clone());
-        //self.end_selector.update_from(range.end.clone());
+    pub fn update_from(&mut self, message: Message) {
+        match message {
+            Message::ChangeRange { range, records } => self.history.update_from(range, records),
+            _ => println!("unhandled message: {:?}", message),
+        }
     }
 
     pub fn show(&self) {

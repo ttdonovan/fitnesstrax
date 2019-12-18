@@ -1,7 +1,6 @@
-use chrono::{DateTime, TimeZone};
+use chrono::TimeZone;
 use chrono_tz;
 use glib::Sender;
-use serde::{Deserialize, Serialize};
 
 use super::config::Configuration;
 use super::errors::Result;
@@ -92,12 +91,4 @@ impl AppContext {
         println!("dispatching message: {:?}", msg);
         self.channel.send(msg).unwrap();
     }
-
-    /*
-    pub fn register_listener(&mut self) -> Receiver<Message> {
-        let (tx, rx) = channel();
-        self.listeners.push(tx);
-        rx
-    }
-    */
 }

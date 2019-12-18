@@ -1,20 +1,18 @@
-use chrono::Date;
-use chrono_tz::Tz;
 use gtk::prelude::*;
 use std::sync::{Arc, RwLock};
 
 use crate::components::DateSelector;
 use crate::types::DateRange;
 
-pub struct RangeBar {
+pub struct RangeSelector {
     pub widget: gtk::Box,
     start_selector: DateSelector,
     end_selector: DateSelector,
     on_change: Arc<RwLock<Option<Box<dyn Fn(DateRange)>>>>,
 }
 
-impl RangeBar {
-    pub fn new(range: DateRange, on_change: Option<Box<dyn Fn(DateRange)>>) -> RangeBar {
+impl RangeSelector {
+    pub fn new(range: DateRange, on_change: Option<Box<dyn Fn(DateRange)>>) -> RangeSelector {
         let start_date = range.start.clone();
         let end_date = range.end.clone();
         let on_change_arc = Arc::new(RwLock::new(on_change));
@@ -43,7 +41,7 @@ impl RangeBar {
             )
         };
 
-        let mut w = RangeBar {
+        let mut w = RangeSelector {
             widget: gtk::Box::new(gtk::Orientation::Vertical, 5),
             start_selector,
             end_selector,
@@ -68,18 +66,6 @@ impl RangeBar {
             }));
         }
 
-        /*
-        w.start_selector.connect_change(Box::new(move |new_date| {
-            println!("new start date: {:?}", new_date);
-            w.on_change.map(|f| {
-                f(DateRange {
-                    start: new_date,
-                    end: w.range.end,
-                })
-            });
-        }));
-        */
-
         w
     }
 
@@ -97,15 +83,6 @@ impl RangeBar {
         self.end_selector.show();
         self.widget.show();
     }
-
-    //pub fn set_handler(&mut self,
-
-    /*
-    pub fn render(&self) -> gtk::Box {
-
-        widget
-    }
-    */
 }
 
 fn dispatch_change(handler: &Arc<RwLock<Option<Box<dyn Fn(DateRange)>>>>, range: DateRange) {

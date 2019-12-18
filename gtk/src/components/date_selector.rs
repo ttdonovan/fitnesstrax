@@ -14,7 +14,7 @@ pub struct DateSelector {
 
 impl DateSelector {
     pub fn new(date: Date<Tz>, on_change: Option<Box<dyn Fn(Date<Tz>)>>) -> DateSelector {
-        let mut w = DateSelector {
+        let w = DateSelector {
             widget: gtk::Box::new(gtk::Orientation::Vertical, 5),
             button: gtk::Button::new_with_label(&format!("{}", date.format("%B %e, %Y"))),
             calendar: gtk::Calendar::new(),
