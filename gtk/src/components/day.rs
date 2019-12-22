@@ -1,4 +1,7 @@
+use emseries::{Record, UniqueId};
+use fitnesstrax::TraxRecord;
 use gtk::prelude::*;
+use std::collections::HashMap;
 use std::sync::{Arc, RwLock};
 
 use crate::components::basics::date_c;
@@ -8,19 +11,23 @@ use crate::components::steps::steps_c;
 use crate::components::time_distance::time_distance_c;
 use crate::components::weight::{weight_record_c, weight_record_edit_c};
 
+enum DayState {
+    View(gtk::Box),
+    Edit(DayEdit),
+}
+
+#[derive(Clone)]
 pub struct Day {
     pub widget: gtk::Box,
-    visible_component: Arc<RwLock<gtk::Box>>,
-    edit: Arc<RwLock<bool>>,
+    visible_component: Arc<RwLock<DayState>>,
     date: chrono::Date<chrono_tz::Tz>,
-    records: Arc<RwLock<Vec<emseries::Record<fitnesstrax::TraxRecord>>>>,
+    records: HashMap<UniqueId, TraxRecord>,
+    updates: Arc<RwLock<HashMap<UniqueId, TraxRecord>>>,
+    new_records: Arc<RwLock<HashMap<UniqueId, TraxRecord>>>,
 }
 
 impl Day {
-    pub fn new(
-        date: chrono::Date<chrono_tz::Tz>,
-        records: Vec<emseries::Record<fitnesstrax::TraxRecord>>,
-    ) -> Day {
+    pub fn new(date: chrono::Date<chrono_tz::Tz>, records: Vec<Record<TraxRecord>>) -> Day {
         let widget = gtk::Box::new(gtk::Orientation::Vertical, 5);
 
         let header = gtk::Box::new(gtk::Orientation::Horizontal, 5);
@@ -28,39 +35,67 @@ impl Day {
 
         widget.pack_start(&header, false, false, 5);
 
-        let visible = day_c(&date, &records);
+        let visible = day_c(&date, records.iter().map(|rec| &rec.data).collect());
         widget.pack_start(&visible, true, true, 5);
+
+        let record_map = records.iter().fold(HashMap::new(), |mut acc, rec| {
+            acc.insert(rec.id.clone(), rec.data.clone());
+            acc
+        });
 
         let w = Day {
             widget,
-            visible_component: Arc::new(RwLock::new(visible)),
-            edit: Arc::new(RwLock::new(false)),
+            visible_component: Arc::new(RwLock::new(DayState::View(visible))),
             date,
-            records: Arc::new(RwLock::new(records)),
+            records: record_map,
+            updates: Arc::new(RwLock::new(HashMap::new())),
+            new_records: Arc::new(RwLock::new(HashMap::new())),
         };
 
         {
-            let widget_ = w.widget.clone();
-            let visible_ = w.visible_component.clone();
+            let w_ = w.clone();
             let edit_button = gtk::Button::new_with_label("Edit");
-            let records_ = w.records.clone();
             header.pack_start(&edit_button, false, false, 5);
-            edit_button.connect_clicked(move |_| {
-                let mut v = visible_.write().unwrap();
-                widget_.remove(&*v);
-                *v = day_edit_c(&date, &records_.read().unwrap());
-                widget_.pack_start(&*v, true, true, 5);
-            });
+            edit_button.connect_clicked(move |_| w_.edit());
         }
 
         w
     }
 
-    pub fn update_from(
-        &self,
-        date: chrono::Date<chrono_tz::Tz>,
-        records: Vec<emseries::Record<fitnesstrax::TraxRecord>>,
-    ) {
+    fn edit(&self) {
+        let mut v = self.visible_component.write().unwrap();
+        match *v {
+            DayState::View(ref w) => self.widget.remove(w),
+            DayState::Edit(_) => return,
+        };
+        let self_save = self.clone();
+        let self_cancel = self.clone();
+        let component = DayEdit::new(
+            &self.date,
+            &self.records,
+            Box::new(move |records| self_save.save_edit(records)),
+            Box::new(move || self_cancel.cancel_edit()),
+        );
+        self.widget.pack_start(&component.widget, true, true, 5);
+        *v = DayState::Edit(component);
+    }
+
+    fn cancel_edit(&self) {
+        let mut v = self.visible_component.write().unwrap();
+        match *v {
+            DayState::View(_) => return,
+            DayState::Edit(ref w) => self.widget.remove(&w.widget),
+        };
+        let component = day_c(&self.date, self.records.values().collect());
+        self.widget.pack_start(&component, true, true, 5);
+        *v = DayState::View(component);
+    }
+
+    fn save_edit(&self, records: Vec<Record<TraxRecord>>) {
+        records
+            .iter()
+            .for_each(|record| println!("record: {:?}", record));
+        /* Now, figure out what records are updated or new and pass them to the on_save handler */
     }
 
     pub fn show(&self) {
@@ -68,10 +103,7 @@ impl Day {
     }
 }
 
-fn day_c(
-    date: &chrono::Date<chrono_tz::Tz>,
-    data: &Vec<emseries::Record<fitnesstrax::TraxRecord>>,
-) -> gtk::Box {
+fn day_c(_date: &chrono::Date<chrono_tz::Tz>, data: Vec<&TraxRecord>) -> gtk::Box {
     let container = gtk::Box::new(gtk::Orientation::Vertical, 5);
 
     /*
@@ -93,19 +125,15 @@ fn day_c(
     let mut set_rep_components: Vec<gtk::Box> = Vec::new();
     let mut time_distance_components: Vec<gtk::Box> = Vec::new();
     for record in data {
-        match record.data {
-            fitnesstrax::TraxRecord::Comments(ref _rec) => (),
-            fitnesstrax::TraxRecord::RepDuration(ref rec) => {
-                rep_duration_components.push(rep_duration_c(&rec))
-            }
-            fitnesstrax::TraxRecord::SetRep(ref rec) => set_rep_components.push(set_rep_c(&rec)),
-            fitnesstrax::TraxRecord::Steps(ref rec) => step_component = Some(steps_c(&rec)),
-            fitnesstrax::TraxRecord::TimeDistance(ref rec) => {
+        match record {
+            TraxRecord::Comments(ref _rec) => (),
+            TraxRecord::RepDuration(ref rec) => rep_duration_components.push(rep_duration_c(&rec)),
+            TraxRecord::SetRep(ref rec) => set_rep_components.push(set_rep_c(&rec)),
+            TraxRecord::Steps(ref rec) => step_component = Some(steps_c(&rec)),
+            TraxRecord::TimeDistance(ref rec) => {
                 time_distance_components.push(time_distance_c(&rec))
             }
-            fitnesstrax::TraxRecord::Weight(ref rec) => {
-                weight_component = Some(weight_record_c(&rec))
-            }
+            TraxRecord::Weight(ref rec) => weight_component = Some(weight_record_c(&rec)),
         }
     }
 
@@ -125,27 +153,81 @@ fn day_c(
     return container;
 }
 
-fn day_edit_c(
-    date: &chrono::Date<chrono_tz::Tz>,
-    data: &Vec<emseries::Record<fitnesstrax::TraxRecord>>,
-) -> gtk::Box {
-    let container = gtk::Box::new(gtk::Orientation::Vertical, 5);
+struct DayEdit {
+    widget: gtk::Box,
+    //components: Vec<WeightRecordEditField>,
+    //on_save: Box<dyn Fn(Vec<Record<TraxRecord>>)>,
+    //on_cancel: Box<dyn Fn()>,
+}
 
-    container.pack_start(&gtk::Label::new(Some("edit mode")), false, false, 5);
-    let first_row = gtk::Box::new(gtk::Orientation::Horizontal, 5);
-    container.pack_start(&first_row, false, false, 5);
+impl DayEdit {
+    fn new(
+        _date: &chrono::Date<chrono_tz::Tz>,
+        data: &HashMap<UniqueId, TraxRecord>,
+        on_save: Box<dyn Fn(Vec<Record<TraxRecord>>)>,
+        on_cancel: Box<dyn Fn()>,
+    ) -> DayEdit {
+        //let records: Arc<RwLock<Vec<Record<TraxRecord>>>> = Arc::new(RwLock::new(data.clone()));
 
-    let mut weight_component = None;
-    for record in data {
-        match record.data {
-            fitnesstrax::TraxRecord::Weight(ref rec) => {
-                weight_component = Some(weight_record_edit_c(&rec))
+        let widget = gtk::Box::new(gtk::Orientation::Vertical, 5);
+        //let mut components = Vec::new();
+
+        let first_row = gtk::Box::new(gtk::Orientation::Horizontal, 5);
+        widget.pack_start(&first_row, false, false, 5);
+
+        let mut weight_component = None;
+        for (id, data) in data {
+            match data {
+                TraxRecord::Weight(ref rec) => {
+                    weight_component = Some(weight_record_edit_c(
+                        id.clone(),
+                        &rec,
+                        Box::new(|res| match res {
+                            Ok(val) => println!("got a weight updated: {:?}", val),
+                            Err(err) => println!("invalid weight field: {}", err),
+                        }),
+                    ))
+                }
+                _ => (),
             }
-            _ => (),
+        }
+        weight_component.map(|c| first_row.pack_start(&c.widget, false, false, 5));
+
+        let buttons_row = gtk::Box::new(gtk::Orientation::Horizontal, 5);
+        let save_button = gtk::Button::new_with_label("Save");
+        let cancel_button = gtk::Button::new_with_label("Cancel");
+        buttons_row.pack_start(&save_button, false, false, 5);
+        buttons_row.pack_start(&cancel_button, false, false, 5);
+        widget.pack_start(&buttons_row, true, true, 5);
+
+        //let components_ = components.clone();
+        save_button.connect_clicked(move |_| {
+            /*
+            let updated_records = components
+                .iter()
+                .map(|c| if c.is_updated() { Some(c) } else { None })
+                .filter(|c| c.is_some())
+                .map(|c| emseries::Record {
+                    id: c.unwrap().id.clone(),
+                    data: TraxRecord::from(c.unwrap().value()),
+                })
+                .collect();
+            on_save(updated_records)
+            */
+        });
+        cancel_button.connect_clicked(move |_| on_cancel());
+
+        widget.show_all();
+
+        DayEdit {
+            widget,
+            //components,
+            //on_save,
+            //on_cancel,
         }
     }
-    weight_component.map(|c| first_row.pack_start(&c, false, false, 5));
 
-    container.show_all();
-    container
+    fn show(&self) {
+        self.widget.show_all();
+    }
 }
