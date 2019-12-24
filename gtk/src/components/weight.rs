@@ -4,7 +4,6 @@ use fitnesstrax::weight::WeightRecord;
 
 use crate::components::ValidatedTextEntry;
 use crate::conversions::parse_mass;
-use crate::errors::Error;
 
 pub fn weight_record_c(record: &WeightRecord) -> gtk::Label {
     gtk::Label::new(Some(&format!("{}", &record.weight.value_unsafe)))

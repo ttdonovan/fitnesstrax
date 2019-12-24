@@ -7,7 +7,7 @@ use std::sync::{Arc, RwLock};
 use crate::components::basics::date_c;
 use crate::components::rep_duration::rep_duration_c;
 use crate::components::set_rep::set_rep_c;
-use crate::components::steps::steps_c;
+use crate::components::steps::{steps_c, steps_edit_c};
 use crate::components::time_distance::time_distance_c;
 use crate::components::weight::{weight_record_c, weight_record_edit_c};
 use crate::context::AppContext;
@@ -177,6 +177,7 @@ impl DayEdit {
         widget.pack_start(&first_row, false, false, 5);
 
         let mut weight_component = None;
+        let mut step_component = None;
         for (id, data) in data {
             match data {
                 TraxRecord::Weight(ref rec) => {
@@ -189,10 +190,21 @@ impl DayEdit {
                         }),
                     ))
                 }
+                TraxRecord::Steps(ref rec) => {
+                    let updates_ = updates.clone();
+                    step_component = Some(steps_edit_c(
+                        id.clone(),
+                        &rec,
+                        Box::new(move |id, rec| {
+                            updates_.write().unwrap().insert(id, TraxRecord::from(rec));
+                        }),
+                    ))
+                }
                 _ => (),
             }
         }
         weight_component.map(|c| first_row.pack_start(&c.widget, false, false, 5));
+        step_component.map(|c| first_row.pack_start(&c.widget, false, false, 5));
 
         let buttons_row = gtk::Box::new(gtk::Orientation::Horizontal, 5);
         let save_button = gtk::Button::new_with_label("Save");
