@@ -15,6 +15,7 @@ pub struct History {
     range_bar: RangeSelector,
     scrolling_history: gtk::ScrolledWindow,
     history_box: gtk::Box,
+    ctx: Arc<RwLock<AppContext>>,
 }
 
 impl History {
@@ -44,11 +45,12 @@ impl History {
             range_bar,
             scrolling_history,
             history_box,
+            ctx,
         };
 
         w.update_from(
-            ctx.read().unwrap().get_range(),
-            ctx.read().unwrap().get_history().unwrap(),
+            w.ctx.read().unwrap().get_range(),
+            w.ctx.read().unwrap().get_history().unwrap(),
         );
 
         w.show();
@@ -65,7 +67,12 @@ impl History {
         dates.sort_unstable();
         dates.reverse();
         dates.iter().for_each(|date| {
-            let day = Day::new((*date).clone(), grouped_history.get(date).unwrap().clone());
+            let ctx = self.ctx.clone();
+            let day = Day::new(
+                (*date).clone(),
+                grouped_history.get(date).unwrap().clone(),
+                ctx,
+            );
             day.show();
             self.history_box.pack_start(&day.widget, true, true, 25);
         });

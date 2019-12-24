@@ -3,7 +3,7 @@ use dimensioned::unit_systems::fps::LB;
 use regex::Regex;
 
 use crate::components::ValidatedTextEntry;
-use emseries::Recordable;
+use emseries::{Recordable, UniqueId};
 use fitnesstrax::weight::WeightRecord;
 
 pub fn weight_record_c(record: &WeightRecord) -> gtk::Label {
@@ -36,14 +36,17 @@ fn parse_mass(inp: &str) -> Result<Kilogram<f64>, String> {
 pub fn weight_record_edit_c(
     id: emseries::UniqueId,
     record: &WeightRecord,
-    on_update: (Box<dyn Fn(Result<WeightRecord, String>)>),
+    on_update: (Box<dyn Fn(Result<(UniqueId, WeightRecord), String>)>),
 ) -> ValidatedTextEntry<Kilogram<f64>> {
     let record_ = record.clone();
     ValidatedTextEntry::new(
         record.weight,
         Box::new(|s| parse_mass(s)),
         Box::new(move |res| match res {
-            Ok(val) => on_update(Ok(WeightRecord::new(record_.timestamp(), val))),
+            Ok(val) => on_update(Ok((
+                id.clone(),
+                WeightRecord::new(record_.timestamp(), val),
+            ))),
             Err(err) => on_update(Err(err)),
         }),
     )

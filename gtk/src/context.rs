@@ -7,7 +7,7 @@ use super::errors::Result;
 use super::range::Range;
 use crate::errors::Error;
 use crate::types::DateRange;
-use emseries::{DateTimeTz, Record};
+use emseries::{DateTimeTz, Record, UniqueId};
 use fitnesstrax::{Trax, TraxRecord};
 
 #[derive(Clone, Debug)]
@@ -18,6 +18,10 @@ pub enum Message {
     },
     ChangeLanguage,
     ChangeTimezone(chrono_tz::Tz),
+    RecordsUpdated {
+        range: DateRange,
+        records: Vec<Record<TraxRecord>>,
+    },
 }
 
 pub struct AppContext {
@@ -76,6 +80,17 @@ impl AppContext {
         self.trax
             .get_history(start_time, end_time)
             .map_err(|err| Error::TraxError(err))
+    }
+
+    pub fn save_records(&mut self, updated_records: Vec<(UniqueId, TraxRecord)>) {
+        for (id, record) in updated_records {
+            self.trax.replace_record(id, record);
+        }
+        let history = self.get_history().unwrap();
+        self.send_notifications(Message::RecordsUpdated {
+            range: self.range.clone(),
+            records: history,
+        });
     }
 
     pub fn set_range(&mut self, range: DateRange) {

@@ -10,6 +10,7 @@ use crate::components::set_rep::set_rep_c;
 use crate::components::steps::steps_c;
 use crate::components::time_distance::time_distance_c;
 use crate::components::weight::{weight_record_c, weight_record_edit_c};
+use crate::context::AppContext;
 
 enum DayState {
     View(gtk::Box),
@@ -22,12 +23,15 @@ pub struct Day {
     visible_component: Arc<RwLock<DayState>>,
     date: chrono::Date<chrono_tz::Tz>,
     records: HashMap<UniqueId, TraxRecord>,
-    updates: Arc<RwLock<HashMap<UniqueId, TraxRecord>>>,
-    new_records: Arc<RwLock<HashMap<UniqueId, TraxRecord>>>,
+    ctx: Arc<RwLock<AppContext>>,
 }
 
 impl Day {
-    pub fn new(date: chrono::Date<chrono_tz::Tz>, records: Vec<Record<TraxRecord>>) -> Day {
+    pub fn new(
+        date: chrono::Date<chrono_tz::Tz>,
+        records: Vec<Record<TraxRecord>>,
+        ctx: Arc<RwLock<AppContext>>,
+    ) -> Day {
         let widget = gtk::Box::new(gtk::Orientation::Vertical, 5);
 
         let header = gtk::Box::new(gtk::Orientation::Horizontal, 5);
@@ -48,8 +52,7 @@ impl Day {
             visible_component: Arc::new(RwLock::new(DayState::View(visible))),
             date,
             records: record_map,
-            updates: Arc::new(RwLock::new(HashMap::new())),
-            new_records: Arc::new(RwLock::new(HashMap::new())),
+            ctx,
         };
 
         {
@@ -91,11 +94,12 @@ impl Day {
         *v = DayState::View(component);
     }
 
-    fn save_edit(&self, records: Vec<Record<TraxRecord>>) {
+    fn save_edit(&self, records: Vec<(UniqueId, TraxRecord)>) {
         records
             .iter()
             .for_each(|record| println!("record: {:?}", record));
-        /* Now, figure out what records are updated or new and pass them to the on_save handler */
+        self.ctx.write().unwrap().save_records(records);
+        self.cancel_edit();
     }
 
     pub fn show(&self) {
@@ -155,22 +159,19 @@ fn day_c(_date: &chrono::Date<chrono_tz::Tz>, data: Vec<&TraxRecord>) -> gtk::Bo
 
 struct DayEdit {
     widget: gtk::Box,
-    //components: Vec<WeightRecordEditField>,
-    //on_save: Box<dyn Fn(Vec<Record<TraxRecord>>)>,
-    //on_cancel: Box<dyn Fn()>,
 }
 
 impl DayEdit {
     fn new(
         _date: &chrono::Date<chrono_tz::Tz>,
         data: &HashMap<UniqueId, TraxRecord>,
-        on_save: Box<dyn Fn(Vec<Record<TraxRecord>>)>,
+        on_save: Box<dyn Fn(Vec<(UniqueId, TraxRecord)>)>,
         on_cancel: Box<dyn Fn()>,
     ) -> DayEdit {
-        //let records: Arc<RwLock<Vec<Record<TraxRecord>>>> = Arc::new(RwLock::new(data.clone()));
+        let updates = Arc::new(RwLock::new(HashMap::new()));
+        //let new_records = Arc::new(RwLock::new(HashMap::new()));
 
         let widget = gtk::Box::new(gtk::Orientation::Vertical, 5);
-        //let mut components = Vec::new();
 
         let first_row = gtk::Box::new(gtk::Orientation::Horizontal, 5);
         widget.pack_start(&first_row, false, false, 5);
@@ -179,11 +180,14 @@ impl DayEdit {
         for (id, data) in data {
             match data {
                 TraxRecord::Weight(ref rec) => {
+                    let updates_ = updates.clone();
                     weight_component = Some(weight_record_edit_c(
                         id.clone(),
                         &rec,
-                        Box::new(|res| match res {
-                            Ok(val) => println!("got a weight updated: {:?}", val),
+                        Box::new(move |res| match res {
+                            Ok((id, rec)) => {
+                                updates_.write().unwrap().insert(id, TraxRecord::from(rec));
+                            }
                             Err(err) => println!("invalid weight field: {}", err),
                         }),
                     ))
@@ -201,30 +205,23 @@ impl DayEdit {
         widget.pack_start(&buttons_row, true, true, 5);
 
         //let components_ = components.clone();
-        save_button.connect_clicked(move |_| {
-            /*
-            let updated_records = components
-                .iter()
-                .map(|c| if c.is_updated() { Some(c) } else { None })
-                .filter(|c| c.is_some())
-                .map(|c| emseries::Record {
-                    id: c.unwrap().id.clone(),
-                    data: TraxRecord::from(c.unwrap().value()),
-                })
-                .collect();
-            on_save(updated_records)
-            */
-        });
+        {
+            let updates_ = updates.clone();
+            save_button.connect_clicked(move |_| {
+                let updated_records = updates_
+                    .read()
+                    .unwrap()
+                    .iter()
+                    .map(|(id, record)| (id.clone(), record.clone()))
+                    .collect();
+                on_save(updated_records);
+            });
+        }
         cancel_button.connect_clicked(move |_| on_cancel());
 
         widget.show_all();
 
-        DayEdit {
-            widget,
-            //components,
-            //on_save,
-            //on_cancel,
-        }
+        DayEdit { widget }
     }
 
     fn show(&self) {
