@@ -12,6 +12,7 @@ use std::sync::{Arc, RwLock};
 mod components;
 mod config;
 mod context;
+mod conversions;
 mod errors;
 mod range;
 mod types;

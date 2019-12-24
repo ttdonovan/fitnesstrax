@@ -184,11 +184,8 @@ impl DayEdit {
                     weight_component = Some(weight_record_edit_c(
                         id.clone(),
                         &rec,
-                        Box::new(move |res| match res {
-                            Ok((id, rec)) => {
-                                updates_.write().unwrap().insert(id, TraxRecord::from(rec));
-                            }
-                            Err(err) => println!("invalid weight field: {}", err),
+                        Box::new(move |id, rec| {
+                            updates_.write().unwrap().insert(id, TraxRecord::from(rec));
                         }),
                     ))
                 }
