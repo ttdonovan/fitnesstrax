@@ -10,14 +10,14 @@ pub fn steps_c(record: &fitnesstrax::steps::StepRecord) -> gtk::Label {
 
 pub fn steps_edit_c(
     id: UniqueId,
-    value: u32,
-    on_update: Box<dyn Fn(UniqueId, u32)>,
+    record: StepRecord,
+    on_update: Box<dyn Fn(UniqueId, StepRecord)>,
 ) -> ValidatedTextEntry<u32> {
     ValidatedTextEntry::new(
-        value,
+        record.steps,
         Box::new(|s| s.parse::<u32>().map_err(|err| Error::ParseStepsError)),
         Box::new(move |res| match res {
-            Some(val) => on_update(id.clone(), val),
+            Some(val) => on_update(id.clone(), StepRecord::new(record.timestamp(), val)),
             None => (),
         }),
     )

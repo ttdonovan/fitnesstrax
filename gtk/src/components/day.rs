@@ -1,5 +1,7 @@
-use emseries::{DateTimeTz, Record, Recordable, UniqueId};
+use dimensioned::si::KG;
+use emseries::{DateTimeTz, Record, UniqueId};
 use fitnesstrax::steps::StepRecord;
+use fitnesstrax::weight::WeightRecord;
 use fitnesstrax::TraxRecord;
 use gtk::prelude::*;
 use std::collections::HashMap;
@@ -183,18 +185,32 @@ impl DayEdit {
         let first_row = gtk::Box::new(gtk::Orientation::Horizontal, 5);
         widget.pack_start(&first_row, false, false, 5);
 
-        let mut weight_component = None;
+        let mut weight_component = {
+            let date_ = date.clone();
+            let new_records_ = new_records.clone();
+            weight_record_edit_c(
+                UniqueId::new(),
+                WeightRecord::new(DateTimeTz(date_.and_hms(0, 0, 0)), 0.0 * KG),
+                Box::new(move |id, rec| {
+                    new_records_
+                        .write()
+                        .unwrap()
+                        .insert(id, TraxRecord::from(rec));
+                }),
+            )
+        };
+
         let mut step_component = {
             let date_ = date.clone();
             let new_records_ = new_records.clone();
             steps_edit_c(
                 UniqueId::new(),
-                0,
-                Box::new(move |id, val| {
-                    new_records_.write().unwrap().insert(
-                        id,
-                        TraxRecord::from(StepRecord::new(DateTimeTz(date_.and_hms(0, 0, 0)), val)),
-                    );
+                StepRecord::new(DateTimeTz(date_.and_hms(0, 0, 0)), 0),
+                Box::new(move |id, rec| {
+                    new_records_
+                        .write()
+                        .unwrap()
+                        .insert(id, TraxRecord::from(rec));
                 }),
             )
         };
@@ -202,33 +218,31 @@ impl DayEdit {
             match data {
                 TraxRecord::Weight(ref rec) => {
                     let updates_ = updates.clone();
-                    weight_component = Some(weight_record_edit_c(
+                    weight_component = weight_record_edit_c(
                         id.clone(),
-                        &rec,
+                        rec.clone(),
                         Box::new(move |id, rec| {
                             updates_.write().unwrap().insert(id, TraxRecord::from(rec));
                         }),
-                    ))
+                    )
                 }
                 TraxRecord::Steps(ref rec) => {
                     let updates_ = updates.clone();
-                    let id_ = id.clone();
-                    let rec_ = rec.clone();
                     step_component = steps_edit_c(
-                        id_,
-                        rec.steps,
-                        Box::new(move |id_, val| {
-                            updates_.write().unwrap().insert(
-                                id_.clone(),
-                                TraxRecord::from(StepRecord::new(rec_.timestamp(), val)),
-                            );
+                        id.clone(),
+                        rec.clone(),
+                        Box::new(move |id_, rec| {
+                            updates_
+                                .write()
+                                .unwrap()
+                                .insert(id_.clone(), TraxRecord::from(rec));
                         }),
                     )
                 }
                 _ => (),
             }
         }
-        weight_component.map(|c| first_row.pack_start(&c.widget, false, false, 5));
+        first_row.pack_start(&weight_component.widget, false, false, 5);
         first_row.pack_start(&step_component.widget, false, false, 5);
 
         let buttons_row = gtk::Box::new(gtk::Orientation::Horizontal, 5);
