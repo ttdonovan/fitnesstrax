@@ -9,16 +9,15 @@ pub fn steps_c(record: &fitnesstrax::steps::StepRecord) -> gtk::Label {
 }
 
 pub fn steps_edit_c(
-    id: emseries::UniqueId,
-    record: &StepRecord,
-    on_update: Box<dyn Fn(UniqueId, StepRecord)>,
+    id: UniqueId,
+    value: u32,
+    on_update: Box<dyn Fn(UniqueId, u32)>,
 ) -> ValidatedTextEntry<u32> {
-    let record_ = record.clone();
     ValidatedTextEntry::new(
-        record.steps,
+        value,
         Box::new(|s| s.parse::<u32>().map_err(|err| Error::ParseStepsError)),
         Box::new(move |res| match res {
-            Some(val) => on_update(id.clone(), StepRecord::new(record_.timestamp(), val)),
+            Some(val) => on_update(id.clone(), val),
             None => (),
         }),
     )

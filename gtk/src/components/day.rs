@@ -1,4 +1,5 @@
-use emseries::{Record, UniqueId};
+use emseries::{DateTimeTz, Record, Recordable, UniqueId};
+use fitnesstrax::steps::StepRecord;
 use fitnesstrax::TraxRecord;
 use gtk::prelude::*;
 use std::collections::HashMap;
@@ -76,7 +77,9 @@ impl Day {
         let component = DayEdit::new(
             &self.date,
             &self.records,
-            Box::new(move |records| self_save.save_edit(records)),
+            Box::new(move |updated_records, new_records| {
+                self_save.save_edit(updated_records, new_records)
+            }),
             Box::new(move || self_cancel.cancel_edit()),
         );
         self.widget.pack_start(&component.widget, true, true, 5);
@@ -94,11 +97,15 @@ impl Day {
         *v = DayState::View(component);
     }
 
-    fn save_edit(&self, records: Vec<(UniqueId, TraxRecord)>) {
-        records
-            .iter()
-            .for_each(|record| println!("record: {:?}", record));
-        self.ctx.write().unwrap().save_records(records);
+    fn save_edit(
+        &self,
+        updated_records: Vec<(UniqueId, TraxRecord)>,
+        new_records: Vec<TraxRecord>,
+    ) {
+        self.ctx
+            .write()
+            .unwrap()
+            .save_records(updated_records, new_records);
         self.cancel_edit();
     }
 
@@ -163,13 +170,13 @@ struct DayEdit {
 
 impl DayEdit {
     fn new(
-        _date: &chrono::Date<chrono_tz::Tz>,
+        date: &chrono::Date<chrono_tz::Tz>,
         data: &HashMap<UniqueId, TraxRecord>,
-        on_save: Box<dyn Fn(Vec<(UniqueId, TraxRecord)>)>,
+        on_save: Box<dyn Fn(Vec<(UniqueId, TraxRecord)>, Vec<TraxRecord>)>,
         on_cancel: Box<dyn Fn()>,
     ) -> DayEdit {
         let updates = Arc::new(RwLock::new(HashMap::new()));
-        //let new_records = Arc::new(RwLock::new(HashMap::new()));
+        let new_records = Arc::new(RwLock::new(HashMap::new()));
 
         let widget = gtk::Box::new(gtk::Orientation::Vertical, 5);
 
@@ -177,7 +184,20 @@ impl DayEdit {
         widget.pack_start(&first_row, false, false, 5);
 
         let mut weight_component = None;
-        let mut step_component = None;
+        let mut step_component = {
+            let date_ = date.clone();
+            let new_records_ = new_records.clone();
+            steps_edit_c(
+                UniqueId::new(),
+                0,
+                Box::new(move |id, val| {
+                    new_records_.write().unwrap().insert(
+                        id,
+                        TraxRecord::from(StepRecord::new(DateTimeTz(date_.and_hms(0, 0, 0)), val)),
+                    );
+                }),
+            )
+        };
         for (id, data) in data {
             match data {
                 TraxRecord::Weight(ref rec) => {
@@ -192,19 +212,24 @@ impl DayEdit {
                 }
                 TraxRecord::Steps(ref rec) => {
                     let updates_ = updates.clone();
-                    step_component = Some(steps_edit_c(
-                        id.clone(),
-                        &rec,
-                        Box::new(move |id, rec| {
-                            updates_.write().unwrap().insert(id, TraxRecord::from(rec));
+                    let id_ = id.clone();
+                    let rec_ = rec.clone();
+                    step_component = steps_edit_c(
+                        id_,
+                        rec.steps,
+                        Box::new(move |id_, val| {
+                            updates_.write().unwrap().insert(
+                                id_.clone(),
+                                TraxRecord::from(StepRecord::new(rec_.timestamp(), val)),
+                            );
                         }),
-                    ))
+                    )
                 }
                 _ => (),
             }
         }
         weight_component.map(|c| first_row.pack_start(&c.widget, false, false, 5));
-        step_component.map(|c| first_row.pack_start(&c.widget, false, false, 5));
+        first_row.pack_start(&step_component.widget, false, false, 5);
 
         let buttons_row = gtk::Box::new(gtk::Orientation::Horizontal, 5);
         let save_button = gtk::Button::new_with_label("Save");
@@ -223,7 +248,13 @@ impl DayEdit {
                     .iter()
                     .map(|(id, record)| (id.clone(), record.clone()))
                     .collect();
-                on_save(updated_records);
+                let new_records_: Vec<TraxRecord> = new_records
+                    .read()
+                    .unwrap()
+                    .values()
+                    .map(|v| v.clone())
+                    .collect();
+                on_save(updated_records, new_records_);
             });
         }
         cancel_button.connect_clicked(move |_| on_cancel());

@@ -82,9 +82,16 @@ impl AppContext {
             .map_err(|err| Error::TraxError(err))
     }
 
-    pub fn save_records(&mut self, updated_records: Vec<(UniqueId, TraxRecord)>) {
+    pub fn save_records(
+        &mut self,
+        updated_records: Vec<(UniqueId, TraxRecord)>,
+        new_records: Vec<TraxRecord>,
+    ) {
         for (id, record) in updated_records {
             self.trax.replace_record(id, record);
+        }
+        for record in new_records {
+            self.trax.add_record(record);
         }
         let history = self.get_history().unwrap();
         self.send_notifications(Message::RecordsUpdated {
