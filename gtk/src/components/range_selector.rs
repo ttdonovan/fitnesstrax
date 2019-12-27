@@ -1,3 +1,4 @@
+use chrono_tz;
 use gtk::prelude::*;
 use std::sync::{Arc, RwLock};
 
@@ -16,19 +17,41 @@ impl RangeSelector {
         let start_date = range.start.clone();
         let end_date = range.end.clone();
         let on_change_arc = Arc::new(RwLock::new(on_change));
+        let timezone = Arc::new(RwLock::new(range.start.timezone()));
 
         let range_arc = Arc::new(RwLock::new(range));
-        let start_selector = DateSelector::new(start_date, None);
+        let start_selector = {
+            let range_ = range_arc.clone();
+            let on_change_ = on_change_arc.clone();
+            let timezone = timezone.clone();
+            DateSelector::new(
+                start_date,
+                Some(Box::new(move |new_date| {
+                    let new_range = DateRange {
+                        start: new_date.with_timezone(&*timezone.read().unwrap()),
+                        end: range_.read().unwrap().end.clone(),
+                    };
+                    *range_.write().unwrap() = new_range;
+                    match *on_change_.read().unwrap() {
+                        Some(ref change_handler_f) => {
+                            (*change_handler_f)(range_.read().unwrap().clone())
+                        }
+                        None => (),
+                    }
+                })),
+            )
+        };
 
         let end_selector = {
             let range_ = range_arc.clone();
             let on_change_ = on_change_arc.clone();
+            let timezone = timezone.clone();
             DateSelector::new(
                 end_date,
                 Some(Box::new(move |new_date| {
                     let new_range = DateRange {
                         start: range_.read().unwrap().start.clone(),
-                        end: new_date,
+                        end: new_date.with_timezone(&*timezone.read().unwrap()),
                     };
                     *range_.write().unwrap() = new_range;
                     match *on_change_.read().unwrap() {
@@ -41,7 +64,7 @@ impl RangeSelector {
             )
         };
 
-        let mut w = RangeSelector {
+        let w = RangeSelector {
             widget: gtk::Box::new(gtk::Orientation::Vertical, 5),
             start_selector,
             end_selector,
@@ -52,19 +75,7 @@ impl RangeSelector {
             .pack_start(&w.start_selector.widget, false, false, 5);
         w.widget.pack_start(&w.end_selector.widget, false, false, 5);
 
-        {
-            let range_ = range_arc.clone();
-            let on_change_ = w.on_change.clone();
-            w.start_selector.connect_change(Box::new(move |new_date| {
-                dispatch_change(
-                    &on_change_,
-                    DateRange {
-                        start: range_.read().unwrap().start.clone(),
-                        end: new_date,
-                    },
-                );
-            }));
-        }
+        {}
 
         w
     }

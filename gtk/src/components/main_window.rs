@@ -8,10 +8,6 @@ pub struct MainWindow {
     pub widget: gtk::ApplicationWindow,
     menubar: MenuBar,
     history: History,
-    /*
-    pub start_selector: DateSelector,
-    end_selector: DateSelector,
-    */
 }
 
 impl MainWindow {

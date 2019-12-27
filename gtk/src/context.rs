@@ -40,8 +40,8 @@ impl AppContext {
         })?;
 
         let range = Range::new(
-            Utc::today().with_timezone(&config.timezone) - chrono::Duration::days(7),
-            Utc::today().with_timezone(&config.timezone),
+            Utc::now().with_timezone(&config.timezone).date() - chrono::Duration::days(7),
+            Utc::now().with_timezone(&config.timezone).date(),
         );
 
         Ok(AppContext {
