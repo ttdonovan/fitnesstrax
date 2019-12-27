@@ -1,4 +1,4 @@
-use chrono::TimeZone;
+use chrono::Utc;
 use chrono_tz;
 use glib::Sender;
 
@@ -40,12 +40,8 @@ impl AppContext {
         })?;
 
         let range = Range::new(
-            /*
-            Utc::today().with_timezone(&config_.timezone) - chrono::Duration::days(7),
-            Utc::today().with_timezone(&config_.timezone),
-            */
-            chrono::Utc.ymd(2019, 9, 1).with_timezone(&config.timezone),
-            chrono::Utc.ymd(2019, 9, 30).with_timezone(&config.timezone),
+            Utc::today().with_timezone(&config.timezone) - chrono::Duration::days(7),
+            Utc::today().with_timezone(&config.timezone),
         );
 
         Ok(AppContext {

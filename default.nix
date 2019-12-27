@@ -1,37 +1,21 @@
 { pkgs ? import <nixpkgs-19.03> {},
   ld ? import <luminescent-dreams> {} }:
 let
-  server = import server/default.nix { pkgs = pkgs; rustc = ld.rust_1_33_0; };
-  client = import client/default.nix { pkgs = pkgs; nodejs = ld.nodejs_10_15_3; };
-
-  wrapper = pkgs.writeScript "fitnesstrax"
-    ''
-    #!/bin/bash
-
-    export HOST=$([ ! -z $HOST ] && echo "$HOST" || echo "localhost")
-    export PORT=$([ ! -z $PORT ] && echo "$PORT" || echo 7000)
-    export WEBAPP_PATH="${client}/"
-    ${server}/bin/fitnesstrax-server
-    '';
-
+  app = import gtk/default.nix { pkgs = pkgs; rustc = ld.rust_1_39; };
 
 in pkgs.stdenv.mkDerivation rec {
   name = "fitnesstrax-${version}";
   version = "0.0.3";
 
   #paths = [ server wrapper ];
-  buildInputs = [ server client pkgs.makeWrapper ];
+  buildInputs = [ app ];
 
   src = ./.;
 
-  phases = [ "installPhase" "postInstallPhase" ];
+  phases = [ "installPhase" ];
   installPhase = ''
     mkdir -p $out/bin
-    cp ${wrapper} $out/bin/fitnesstrax
-    '';
-
-  postInstallPhase = ''
-    patchShebangs $out/bin/fitnesstrax
+    cp ${app}/bin/fitnesstrax-gtk $out/bin/fitnesstrax
     '';
 
   meta = with pkgs.stdenv.lib; {
