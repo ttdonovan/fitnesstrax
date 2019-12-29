@@ -3,7 +3,7 @@ use emseries::{DateTimeTz, Recordable};
 #[derive(Clone, Debug, PartialEq, Deserialize, Serialize)]
 pub struct StepRecord {
     date: DateTimeTz,
-    steps: u32,
+    pub steps: u32,
 }
 
 impl StepRecord {

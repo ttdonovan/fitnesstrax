@@ -1,6 +1,5 @@
 .DS_Store
-fitnesstrax-lib/target/
-server/target/
+**/target/
 **/*.rs.bk
 Cargo.lock
 var/
@@ -9,5 +8,6 @@ client/static
 client/dist
 client/build
 client/index.js
-server/db.series
+db.series
 result
+config.yaml

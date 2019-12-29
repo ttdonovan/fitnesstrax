@@ -5,7 +5,7 @@ use emseries::{DateTimeTz, Recordable};
 #[derive(Clone, Debug, PartialEq, Deserialize, Serialize)]
 pub struct WeightRecord {
     date: DateTimeTz,
-    weight: Kilogram<f64>,
+    pub weight: Kilogram<f64>,
 }
 
 impl WeightRecord {

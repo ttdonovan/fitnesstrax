@@ -34,7 +34,7 @@ impl error::Error for Error {
         }
     }
 
-    fn cause(&self) -> Option<&error::Error> {
+    fn cause(&self) -> Option<&(dyn error::Error + 'static)> {
         match self {
             Error::InvalidParameter => None,
             Error::NoSeries => None,

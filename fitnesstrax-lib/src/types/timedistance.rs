@@ -1,5 +1,6 @@
 use dimensioned::si::{Meter, Second};
 use emseries::{DateTimeTz, Recordable};
+use std::convert::TryFrom;
 
 #[derive(Clone, Debug, PartialEq, Deserialize, Serialize)]
 pub enum ActivityType {
@@ -10,14 +11,39 @@ pub enum ActivityType {
     Walking,
 }
 
+pub fn activity_types() -> Vec<ActivityType> {
+    vec![
+        ActivityType::Cycling,
+        ActivityType::Rowing,
+        ActivityType::Running,
+        ActivityType::Swimming,
+        ActivityType::Walking,
+    ]
+}
+
+impl TryFrom<&str> for ActivityType {
+    type Error = &'static str;
+
+    fn try_from(inp: &str) -> Result<ActivityType, Self::Error> {
+        match inp {
+            "Cycling" => Ok(ActivityType::Cycling),
+            "Rowing" => Ok(ActivityType::Rowing),
+            "Running" => Ok(ActivityType::Running),
+            "Swimming" => Ok(ActivityType::Swimming),
+            "Walking" => Ok(ActivityType::Walking),
+            _ => Err("invalid activity string"),
+        }
+    }
+}
+
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct TimeDistanceRecord {
     #[serde(rename = "date")]
-    timestamp: DateTimeTz,
-    activity: ActivityType,
-    distance: Option<Meter<f64>>,
-    duration: Option<Second<f64>>,
-    comments: Option<String>,
+    pub timestamp: DateTimeTz,
+    pub activity: ActivityType,
+    pub distance: Option<Meter<f64>>,
+    pub duration: Option<Second<f64>>,
+    pub comments: Option<String>,
 }
 
 impl TimeDistanceRecord {

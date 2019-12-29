@@ -73,6 +73,24 @@ impl TraxRecord {
     }
 }
 
+impl From<steps::StepRecord> for TraxRecord {
+    fn from(r: steps::StepRecord) -> TraxRecord {
+        TraxRecord::Steps(r)
+    }
+}
+
+impl From<timedistance::TimeDistanceRecord> for TraxRecord {
+    fn from(r: timedistance::TimeDistanceRecord) -> TraxRecord {
+        TraxRecord::TimeDistance(r)
+    }
+}
+
+impl From<weight::WeightRecord> for TraxRecord {
+    fn from(r: weight::WeightRecord) -> TraxRecord {
+        TraxRecord::Weight(r)
+    }
+}
+
 impl emseries::Recordable for TraxRecord {
     fn timestamp(&self) -> DateTimeTz {
         match self {

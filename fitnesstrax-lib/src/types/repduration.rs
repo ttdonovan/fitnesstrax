@@ -12,9 +12,9 @@ pub enum ActivityType {
 pub struct RepDurationRecord {
     #[serde(rename = "date")]
     timestamp: DateTimeTz,
-    activity: ActivityType,
-    sets: Vec<Second<f64>>,
-    comments: Option<String>,
+    pub activity: ActivityType,
+    pub sets: Vec<Second<f64>>,
+    pub comments: Option<String>,
 }
 
 impl RepDurationRecord {
