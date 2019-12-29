@@ -1,22 +1,21 @@
 use chrono::Timelike;
 use emseries::*;
 use gtk::prelude::*;
+use std::convert::TryFrom;
 use std::sync::{Arc, RwLock};
 
 use crate::components::basics::{
     distance_c, distance_edit_c, duration_c, duration_edit_c, time_c, time_edit_c,
 };
-use crate::components::validated_text_entry::ValidatedTextEntry;
-use crate::conversions::parse_duration;
-use fitnesstrax::timedistance::TimeDistanceRecord;
+use fitnesstrax::timedistance::{ActivityType, TimeDistanceRecord};
 
-fn activity_c(activity: &fitnesstrax::timedistance::ActivityType) -> gtk::Label {
+fn activity_c(activity: &ActivityType) -> gtk::Label {
     gtk::Label::new(match activity {
-        fitnesstrax::timedistance::ActivityType::Cycling => Some("Cycling"),
-        fitnesstrax::timedistance::ActivityType::Rowing => Some("Rowing"),
-        fitnesstrax::timedistance::ActivityType::Running => Some("Running"),
-        fitnesstrax::timedistance::ActivityType::Swimming => Some("Swimming"),
-        fitnesstrax::timedistance::ActivityType::Walking => Some("Walking"),
+        ActivityType::Cycling => Some("Cycling"),
+        ActivityType::Rowing => Some("Rowing"),
+        ActivityType::Running => Some("Running"),
+        ActivityType::Swimming => Some("Swimming"),
+        ActivityType::Walking => Some("Walking"),
     })
 }
 
@@ -79,6 +78,26 @@ pub fn time_distance_record_edit_c(
         )
     };
 
+    let activity_selection = {
+        let id = id.clone();
+        let record = record.clone();
+        let on_update = on_update.clone();
+        let menu = gtk::ComboBoxText::new();
+        for activity in ["Cycling", "Rowing", "Running", "Swimming", "Walking"].iter() {
+            menu.append(Some(activity), activity);
+        }
+        menu.set_active_id(Some(&format!("{:?}", record.read().unwrap().activity)));
+        menu.connect_changed(move |s| match s.get_active_id() {
+            Some(val) => {
+                let mut r = record.write().unwrap();
+                r.activity = ActivityType::try_from(val.as_str()).unwrap();
+                (on_update.read().unwrap())(id.clone(), r.clone())
+            }
+            None => (),
+        });
+        menu
+    };
+
     let distance_entry = {
         let id = id.clone();
         let record = record.clone();
@@ -113,25 +132,10 @@ pub fn time_distance_record_edit_c(
                 None => (),
             }),
         )
-
-        /*
-        ValidatedTextEntry::new(
-            duration,
-            Box::new(|s| format!("{}", s)),
-            Box::new(|s| parse_duration(s)),
-            Box::new(move |res| match res {
-                Some(val) => {
-                    let mut r = record.write().unwrap();
-                    r.duration = Some(val);
-                    (on_update.read().unwrap())(id.clone(), r.clone())
-                }
-                None => (),
-            }),
-        )
-        */
     };
 
     container.pack_start(&time_entry.widget, false, false, 5);
+    container.pack_start(&activity_selection, false, false, 5);
     container.pack_start(&distance_entry.widget, false, false, 5);
     container.pack_start(&gtk::Label::new(Some("km")), false, false, 5);
     container.pack_start(&duration_entry.widget, false, false, 5);

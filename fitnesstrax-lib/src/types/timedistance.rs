@@ -1,5 +1,6 @@
 use dimensioned::si::{Meter, Second};
 use emseries::{DateTimeTz, Recordable};
+use std::convert::TryFrom;
 
 #[derive(Clone, Debug, PartialEq, Deserialize, Serialize)]
 pub enum ActivityType {
@@ -8,6 +9,21 @@ pub enum ActivityType {
     Running,
     Swimming,
     Walking,
+}
+
+impl TryFrom<&str> for ActivityType {
+    type Error = &'static str;
+
+    fn try_from(inp: &str) -> Result<ActivityType, Self::Error> {
+        match inp {
+            "Cycling" => Ok(ActivityType::Cycling),
+            "Rowing" => Ok(ActivityType::Rowing),
+            "Running" => Ok(ActivityType::Running),
+            "Swimming" => Ok(ActivityType::Swimming),
+            "Walking" => Ok(ActivityType::Walking),
+            _ => Err("invalid activity string"),
+        }
+    }
 }
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
