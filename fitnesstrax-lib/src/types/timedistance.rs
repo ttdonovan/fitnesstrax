@@ -11,6 +11,16 @@ pub enum ActivityType {
     Walking,
 }
 
+pub fn activity_types() -> Vec<ActivityType> {
+    vec![
+        ActivityType::Cycling,
+        ActivityType::Rowing,
+        ActivityType::Running,
+        ActivityType::Swimming,
+        ActivityType::Walking,
+    ]
+}
+
 impl TryFrom<&str> for ActivityType {
     type Error = &'static str;
 

@@ -7,7 +7,7 @@ use std::sync::{Arc, RwLock};
 use crate::components::basics::{
     distance_c, distance_edit_c, duration_c, duration_edit_c, time_c, time_edit_c,
 };
-use fitnesstrax::timedistance::{ActivityType, TimeDistanceRecord};
+use fitnesstrax::timedistance::{activity_types, ActivityType, TimeDistanceRecord};
 
 fn activity_c(activity: &ActivityType) -> gtk::Label {
     gtk::Label::new(match activity {
@@ -83,8 +83,9 @@ pub fn time_distance_record_edit_c(
         let record = record.clone();
         let on_update = on_update.clone();
         let menu = gtk::ComboBoxText::new();
-        for activity in ["Cycling", "Rowing", "Running", "Swimming", "Walking"].iter() {
-            menu.append(Some(activity), activity);
+        for activity in activity_types().iter() {
+            let activity_str = format!("{:?}", activity);
+            menu.append(Some(&activity_str), &activity_str);
         }
         menu.set_active_id(Some(&format!("{:?}", record.read().unwrap().activity)));
         menu.connect_changed(move |s| match s.get_active_id() {
