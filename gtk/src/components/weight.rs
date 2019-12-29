@@ -17,9 +17,6 @@ pub fn weight_record_edit_c(
     ValidatedTextEntry::new(
         record.weight,
         Box::new(|s| parse_mass(s)),
-        Box::new(move |res| match res {
-            Some(val) => on_update(id.clone(), WeightRecord::new(record.timestamp(), val)),
-            None => (),
-        }),
+        Box::new(move |val| on_update(id.clone(), WeightRecord::new(record.timestamp(), val))),
     )
 }
