@@ -69,10 +69,10 @@ pub fn parse_duration(inp: &str) -> Result<Option<Second<f64>>, Error> {
             Ok(Some((seconds + minutes * 60.0 + hours * 3600.0) * S))
         }
         2 => {
-            let seconds = parts[2]
+            let seconds = parts[1]
                 .parse::<f64>()
                 .map_err(|_| Error::ParseDurationError)?;
-            let minutes = parts[1]
+            let minutes = parts[0]
                 .parse::<f64>()
                 .map_err(|_| Error::ParseDurationError)?;
             Ok(Some((seconds + minutes * 60.0) * S))

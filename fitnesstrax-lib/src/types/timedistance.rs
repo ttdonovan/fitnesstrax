@@ -13,7 +13,7 @@ pub enum ActivityType {
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct TimeDistanceRecord {
     #[serde(rename = "date")]
-    timestamp: DateTimeTz,
+    pub timestamp: DateTimeTz,
     pub activity: ActivityType,
     pub distance: Option<Meter<f64>>,
     pub duration: Option<Second<f64>>,

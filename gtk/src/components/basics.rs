@@ -1,6 +1,7 @@
 use crate::components::validated_text_entry::ValidatedTextEntry;
 use crate::conversions::{
-    parse_distance, parse_hours_minutes, render_distance, render_duration, render_hours_minutes,
+    parse_distance, parse_duration, parse_hours_minutes, render_distance, render_duration,
+    render_hours_minutes,
 };
 
 pub fn date_c(date: &chrono::Date<chrono_tz::Tz>) -> gtk::Label {
@@ -41,4 +42,16 @@ pub fn distance_edit_c(
 
 pub fn duration_c(duration: &dimensioned::si::Second<f64>) -> gtk::Label {
     gtk::Label::new(Some(&render_duration(duration)))
+}
+
+pub fn duration_edit_c(
+    duration: &Option<dimensioned::si::Second<f64>>,
+    on_update: Box<dyn Fn(Option<dimensioned::si::Second<f64>>)>,
+) -> ValidatedTextEntry<Option<dimensioned::si::Second<f64>>> {
+    ValidatedTextEntry::new(
+        duration.clone(),
+        Box::new(|s| s.map(|s_| render_duration(&s_)).unwrap_or(String::from(""))),
+        Box::new(|s| parse_duration(s)),
+        on_update,
+    )
 }

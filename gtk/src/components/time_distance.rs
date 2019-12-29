@@ -1,8 +1,14 @@
+use chrono::Timelike;
 use emseries::*;
 use gtk::prelude::*;
+use std::sync::{Arc, RwLock};
 
-use super::basics::{distance_c, duration_c, time_c};
-use fitnesstrax;
+use crate::components::basics::{
+    distance_c, distance_edit_c, duration_c, duration_edit_c, time_c, time_edit_c,
+};
+use crate::components::validated_text_entry::ValidatedTextEntry;
+use crate::conversions::parse_duration;
+use fitnesstrax::timedistance::TimeDistanceRecord;
 
 fn activity_c(activity: &fitnesstrax::timedistance::ActivityType) -> gtk::Label {
     gtk::Label::new(match activity {
@@ -39,4 +45,96 @@ pub fn time_distance_c(record: &fitnesstrax::timedistance::TimeDistanceRecord) -
     );
 
     return container;
+}
+
+pub fn time_distance_record_edit_c(
+    id: UniqueId,
+    record: TimeDistanceRecord,
+    on_update: Box<dyn Fn(UniqueId, TimeDistanceRecord)>,
+) -> gtk::Box {
+    let container = gtk::Box::new(gtk::Orientation::Horizontal, 5);
+    let record = Arc::new(RwLock::new(record));
+    let on_update = Arc::new(RwLock::new(on_update));
+
+    let time_entry = {
+        let id = id.clone();
+        let record = record.clone();
+        let on_update = on_update.clone();
+        let time = record.read().unwrap().timestamp().0.time();
+        time_edit_c(
+            &time,
+            Box::new(move |val| {
+                let mut r = record.write().unwrap();
+                r.timestamp = r.timestamp.map(|ts| {
+                    ts.clone()
+                        .with_hour(val.hour())
+                        .unwrap()
+                        .with_minute(val.minute())
+                        .unwrap()
+                        .with_second(val.second())
+                        .unwrap()
+                });
+                (on_update.read().unwrap())(id.clone(), r.clone())
+            }),
+        )
+    };
+
+    let distance_entry = {
+        let id = id.clone();
+        let record = record.clone();
+        let on_update = on_update.clone();
+        let distance = record.read().unwrap().distance.clone();
+        distance_edit_c(
+            &distance,
+            Box::new(move |res| match res {
+                Some(val) => {
+                    let mut r = record.write().unwrap();
+                    r.distance = Some(val);
+                    (on_update.read().unwrap())(id.clone(), r.clone())
+                }
+                None => (),
+            }),
+        )
+    };
+
+    let duration_entry = {
+        let id = id.clone();
+        let record = record.clone();
+        let on_update = on_update.clone();
+        let duration = record.read().unwrap().duration.clone();
+        duration_edit_c(
+            &duration,
+            Box::new(move |res| match res {
+                Some(val) => {
+                    let mut r = record.write().unwrap();
+                    r.duration = Some(val);
+                    (on_update.read().unwrap())(id.clone(), r.clone())
+                }
+                None => (),
+            }),
+        )
+
+        /*
+        ValidatedTextEntry::new(
+            duration,
+            Box::new(|s| format!("{}", s)),
+            Box::new(|s| parse_duration(s)),
+            Box::new(move |res| match res {
+                Some(val) => {
+                    let mut r = record.write().unwrap();
+                    r.duration = Some(val);
+                    (on_update.read().unwrap())(id.clone(), r.clone())
+                }
+                None => (),
+            }),
+        )
+        */
+    };
+
+    container.pack_start(&time_entry.widget, false, false, 5);
+    container.pack_start(&distance_entry.widget, false, false, 5);
+    container.pack_start(&gtk::Label::new(Some("km")), false, false, 5);
+    container.pack_start(&duration_entry.widget, false, false, 5);
+
+    container
 }

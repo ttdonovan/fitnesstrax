@@ -106,7 +106,7 @@ impl AppContext {
     }
 
     fn send_notifications(&self, msg: Message) {
-        println!("dispatching message: {:?}", msg);
+        //println!("dispatching message: {:?}", msg);
         self.channel.send(msg).unwrap();
     }
 }
