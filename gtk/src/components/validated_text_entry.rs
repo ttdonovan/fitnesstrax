@@ -13,14 +13,15 @@ pub struct ValidatedTextEntry<A: Clone> {
 impl<A: Clone> ValidatedTextEntry<A> {
     pub fn new(
         value: A,
+        render: Box<dyn Fn(&A) -> String>,
         parse: Box<dyn Fn(&str) -> Result<A, Error>>,
         on_update: Box<dyn Fn(A)>,
     ) -> ValidatedTextEntry<A>
     where
-        A: 'static + Display + Clone,
+        A: 'static + Clone,
     {
         let widget = gtk::Entry::new();
-        widget.set_text(&format!("{}", value));
+        widget.set_text(&render(&value));
 
         let w = ValidatedTextEntry {
             widget,

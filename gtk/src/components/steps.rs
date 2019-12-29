@@ -15,6 +15,7 @@ pub fn steps_edit_c(
 ) -> ValidatedTextEntry<u32> {
     ValidatedTextEntry::new(
         record.steps,
+        Box::new(|s| format!("{}", s)),
         Box::new(|s| s.parse::<u32>().map_err(|_err| Error::ParseStepsError)),
         Box::new(move |val| on_update(id.clone(), StepRecord::new(record.timestamp(), val))),
     )
