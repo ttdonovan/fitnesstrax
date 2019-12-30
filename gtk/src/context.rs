@@ -5,6 +5,7 @@ use std::path::PathBuf;
 
 use crate::config::Configuration;
 use crate::errors::{Error, Result};
+use crate::i18n::Messages;
 use crate::preferences::{Preferences, UnitSystem};
 use crate::range::Range;
 use crate::types::DateRange;
@@ -35,6 +36,7 @@ pub struct AppContext {
     prefs: Preferences,
     trax: Trax,
     range: DateRange,
+    messages: Messages,
     channel: Sender<Message>,
 }
 
@@ -51,6 +53,8 @@ impl AppContext {
             Utc::now().with_timezone(&config.timezone).date(),
         );
 
+        let messages = Messages::new(&config.language);
+
         Ok(AppContext {
             series_path: config.series_path,
             prefs: Preferences {
@@ -61,6 +65,7 @@ impl AppContext {
             trax,
             range,
             channel,
+            messages,
         })
     }
 
@@ -97,6 +102,10 @@ impl AppContext {
 
     pub fn get_range(&self) -> DateRange {
         self.range.clone()
+    }
+
+    pub fn get_messages(&self) -> Messages {
+        self.messages.clone()
     }
 
     pub fn get_history(&self) -> Result<Vec<Record<TraxRecord>>> {

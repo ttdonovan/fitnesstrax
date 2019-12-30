@@ -14,6 +14,7 @@ mod config;
 mod context;
 mod conversions;
 mod errors;
+mod i18n;
 mod preferences;
 mod range;
 mod types;

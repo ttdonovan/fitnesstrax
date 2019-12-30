@@ -21,6 +21,7 @@ impl MainWindow {
 
         {
             let ctx = ctx.read().unwrap();
+            let messages = ctx.get_messages();
             notebook.append_page(
                 history.render(
                     ctx.get_preferences(),
@@ -29,11 +30,13 @@ impl MainWindow {
                 ),
                 Some(&gtk::Label::new(Some("History"))),
             );
+            notebook.append_page(
+                preferences.render(),
+                Some(&gtk::Label::new(
+                    messages.tr("preferences").as_ref().map(|c| &**c),
+                )),
+            );
         }
-        notebook.append_page(
-            preferences.render(),
-            Some(&gtk::Label::new(Some("Preferences"))),
-        );
 
         let w = MainWindow {
             widget,

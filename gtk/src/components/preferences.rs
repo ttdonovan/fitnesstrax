@@ -4,6 +4,7 @@ use std::sync::{Arc, RwLock};
 
 use crate::components::{entry_setting_c, pulldown_setting_c};
 use crate::context::AppContext;
+use crate::i18n::Messages;
 use crate::preferences;
 
 #[derive(Clone)]
@@ -46,6 +47,7 @@ impl Preferences {
          * no way for the values of a component to change outside of changes within this object.
          * However, this changes when I handle translation, because changing the translation
          * setting should trigger a total re-render. */
+
         match self.component {
             None => {
                 let widget = gtk::Box::new(gtk::Orientation::Vertical, 5);
@@ -56,6 +58,8 @@ impl Preferences {
                     timezone,
                     units,
                 } = self.ctx.read().unwrap().get_preferences();
+
+                let messages = self.ctx.read().unwrap().get_messages();
 
                 {
                     let ctx = self.ctx.clone();
@@ -75,7 +79,7 @@ impl Preferences {
                     let w = self.clone();
                     widget.pack_start(
                         &pulldown_setting_c(
-                            "Language",
+                            messages.tr("language").as_ref().map(|c| &**c).unwrap(),
                             vec![("en", "English"), ("eo", "Esperanto")],
                             &language,
                             Box::new(move |s| w.set_language(s)),
@@ -90,7 +94,7 @@ impl Preferences {
                     let w = self.clone();
                     widget.pack_start(
                         &pulldown_setting_c(
-                            "Timezone",
+                            messages.tr("timezone").as_ref().map(|c| &**c).unwrap(),
                             tz_list(),
                             timezone.name(),
                             Box::new(move |s| w.set_timezone(s)),
@@ -105,7 +109,7 @@ impl Preferences {
                     let w = self.clone();
                     widget.pack_start(
                         &pulldown_setting_c(
-                            "Units",
+                            messages.tr("units").as_ref().map(|c| &**c).unwrap(),
                             vec![("SI", "SI (kg, km, m/s)"), ("USA", "USA (lbs, mi, mph)")],
                             &String::from(units),
                             Box::new(move |s| w.set_units(s)),
