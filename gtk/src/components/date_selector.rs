@@ -9,17 +9,17 @@ pub struct DateSelector {
     button: gtk::Button,
     calendar: gtk::Calendar,
     date: Arc<RwLock<Date<Tz>>>,
-    on_change: Arc<RwLock<Option<Box<dyn Fn(Date<Tz>)>>>>,
+    on_change: Arc<Box<dyn Fn(Date<Tz>)>>,
 }
 
 impl DateSelector {
-    pub fn new(date: Date<Tz>, on_change: Option<Box<dyn Fn(Date<Tz>)>>) -> DateSelector {
+    pub fn new(date: Date<Tz>, on_change: Box<dyn Fn(Date<Tz>)>) -> DateSelector {
         let w = DateSelector {
             widget: gtk::Box::new(gtk::Orientation::Vertical, 5),
             button: gtk::Button::new_with_label(&format!("{}", date.format("%B %e, %Y"))),
             calendar: gtk::Calendar::new(),
             date: Arc::new(RwLock::new(date)),
-            on_change: Arc::new(RwLock::new(on_change)),
+            on_change: Arc::new(on_change),
         };
 
         w.calendar.select_month(date.month0(), date.year() as u32);
@@ -39,10 +39,7 @@ impl DateSelector {
                 let (year, month0, day) = cal.get_date();
                 *date.write().unwrap() = Utc.ymd(year as i32, month0 + 1, day).with_timezone(&UTC);
                 button.set_label(&format!("{}", date.read().unwrap().format("%B %e, %Y")));
-                match *change_handler.read().unwrap() {
-                    Some(ref change_handler_f) => (*change_handler_f)(*date.read().unwrap()),
-                    None => (),
-                }
+                change_handler(*date.read().unwrap());
             });
         }
 
@@ -53,10 +50,6 @@ impl DateSelector {
         w.show();
 
         w
-    }
-
-    pub fn connect_change(&mut self, on_change: Box<dyn Fn(Date<Tz>)>) {
-        *self.on_change.write().unwrap() = Some(on_change);
     }
 
     pub fn show(&self) {

@@ -1,4 +1,3 @@
-use chrono::Utc;
 use dimensioned::si::KG;
 use emseries::{DateTimeTz, Record, UniqueId};
 use fitnesstrax::steps::StepRecord;
@@ -8,6 +7,7 @@ use fitnesstrax::TraxRecord;
 use gtk::prelude::*;
 use std::collections::HashMap;
 use std::sync::{Arc, RwLock};
+use std::thread;
 
 use crate::components::basics::date_c;
 use crate::components::rep_duration::rep_duration_c;
@@ -107,10 +107,12 @@ impl Day {
         updated_records: Vec<(UniqueId, TraxRecord)>,
         new_records: Vec<TraxRecord>,
     ) {
-        self.ctx
-            .write()
-            .unwrap()
-            .save_records(updated_records, new_records);
+        let ctx = self.ctx.clone();
+        thread::spawn(move || {
+            ctx.write()
+                .unwrap()
+                .save_records(updated_records, new_records);
+        });
         self.cancel_edit();
     }
 
@@ -252,6 +254,7 @@ impl DayEdit {
                         id.clone(),
                         rec.clone(),
                         Box::new(move |id_, rec| {
+                            println!("updating record information");
                             updates_
                                 .write()
                                 .unwrap()
@@ -268,7 +271,7 @@ impl DayEdit {
             time_distance_components.push(time_distance_record_edit_c(
                 UniqueId::new(),
                 timedistance::TimeDistanceRecord::new(
-                    DateTimeTz(Utc::now().with_timezone(timezone)),
+                    DateTimeTz(date.with_timezone(timezone).and_hms(0, 0, 0)),
                     timedistance::ActivityType::Cycling,
                     None,
                     None,
@@ -299,9 +302,10 @@ impl DayEdit {
         widget.pack_start(&buttons_row, true, true, 5);
 
         {
-            let updates_ = updates.clone();
+            let updates = updates.clone();
+            let new_records = new_records.clone();
             save_button.connect_clicked(move |_| {
-                let updated_records = updates_
+                let updated_records = updates
                     .read()
                     .unwrap()
                     .iter()

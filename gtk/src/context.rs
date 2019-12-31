@@ -1,6 +1,7 @@
 use chrono::Utc;
 use chrono_tz;
 use glib::Sender;
+use std::thread;
 
 use super::config::Configuration;
 use super::errors::Result;
