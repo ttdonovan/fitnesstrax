@@ -27,7 +27,13 @@ impl DateSelector {
 
         {
             let cal = w.calendar.clone();
-            w.button.connect_clicked(move |_| cal.show());
+            w.button.connect_clicked(move |_| {
+                if !cal.get_visible() {
+                    cal.show()
+                } else {
+                    cal.hide()
+                }
+            });
         }
 
         {
@@ -57,8 +63,8 @@ impl DateSelector {
         self.button.show();
     }
 
+    /*
     pub fn update_from(&mut self, date: Date<Tz>) {
-        println!("date_selector.update_from: {:?}", date);
         if *self.date.read().unwrap() != date {
             *self.date.write().unwrap() = date;
             self.calendar
@@ -68,4 +74,5 @@ impl DateSelector {
                 .set_label(&format!("{}", date.format("%B %e, %Y")));
         }
     }
+    */
 }

@@ -39,7 +39,6 @@ impl MainWindow {
         match message {
             Message::ChangeRange { range, records } => self.history.update_from(range, records),
             Message::RecordsUpdated { range, records } => self.history.update_from(range, records),
-            _ => println!("unhandled message: {:?}", message),
         }
     }
 

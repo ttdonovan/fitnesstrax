@@ -327,7 +327,9 @@ impl DayEdit {
         DayEdit { widget }
     }
 
+    /*
     fn show(&self) {
         self.widget.show_all();
     }
+    */
 }

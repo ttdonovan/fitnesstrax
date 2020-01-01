@@ -1,4 +1,3 @@
-use chrono_tz;
 use gtk::prelude::*;
 use std::sync::{Arc, RwLock};
 
@@ -9,7 +8,6 @@ pub struct RangeSelector {
     pub widget: gtk::Box,
     start_selector: DateSelector,
     end_selector: DateSelector,
-    on_change: Arc<Box<dyn Fn(DateRange)>>,
 }
 
 impl RangeSelector {
@@ -60,7 +58,6 @@ impl RangeSelector {
             widget: gtk::Box::new(gtk::Orientation::Vertical, 5),
             start_selector,
             end_selector,
-            on_change: on_change,
         };
 
         w.widget
@@ -70,17 +67,6 @@ impl RangeSelector {
         {}
 
         w
-    }
-
-    /*
-    pub fn connect_change(&mut self, on_change: Box<dyn Fn(DateRange)>) {
-        *self.on_change.write().unwrap() = Some(on_change);
-    }
-    */
-
-    pub fn update_from(&mut self, range: DateRange) {
-        self.start_selector.update_from(range.start.clone());
-        self.end_selector.update_from(range.end);
     }
 
     pub fn show(&self) {
