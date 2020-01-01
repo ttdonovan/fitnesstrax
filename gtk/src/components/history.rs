@@ -27,9 +27,7 @@ impl History {
             let ctx_ = ctx.clone();
             RangeSelector::new(
                 ctx.read().unwrap().get_range().clone(),
-                Some(Box::new(move |new_range| {
-                    ctx_.write().unwrap().set_range(new_range)
-                })),
+                Box::new(move |new_range| ctx_.write().unwrap().set_range(new_range)),
             )
         };
 

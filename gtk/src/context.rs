@@ -16,8 +16,8 @@ pub enum Message {
         range: DateRange,
         records: Vec<Record<TraxRecord>>,
     },
-    ChangeLanguage,
-    ChangeTimezone(chrono_tz::Tz),
+    //ChangeLanguage,
+    //ChangeTimezone(chrono_tz::Tz),
     RecordsUpdated {
         range: DateRange,
         records: Vec<Record<TraxRecord>>,
@@ -84,10 +84,10 @@ impl AppContext {
         new_records: Vec<TraxRecord>,
     ) {
         for (id, record) in updated_records {
-            self.trax.replace_record(id, record);
+            let _ = self.trax.replace_record(id, record);
         }
         for record in new_records {
-            self.trax.add_record(record);
+            let _ = self.trax.add_record(record);
         }
         let history = self.get_history().unwrap();
         self.send_notifications(Message::RecordsUpdated {

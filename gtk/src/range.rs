@@ -22,6 +22,7 @@ impl<A> Range<A> {
         Range { start, end }
     }
 
+    /*
     pub fn map<F, B>(&self, f: F) -> Range<B>
     where
         F: Fn(&A) -> B,
@@ -31,6 +32,7 @@ impl<A> Range<A> {
             end: f(&self.end),
         }
     }
+    */
 }
 
 pub fn dates_in_range(

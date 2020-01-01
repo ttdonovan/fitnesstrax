@@ -53,7 +53,7 @@ pub fn time_distance_record_edit_c(
 ) -> gtk::Box {
     let container = gtk::Box::new(gtk::Orientation::Horizontal, 5);
     let record = Arc::new(RwLock::new(record));
-    let on_update = Arc::new(RwLock::new(on_update));
+    let on_update = Arc::new(on_update);
 
     let time_entry = {
         let id = id.clone();
@@ -73,7 +73,7 @@ pub fn time_distance_record_edit_c(
                         .with_second(val.second())
                         .unwrap()
                 });
-                (on_update.read().unwrap())(id.clone(), r.clone())
+                on_update(id.clone(), r.clone());
             }),
         )
     };
@@ -92,7 +92,7 @@ pub fn time_distance_record_edit_c(
             Some(val) => {
                 let mut r = record.write().unwrap();
                 r.activity = ActivityType::try_from(val.as_str()).unwrap();
-                (on_update.read().unwrap())(id.clone(), r.clone())
+                on_update(id.clone(), r.clone());
             }
             None => (),
         });
@@ -110,7 +110,7 @@ pub fn time_distance_record_edit_c(
                 Some(val) => {
                     let mut r = record.write().unwrap();
                     r.distance = Some(val);
-                    (on_update.read().unwrap())(id.clone(), r.clone())
+                    on_update(id.clone(), r.clone());
                 }
                 None => (),
             }),
@@ -128,7 +128,7 @@ pub fn time_distance_record_edit_c(
                 Some(val) => {
                     let mut r = record.write().unwrap();
                     r.duration = Some(val);
-                    (on_update.read().unwrap())(id.clone(), r.clone())
+                    on_update(id.clone(), r.clone());
                 }
                 None => (),
             }),
