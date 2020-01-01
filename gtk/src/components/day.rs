@@ -267,7 +267,7 @@ impl DayEdit {
         }
 
         {
-            let new_records_ = new_records.clone();
+            let new_records = new_records.clone();
             time_distance_components.push(time_distance_record_edit_c(
                 UniqueId::new(),
                 timedistance::TimeDistanceRecord::new(
@@ -278,7 +278,7 @@ impl DayEdit {
                     None,
                 ),
                 Box::new(move |id_, rec| {
-                    new_records_
+                    new_records
                         .write()
                         .unwrap()
                         .insert(id_, TraxRecord::from(rec));
@@ -299,7 +299,7 @@ impl DayEdit {
         let cancel_button = gtk::Button::new_with_label("Cancel");
         buttons_row.pack_start(&save_button, false, false, 5);
         buttons_row.pack_start(&cancel_button, false, false, 5);
-        widget.pack_start(&buttons_row, true, true, 5);
+        widget.pack_start(&buttons_row, false, false, 5);
 
         {
             let updates = updates.clone();

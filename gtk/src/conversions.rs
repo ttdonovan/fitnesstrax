@@ -4,6 +4,7 @@ use regex::Regex;
 
 use crate::errors::Error;
 
+/*
 // Needing this conversion around because apparently Dimensioned doesn't include conversions
 // between FPS and SI. That seems silly, but I don't want to figure out how to retrofit it.
 const KG_PER_POUND: f64 = 0.4535924;
@@ -28,13 +29,14 @@ pub fn parse_mass(inp: &str) -> Result<Kilogram<f64>, Error> {
         None => Err(Error::ParseMassError),
     }
 }
+*/
 
 pub fn render_hours_minutes(inp: &NaiveTime) -> String {
     format!("{}", inp.format("%H:%M"))
 }
 
 pub fn parse_hours_minutes(inp: &str) -> Result<NaiveTime, Error> {
-    inp.parse::<NaiveTime>().map_err(|_| Error::ParseTimeError)
+    NaiveTime::parse_from_str(inp, "%H:%M").map_err(|_| Error::ParseTimeError)
 }
 
 pub fn render_duration(inp: &Second<f64>) -> String {

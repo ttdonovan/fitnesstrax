@@ -178,7 +178,7 @@ impl Trax {
                 },
                 rside: emseries::EndTime {
                     time: end,
-                    incl: true,
+                    incl: false,
                 },
             })
             .map_err(Error::from)

@@ -68,8 +68,7 @@ impl AppContext {
                 .with_timezone(&self.config.timezone),
         );
         let end_time = DateTimeTz(
-            self.range
-                .end
+            (self.range.end + chrono::Duration::days(1))
                 .and_hms(0, 0, 0)
                 .with_timezone(&self.config.timezone),
         );
