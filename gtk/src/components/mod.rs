@@ -9,6 +9,7 @@ mod rep_duration;
 mod set_rep;
 mod steps;
 mod time_distance;
+mod time_distance_row;
 mod validated_text_entry;
 mod weight;
 
