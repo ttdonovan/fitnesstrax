@@ -5,7 +5,7 @@ let
 
 in pkgs.stdenv.mkDerivation rec {
   name = "fitnesstrax-${version}";
-  version = "0.0.3";
+  version = "0.0.4";
 
   #paths = [ server wrapper ];
   buildInputs = [ app ];

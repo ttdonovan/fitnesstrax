@@ -1,6 +1,5 @@
 [package]
 name = "fitnesstrax-gtk"
-version = "0.1.0"
 authors = ["savanni"]
 edition = "2018"
 
