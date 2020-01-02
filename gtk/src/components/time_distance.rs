@@ -1,145 +1,155 @@
-use chrono::Timelike;
-use emseries::*;
+use emseries::{DateTimeTz, Recordable, UniqueId};
+use fitnesstrax::timedistance::{ActivityType, TimeDistanceRecord};
 use gtk::prelude::*;
-use std::convert::TryFrom;
+use std::collections::HashMap;
 use std::sync::{Arc, RwLock};
 
-use crate::components::basics::{
-    distance_c, distance_edit_c, duration_c, duration_edit_c, time_c, time_edit_c,
-};
-use fitnesstrax::timedistance::{activity_types, ActivityType, TimeDistanceRecord};
+use crate::components::time_distance_row::time_distance_record_edit_c;
 
-fn activity_c(activity: &ActivityType) -> gtk::Label {
-    gtk::Label::new(match activity {
-        ActivityType::Cycling => Some("Cycling"),
-        ActivityType::Rowing => Some("Rowing"),
-        ActivityType::Running => Some("Running"),
-        ActivityType::Swimming => Some("Swimming"),
-        ActivityType::Walking => Some("Walking"),
-    })
+#[derive(Clone)]
+pub struct TimeDistanceEdit {
+    pub widget: gtk::Box,
+    record_box: gtk::Box,
+
+    records: HashMap<UniqueId, TimeDistanceRecord>,
+    updated_records: Arc<RwLock<HashMap<UniqueId, TimeDistanceRecord>>>,
+    new_records: Arc<RwLock<HashMap<UniqueId, TimeDistanceRecord>>>,
 }
 
-pub fn time_distance_c(record: &fitnesstrax::timedistance::TimeDistanceRecord) -> gtk::Box {
-    let container = gtk::Box::new(gtk::Orientation::Horizontal, 5);
-
-    container.pack_start(&time_c(&record.timestamp().0.time()), false, false, 5);
-    container.pack_start(&activity_c(&record.activity), false, false, 5);
-    container.pack_start(
-        &record
-            .distance
-            .map(|r| distance_c(&r))
-            .unwrap_or(gtk::Label::new(Some("---"))),
-        false,
-        false,
-        5,
-    );
-    container.pack_start(
-        &record
-            .duration
-            .map(|r| duration_c(&r))
-            .unwrap_or(gtk::Label::new(Some("---"))),
-        false,
-        false,
-        5,
-    );
-
-    return container;
-}
-
-pub fn time_distance_record_edit_c(
-    id: UniqueId,
-    record: TimeDistanceRecord,
-    on_update: Box<dyn Fn(UniqueId, TimeDistanceRecord)>,
-) -> gtk::Box {
-    let container = gtk::Box::new(gtk::Orientation::Horizontal, 5);
-    let record = Arc::new(RwLock::new(record));
-    let on_update = Arc::new(on_update);
-
-    let time_entry = {
-        let id = id.clone();
-        let record = record.clone();
-        let on_update = on_update.clone();
-        let time = record.read().unwrap().timestamp().0.time();
-        time_edit_c(
-            &time,
-            Box::new(move |val| {
-                let mut r = record.write().unwrap();
-                r.timestamp = r.timestamp.map(|ts| {
-                    ts.clone()
-                        .with_hour(val.hour())
-                        .unwrap()
-                        .with_minute(val.minute())
-                        .unwrap()
-                        .with_second(val.second())
-                        .unwrap()
-                });
-                on_update(id.clone(), r.clone());
-            }),
-        )
-    };
-
-    let activity_selection = {
-        let id = id.clone();
-        let record = record.clone();
-        let on_update = on_update.clone();
-        let menu = gtk::ComboBoxText::new();
-        for activity in activity_types().iter() {
-            let activity_str = format!("{:?}", activity);
-            menu.append(Some(&activity_str), &activity_str);
+impl TimeDistanceEdit {
+    pub fn new(
+        date: chrono::Date<chrono_tz::Tz>,
+        records: Vec<(&UniqueId, &TimeDistanceRecord)>,
+    ) -> TimeDistanceEdit {
+        let mut record_hash: HashMap<UniqueId, TimeDistanceRecord> = HashMap::new();
+        for (id, rec) in records.iter() {
+            record_hash.insert((*id).clone(), (*rec).clone());
         }
-        menu.set_active_id(Some(&format!("{:?}", record.read().unwrap().activity)));
-        menu.connect_changed(move |s| match s.get_active_id() {
-            Some(val) => {
-                let mut r = record.write().unwrap();
-                r.activity = ActivityType::try_from(val.as_str()).unwrap();
-                on_update(id.clone(), r.clone());
+
+        let updated_records = Arc::new(RwLock::new(HashMap::new()));
+        let new_records = Arc::new(RwLock::new(HashMap::new()));
+
+        let widget = gtk::Box::new(gtk::Orientation::Vertical, 5);
+        let record_box = gtk::Box::new(gtk::Orientation::Vertical, 5);
+
+        let w = TimeDistanceEdit {
+            widget,
+            record_box,
+
+            records: record_hash,
+            updated_records,
+            new_records: new_records.clone(),
+        };
+
+        let button_box = {
+            let w = w.clone();
+            let new_records = new_records.clone();
+            let button_box = gtk::Box::new(gtk::Orientation::Horizontal, 5);
+            let new_button = gtk::Button::new_with_label("Add a Time/Distance workout");
+            new_button.show();
+            button_box.pack_start(&new_button, false, false, 5);
+            new_button.connect_clicked(move |_| {
+                new_records.write().unwrap().insert(
+                    UniqueId::new(),
+                    TimeDistanceRecord::new(
+                        DateTimeTz(date.and_hms(0, 0, 0)),
+                        ActivityType::Cycling,
+                        None,
+                        None,
+                        None,
+                    ),
+                );
+                w.render();
+            });
+            button_box
+        };
+
+        w.widget.pack_start(&w.record_box, false, false, 5);
+        w.widget.pack_start(&button_box, false, false, 5);
+
+        w.render();
+
+        w
+    }
+
+    pub fn render(&self) {
+        self.record_box.foreach(|child| child.destroy());
+
+        let mut sorted_records: Vec<(&UniqueId, &TimeDistanceRecord)> = self
+            .records
+            .iter()
+            .map(|(id, record)| (id, record))
+            .collect();
+        sorted_records.sort_unstable_by_key(|(_, rec)| rec.timestamp());
+
+        for (id, record) in sorted_records {
+            let updated_records = self.updated_records.clone();
+            match self.updated_records.read().unwrap().get(id) {
+                Some(rec) => {
+                    self.record_box.pack_start(
+                        &time_distance_record_edit_c(
+                            id.clone(),
+                            rec.clone(),
+                            Box::new(move |id, rec| {
+                                updated_records.write().unwrap().insert(id, rec);
+                            }),
+                        ),
+                        false,
+                        false,
+                        5,
+                    );
+                }
+                None => {
+                    self.record_box.pack_start(
+                        &time_distance_record_edit_c(
+                            id.clone(),
+                            record.clone(),
+                            Box::new(move |id, rec| {
+                                updated_records.write().unwrap().insert(id, rec);
+                            }),
+                        ),
+                        false,
+                        false,
+                        5,
+                    );
+                }
             }
-            None => (),
-        });
-        menu
-    };
+        }
 
-    let distance_entry = {
-        let id = id.clone();
-        let record = record.clone();
-        let on_update = on_update.clone();
-        let distance = record.read().unwrap().distance.clone();
-        distance_edit_c(
-            &distance,
-            Box::new(move |res| match res {
-                Some(val) => {
-                    let mut r = record.write().unwrap();
-                    r.distance = Some(val);
-                    on_update(id.clone(), r.clone());
-                }
-                None => (),
-            }),
-        )
-    };
+        for (id, record) in self.new_records.read().unwrap().iter() {
+            let new_records = self.new_records.clone();
+            self.record_box.pack_start(
+                &time_distance_record_edit_c(
+                    id.clone(),
+                    record.clone(),
+                    Box::new(move |id, rec| {
+                        new_records.write().unwrap().insert(id, rec);
+                    }),
+                ),
+                false,
+                false,
+                5,
+            );
+        }
 
-    let duration_entry = {
-        let id = id.clone();
-        let record = record.clone();
-        let on_update = on_update.clone();
-        let duration = record.read().unwrap().duration.clone();
-        duration_edit_c(
-            &duration,
-            Box::new(move |res| match res {
-                Some(val) => {
-                    let mut r = record.write().unwrap();
-                    r.duration = Some(val);
-                    on_update(id.clone(), r.clone());
-                }
-                None => (),
-            }),
-        )
-    };
+        self.record_box.show_all();
+    }
 
-    container.pack_start(&time_entry.widget, false, false, 5);
-    container.pack_start(&activity_selection, false, false, 5);
-    container.pack_start(&distance_entry.widget, false, false, 5);
-    container.pack_start(&gtk::Label::new(Some("km")), false, false, 5);
-    container.pack_start(&duration_entry.widget, false, false, 5);
+    pub fn updated_records(&self) -> Vec<(UniqueId, TimeDistanceRecord)> {
+        self.updated_records
+            .read()
+            .unwrap()
+            .iter()
+            .map(|(id, record)| (id.clone(), record.clone()))
+            .collect()
+    }
 
-    container
+    pub fn new_records(&self) -> Vec<(UniqueId, TimeDistanceRecord)> {
+        self.new_records
+            .read()
+            .unwrap()
+            .iter()
+            .map(|(id, record)| (id.clone(), record.clone()))
+            .collect()
+    }
 }

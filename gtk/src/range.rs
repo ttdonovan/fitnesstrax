@@ -75,7 +75,7 @@ mod test {
     use chrono::TimeZone;
     use chrono_tz::America::New_York;
     use dimensioned::si::KG;
-    use emseries::{DateTimeTz, Record};
+    use emseries::DateTimeTz;
     use fitnesstrax::TraxRecord;
 
     #[test]

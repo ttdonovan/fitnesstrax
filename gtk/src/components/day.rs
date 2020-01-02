@@ -1,7 +1,6 @@
 use dimensioned::si::KG;
-use emseries::{DateTimeTz, Record, UniqueId};
+use emseries::{DateTimeTz, Record, Recordable, UniqueId};
 use fitnesstrax::steps::StepRecord;
-use fitnesstrax::timedistance;
 use fitnesstrax::weight::WeightRecord;
 use fitnesstrax::TraxRecord;
 use gtk::prelude::*;
@@ -13,7 +12,8 @@ use crate::components::basics::date_c;
 use crate::components::rep_duration::rep_duration_c;
 use crate::components::set_rep::set_rep_c;
 use crate::components::steps::{steps_c, steps_edit_c};
-use crate::components::time_distance::{time_distance_c, time_distance_record_edit_c};
+use crate::components::time_distance::TimeDistanceEdit;
+use crate::components::time_distance_row::time_distance_c;
 use crate::components::weight::{weight_record_c, weight_record_edit_c};
 use crate::context::AppContext;
 
@@ -142,7 +142,9 @@ fn day_c(_date: &chrono::Date<chrono_tz::Tz>, data: Vec<&TraxRecord>) -> gtk::Bo
     let mut rep_duration_components: Vec<gtk::Box> = Vec::new();
     let mut set_rep_components: Vec<gtk::Box> = Vec::new();
     let mut time_distance_components: Vec<gtk::Box> = Vec::new();
-    for record in data {
+    let mut records = data.clone();
+    records.sort_unstable_by_key(|rec| rec.timestamp());
+    for record in records {
         match record {
             TraxRecord::Comments(ref _rec) => (),
             TraxRecord::RepDuration(ref rec) => rep_duration_components.push(rep_duration_c(&rec)),
@@ -179,7 +181,7 @@ impl DayEdit {
     fn new(
         date: &chrono::Date<chrono_tz::Tz>,
         data: &HashMap<UniqueId, TraxRecord>,
-        timezone: &chrono_tz::Tz,
+        _timezone: &chrono_tz::Tz,
         on_save: Box<dyn Fn(Vec<(UniqueId, TraxRecord)>, Vec<TraxRecord>)>,
         on_cancel: Box<dyn Fn()>,
     ) -> DayEdit {
@@ -221,7 +223,7 @@ impl DayEdit {
             )
         };
 
-        let mut time_distance_components = Vec::new();
+        let mut time_distance_records = Vec::new();
 
         for (id, data) in data {
             match data {
@@ -249,50 +251,19 @@ impl DayEdit {
                     )
                 }
                 TraxRecord::TimeDistance(ref rec) => {
-                    let updates_ = updates.clone();
-                    time_distance_components.push(time_distance_record_edit_c(
-                        id.clone(),
-                        rec.clone(),
-                        Box::new(move |id_, rec| {
-                            println!("updating record information");
-                            updates_
-                                .write()
-                                .unwrap()
-                                .insert(id_.clone(), TraxRecord::from(rec));
-                        }),
-                    ));
+                    time_distance_records.push((id, rec));
                 }
                 _ => (),
             }
         }
 
-        {
-            let new_records = new_records.clone();
-            time_distance_components.push(time_distance_record_edit_c(
-                UniqueId::new(),
-                timedistance::TimeDistanceRecord::new(
-                    DateTimeTz(date.with_timezone(timezone).and_hms(0, 0, 0)),
-                    timedistance::ActivityType::Cycling,
-                    None,
-                    None,
-                    None,
-                ),
-                Box::new(move |id_, rec| {
-                    new_records
-                        .write()
-                        .unwrap()
-                        .insert(id_, TraxRecord::from(rec));
-                }),
-            ));
-        }
+        let time_distance_edit = { TimeDistanceEdit::new(date.clone(), time_distance_records) };
 
         first_row.pack_start(&weight_component.widget, false, false, 5);
         first_row.pack_start(&gtk::Label::new(Some("kg")), false, false, 5);
         first_row.pack_start(&step_component.widget, false, false, 5);
         first_row.pack_start(&gtk::Label::new(Some("steps")), false, false, 5);
-        for component in time_distance_components {
-            widget.pack_start(&component, false, false, 5);
-        }
+        widget.pack_start(&time_distance_edit.widget, false, false, 5);
 
         let buttons_row = gtk::Box::new(gtk::Orientation::Horizontal, 5);
         let save_button = gtk::Button::new_with_label("Save");
@@ -305,18 +276,36 @@ impl DayEdit {
             let updates = updates.clone();
             let new_records = new_records.clone();
             save_button.connect_clicked(move |_| {
-                let updated_records = updates
+                let mut updated_records: Vec<(UniqueId, TraxRecord)> = updates
                     .read()
                     .unwrap()
                     .iter()
                     .map(|(id, record)| (id.clone(), record.clone()))
                     .collect();
-                let new_records_: Vec<TraxRecord> = new_records
+                let mut new_records_: Vec<TraxRecord> = new_records
                     .read()
                     .unwrap()
                     .values()
                     .map(|v| v.clone())
                     .collect();
+
+                updated_records.append(
+                    &mut time_distance_edit
+                        .updated_records()
+                        .into_iter()
+                        .map(|(id, rec)| (id, TraxRecord::from(rec)))
+                        .collect::<Vec<(UniqueId, TraxRecord)>>(),
+                );
+
+                new_records_.append(
+                    &mut time_distance_edit
+                        .new_records()
+                        .into_iter()
+                        .map(|(_, rec)| TraxRecord::from(rec))
+                        .collect::<Vec<TraxRecord>>(),
+                );
+
+                //new_records_.append(time_distance_edit.new_records());
                 on_save(updated_records, new_records_);
             });
         }
