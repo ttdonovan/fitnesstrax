@@ -1,6 +1,5 @@
 use chrono::NaiveTime;
-use dimensioned::si::{Kilogram, Meter, Second, KG, M, S};
-use regex::Regex;
+use dimensioned::si::{Meter, Second, M, S};
 
 use crate::errors::Error;
 
