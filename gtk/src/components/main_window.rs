@@ -17,10 +17,13 @@ impl MainWindow {
         let notebook = gtk::Notebook::new();
 
         let history = History::new(ctx.clone());
-        let preferences = Preferences::new();
+        let preferences = Preferences::new(ctx.clone());
 
         notebook.append_page(&history.widget, Some(&gtk::Label::new(Some("History"))));
-        notebook.append_page(&preferences.widget, Some(&gtk::Label::new(Some("Preferences"))));
+        notebook.append_page(
+            &preferences.widget,
+            Some(&gtk::Label::new(Some("Preferences"))),
+        );
 
         let w = MainWindow {
             widget,

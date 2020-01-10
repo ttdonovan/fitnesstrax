@@ -60,6 +60,10 @@ impl AppContext {
         self.range.clone()
     }
 
+    pub fn get_configuration(&self) -> Configuration {
+        self.config.clone()
+    }
+
     pub fn get_history(&self) -> Result<Vec<Record<TraxRecord>>> {
         let start_time = DateTimeTz(
             self.range

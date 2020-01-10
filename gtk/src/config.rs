@@ -3,11 +3,12 @@ use std::env;
 use std::fs::File;
 use std::path;
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Configuration {
     pub series_path: path::PathBuf,
     pub timezone: chrono_tz::Tz,
     pub language: String,
+    pub units: String,
 }
 
 impl Configuration {
