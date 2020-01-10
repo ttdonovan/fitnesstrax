@@ -1,4 +1,5 @@
 use chrono::Timelike;
+use chrono_tz::Tz;
 use emseries::*;
 use gtk::prelude::*;
 use std::convert::TryFrom;
@@ -19,10 +20,18 @@ fn activity_c(activity: &ActivityType) -> gtk::Label {
     })
 }
 
-pub fn time_distance_c(record: &fitnesstrax::timedistance::TimeDistanceRecord) -> gtk::Box {
+pub fn time_distance_c(
+    record: &fitnesstrax::timedistance::TimeDistanceRecord,
+    timezone: &Tz,
+) -> gtk::Box {
     let container = gtk::Box::new(gtk::Orientation::Horizontal, 5);
 
-    container.pack_start(&time_c(&record.timestamp().0.time()), false, false, 5);
+    container.pack_start(
+        &time_c(&record.timestamp().0.with_timezone(timezone).time()),
+        false,
+        false,
+        5,
+    );
     container.pack_start(&activity_c(&record.activity), false, false, 5);
     container.pack_start(
         &record
@@ -49,6 +58,7 @@ pub fn time_distance_c(record: &fitnesstrax::timedistance::TimeDistanceRecord) -
 pub fn time_distance_record_edit_c(
     id: UniqueId,
     record: TimeDistanceRecord,
+    timezone: Tz,
     on_update: Box<dyn Fn(UniqueId, TimeDistanceRecord)>,
 ) -> gtk::Box {
     let on_update = Arc::new(on_update);
@@ -59,7 +69,13 @@ pub fn time_distance_record_edit_c(
         let id = id.clone();
         let record = record.clone();
         let on_update = on_update.clone();
-        let time = record.read().unwrap().timestamp().0.time();
+        let time = record
+            .read()
+            .unwrap()
+            .timestamp()
+            .0
+            .with_timezone(&timezone)
+            .time();
         time_edit_c(
             &time,
             Box::new(move |val| {
@@ -72,6 +88,7 @@ pub fn time_distance_record_edit_c(
                         .unwrap()
                         .with_second(val.second())
                         .unwrap()
+                        .with_timezone(&timezone)
                 });
                 on_update(id.clone(), r.clone());
             }),

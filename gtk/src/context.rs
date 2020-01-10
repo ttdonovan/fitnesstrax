@@ -67,8 +67,10 @@ impl AppContext {
     }
 
     pub fn set_language(&mut self, language: &str) {
-        self.config.language = String::from(language);
-        self.config.save_to_yaml();
+        {
+            self.config.language = String::from(language);
+            self.config.save_to_yaml();
+        }
         self.send_notifications(Message::ChangeLanguage(self.config.language.clone()));
     }
 
@@ -77,8 +79,10 @@ impl AppContext {
     }
 
     pub fn set_timezone(&mut self, timezone: chrono_tz::Tz) {
-        self.config.timezone = timezone;
-        self.config.save_to_yaml();
+        {
+            self.config.timezone = timezone;
+            self.config.save_to_yaml();
+        }
         self.send_notifications(Message::ChangeTimezone(self.config.timezone.clone()));
     }
 
@@ -87,8 +91,10 @@ impl AppContext {
     }
 
     pub fn set_units(&mut self, units: &str) {
-        self.config.units = String::from(units);
-        self.config.save_to_yaml();
+        {
+            self.config.units = String::from(units);
+            self.config.save_to_yaml();
+        }
         self.send_notifications(Message::ChangeUnits(self.config.units.clone()));
     }
 

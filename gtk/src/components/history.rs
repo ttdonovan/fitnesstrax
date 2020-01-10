@@ -16,6 +16,9 @@ pub struct History {
     scrolling_history: gtk::ScrolledWindow,
     history_box: gtk::Box,
     ctx: Arc<RwLock<AppContext>>,
+    timezone: Arc<RwLock<Tz>>,
+    range: Arc<RwLock<DateRange>>,
+    records: Arc<RwLock<Vec<Record<TraxRecord>>>>,
 }
 
 impl History {
@@ -38,26 +41,45 @@ impl History {
         widget.pack_start(&range_bar.widget, false, false, 25);
         widget.pack_start(&scrolling_history, true, true, 5);
 
+        let ctx_ = ctx.read().unwrap();
+        let timezone = Arc::new(RwLock::new(ctx_.get_timezone()));
+        let range = Arc::new(RwLock::new(ctx_.get_range()));
+        let records = Arc::new(RwLock::new(ctx_.get_history().unwrap()));
+
         let w = History {
             widget,
             range_bar,
             scrolling_history,
             history_box,
-            ctx,
+            ctx: ctx.clone(),
+            timezone,
+            range,
+            records,
         };
 
-        w.update_from(
-            w.ctx.read().unwrap().get_range(),
-            w.ctx.read().unwrap().get_history().unwrap(),
-        );
+        w.render();
 
         w.show();
 
         w
     }
 
-    pub fn update_from(&self, range: DateRange, history: Vec<Record<TraxRecord>>) {
-        let grouped_history = group_by_date(range, history);
+    pub fn update_timezone(&mut self, tz: Tz) {
+        *self.timezone.write().unwrap() = tz;
+        self.render();
+    }
+
+    pub fn update_records(&mut self, range: DateRange, records: Vec<Record<TraxRecord>>) {
+        *self.range.write().unwrap() = range;
+        *self.records.write().unwrap() = records;
+        self.render();
+    }
+
+    pub fn render(&self) {
+        let grouped_history = group_by_date(
+            self.range.read().unwrap().clone(),
+            self.records.read().unwrap().clone(),
+        );
 
         self.history_box.foreach(|child| child.destroy());
 
@@ -69,6 +91,7 @@ impl History {
             let day = Day::new(
                 (*date).clone(),
                 grouped_history.get(date).unwrap().clone(),
+                self.timezone.read().unwrap().clone(),
                 ctx,
             );
             day.show();

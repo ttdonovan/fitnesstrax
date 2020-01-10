@@ -1,3 +1,4 @@
+use chrono_tz::Tz;
 use dimensioned::si::KG;
 use emseries::{DateTimeTz, Record, Recordable, UniqueId};
 use fitnesstrax::steps::StepRecord;
@@ -28,6 +29,7 @@ pub struct Day {
     visible_component: Arc<RwLock<DayState>>,
     date: chrono::Date<chrono_tz::Tz>,
     records: HashMap<UniqueId, TraxRecord>,
+    timezone: Tz,
     ctx: Arc<RwLock<AppContext>>,
 }
 
@@ -35,6 +37,7 @@ impl Day {
     pub fn new(
         date: chrono::Date<chrono_tz::Tz>,
         records: Vec<Record<TraxRecord>>,
+        timezone: Tz,
         ctx: Arc<RwLock<AppContext>>,
     ) -> Day {
         let widget = gtk::Box::new(gtk::Orientation::Vertical, 5);
@@ -44,7 +47,11 @@ impl Day {
 
         widget.pack_start(&header, false, false, 5);
 
-        let visible = day_c(&date, records.iter().map(|rec| &rec.data).collect());
+        let visible = day_c(
+            &date,
+            records.iter().map(|rec| &rec.data).collect(),
+            &timezone,
+        );
         widget.pack_start(&visible, true, true, 5);
 
         let record_map = records.iter().fold(HashMap::new(), |mut acc, rec| {
@@ -57,6 +64,7 @@ impl Day {
             visible_component: Arc::new(RwLock::new(DayState::View(visible))),
             date,
             records: record_map,
+            timezone,
             ctx,
         };
 
@@ -97,7 +105,7 @@ impl Day {
             DayState::View(_) => return,
             DayState::Edit(ref w) => self.widget.remove(&w.widget),
         };
-        let component = day_c(&self.date, self.records.values().collect());
+        let component = day_c(&self.date, self.records.values().collect(), &self.timezone);
         self.widget.pack_start(&component, true, true, 5);
         *v = DayState::View(component);
     }
@@ -121,7 +129,7 @@ impl Day {
     }
 }
 
-fn day_c(_date: &chrono::Date<chrono_tz::Tz>, data: Vec<&TraxRecord>) -> gtk::Box {
+fn day_c(_date: &chrono::Date<chrono_tz::Tz>, data: Vec<&TraxRecord>, timezone: &Tz) -> gtk::Box {
     let container = gtk::Box::new(gtk::Orientation::Vertical, 5);
 
     /*
@@ -151,7 +159,7 @@ fn day_c(_date: &chrono::Date<chrono_tz::Tz>, data: Vec<&TraxRecord>) -> gtk::Bo
             TraxRecord::SetRep(ref rec) => set_rep_components.push(set_rep_c(&rec)),
             TraxRecord::Steps(ref rec) => step_component = Some(steps_c(&rec)),
             TraxRecord::TimeDistance(ref rec) => {
-                time_distance_components.push(time_distance_c(&rec))
+                time_distance_components.push(time_distance_c(&rec, timezone))
             }
             TraxRecord::Weight(ref rec) => weight_component = Some(weight_record_c(&rec)),
         }
@@ -181,7 +189,7 @@ impl DayEdit {
     fn new(
         date: &chrono::Date<chrono_tz::Tz>,
         data: &HashMap<UniqueId, TraxRecord>,
-        _timezone: &chrono_tz::Tz,
+        timezone: &chrono_tz::Tz,
         on_save: Box<dyn Fn(Vec<(UniqueId, TraxRecord)>, Vec<TraxRecord>)>,
         on_cancel: Box<dyn Fn()>,
     ) -> DayEdit {
@@ -257,7 +265,8 @@ impl DayEdit {
             }
         }
 
-        let time_distance_edit = { TimeDistanceEdit::new(date.clone(), time_distance_records) };
+        let time_distance_edit =
+            { TimeDistanceEdit::new(date.clone(), time_distance_records, timezone) };
 
         first_row.pack_start(&weight_component.widget, false, false, 5);
         first_row.pack_start(&gtk::Label::new(Some("kg")), false, false, 5);

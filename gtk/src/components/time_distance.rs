@@ -1,3 +1,4 @@
+use chrono_tz::Tz;
 use emseries::{DateTimeTz, Recordable, UniqueId};
 use fitnesstrax::timedistance::{ActivityType, TimeDistanceRecord};
 use gtk::prelude::*;
@@ -12,6 +13,7 @@ pub struct TimeDistanceEdit {
     record_box: gtk::Box,
 
     records: HashMap<UniqueId, TimeDistanceRecord>,
+    timezone: Tz,
     updated_records: Arc<RwLock<HashMap<UniqueId, TimeDistanceRecord>>>,
     new_records: Arc<RwLock<HashMap<UniqueId, TimeDistanceRecord>>>,
 }
@@ -20,6 +22,7 @@ impl TimeDistanceEdit {
     pub fn new(
         date: chrono::Date<chrono_tz::Tz>,
         records: Vec<(&UniqueId, &TimeDistanceRecord)>,
+        timezone: &Tz,
     ) -> TimeDistanceEdit {
         let mut record_hash: HashMap<UniqueId, TimeDistanceRecord> = HashMap::new();
         for (id, rec) in records.iter() {
@@ -37,6 +40,7 @@ impl TimeDistanceEdit {
             record_box,
 
             records: record_hash,
+            timezone: timezone.clone(),
             updated_records,
             new_records: new_records.clone(),
         };
@@ -90,6 +94,7 @@ impl TimeDistanceEdit {
                         &time_distance_record_edit_c(
                             id.clone(),
                             rec.clone(),
+                            self.timezone,
                             Box::new(move |id, rec| {
                                 updated_records.write().unwrap().insert(id, rec);
                             }),
@@ -104,6 +109,7 @@ impl TimeDistanceEdit {
                         &time_distance_record_edit_c(
                             id.clone(),
                             record.clone(),
+                            self.timezone,
                             Box::new(move |id, rec| {
                                 updated_records.write().unwrap().insert(id, rec);
                             }),
@@ -122,6 +128,7 @@ impl TimeDistanceEdit {
                 &time_distance_record_edit_c(
                     id.clone(),
                     record.clone(),
+                    self.timezone,
                     Box::new(move |id, rec| {
                         new_records.write().unwrap().insert(id, rec);
                     }),

@@ -43,11 +43,13 @@ impl MainWindow {
 
     pub fn update_from(&mut self, message: Message) {
         match message {
-            Message::ChangeRange { range, records } => self.history.update_from(range, records),
+            Message::ChangeRange { range, records } => self.history.update_records(range, records),
             Message::ChangeLanguage(_) => (),
-            Message::ChangeTimezone(_) => (),
+            Message::ChangeTimezone(tz) => self.history.update_timezone(tz),
             Message::ChangeUnits(_) => (),
-            Message::RecordsUpdated { range, records } => self.history.update_from(range, records),
+            Message::RecordsUpdated { range, records } => {
+                self.history.update_records(range, records)
+            }
         }
     }
 
