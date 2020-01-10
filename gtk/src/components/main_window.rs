@@ -6,30 +6,33 @@ use crate::components::*;
 
 pub struct MainWindow {
     pub widget: gtk::ApplicationWindow,
-    menubar: MenuBar,
+    notebook: gtk::Notebook,
     history: History,
+    preferences: Preferences,
 }
 
 impl MainWindow {
     pub fn new(ctx: Arc<RwLock<AppContext>>, app: &gtk::Application) -> MainWindow {
         let widget = gtk::ApplicationWindow::new(app);
-        let menubar = MenuBar::new();
+        let notebook = gtk::Notebook::new();
+
         let history = History::new(ctx.clone());
+        let preferences = Preferences::new();
+
+        notebook.append_page(&history.widget, Some(&gtk::Label::new(Some("History"))));
+        notebook.append_page(&preferences.widget, Some(&gtk::Label::new(Some("Preferences"))));
 
         let w = MainWindow {
             widget,
-            menubar,
+            notebook,
             history,
+            preferences,
         };
 
         w.widget.set_title("Fitnesstrax");
         w.widget.set_default_size(350, 70);
 
-        let main_panel = gtk::Box::new(gtk::Orientation::Vertical, 5);
-        main_panel.pack_start(&w.menubar.widget, false, false, 5);
-        main_panel.pack_start(&w.history.widget, true, true, 5);
-        w.widget.add(&main_panel);
-        main_panel.show();
+        w.widget.add(&w.notebook);
         w.show();
 
         w
@@ -43,8 +46,7 @@ impl MainWindow {
     }
 
     pub fn show(&self) {
-        self.menubar.show();
-        self.history.show();
+        self.notebook.show();
         self.widget.show();
     }
 }

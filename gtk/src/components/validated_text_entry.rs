@@ -24,7 +24,7 @@ impl<A: Clone> ValidatedTextEntry<A> {
 
         let w = ValidatedTextEntry {
             widget,
-            value: Arc::new(RwLock::new(Ok(value.clone()))),
+            value: Arc::new(RwLock::new(Ok(value))),
         };
 
         let w_ = w.clone();
