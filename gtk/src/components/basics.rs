@@ -1,3 +1,5 @@
+use gtk::prelude::*;
+
 use crate::components::validated_text_entry::ValidatedTextEntry;
 use crate::conversions::{
     parse_distance, parse_duration, parse_hours_minutes, render_distance, render_duration,
@@ -54,4 +56,42 @@ pub fn duration_edit_c(
         Box::new(|s| parse_duration(s)),
         on_update,
     )
+}
+
+pub fn setting_with_label_c<A: IsA<gtk::Widget>>(label: &str, selector: A) -> gtk::Box {
+    let widget = gtk::Box::new(gtk::Orientation::Horizontal, 5);
+    widget.pack_start(&gtk::Label::new(Some(label)), false, false, 5);
+    widget.pack_start(&selector, false, false, 5);
+
+    widget
+}
+
+pub fn entry_setting_c(label: &str, current: &str, on_changed: Box<dyn Fn(&str)>) -> gtk::Box {
+    let entry = gtk::Entry::new();
+    entry.set_text(current);
+    entry.connect_changed(move |v| match v.get_text() {
+        Some(ref s) => on_changed(s),
+        None => (),
+    });
+
+    setting_with_label_c(label, entry)
+}
+
+pub fn pulldown_setting_c(
+    label: &str,
+    options: Vec<(&str, &str)>,
+    current: &str,
+    on_changed: Box<dyn Fn(&str)>,
+) -> gtk::Box {
+    let combo = gtk::ComboBoxText::new();
+    for (id, option) in options.iter() {
+        combo.append(Some(id), option);
+    }
+    combo.set_active_id(Some(current));
+    combo.connect_changed(move |s| match s.get_active_id() {
+        Some(val) => on_changed(val.as_str()),
+        None => (),
+    });
+
+    setting_with_label_c(label, combo)
 }

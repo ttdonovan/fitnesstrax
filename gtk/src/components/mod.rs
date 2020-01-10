@@ -15,6 +15,7 @@ mod time_distance_row;
 mod validated_text_entry;
 mod weight;
 
+pub use basics::*;
 pub use date_selector::DateSelector;
 pub use day::Day;
 pub use history::History;

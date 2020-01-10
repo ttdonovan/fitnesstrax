@@ -44,6 +44,9 @@ impl MainWindow {
     pub fn update_from(&mut self, message: Message) {
         match message {
             Message::ChangeRange { range, records } => self.history.update_from(range, records),
+            Message::ChangeLanguage(_) => (),
+            Message::ChangeTimezone(_) => (),
+            Message::ChangeUnits(_) => (),
             Message::RecordsUpdated { range, records } => self.history.update_from(range, records),
         }
     }

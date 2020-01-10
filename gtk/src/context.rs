@@ -1,6 +1,7 @@
 use chrono::Utc;
 use chrono_tz;
 use glib::Sender;
+use std::path::PathBuf;
 
 use super::config::Configuration;
 use super::errors::Result;
@@ -16,8 +17,9 @@ pub enum Message {
         range: DateRange,
         records: Vec<Record<TraxRecord>>,
     },
-    //ChangeLanguage,
-    //ChangeTimezone(chrono_tz::Tz),
+    ChangeLanguage(String),
+    ChangeTimezone(chrono_tz::Tz),
+    ChangeUnits(String),
     RecordsUpdated {
         range: DateRange,
         records: Vec<Record<TraxRecord>>,
@@ -52,16 +54,46 @@ impl AppContext {
         })
     }
 
+    pub fn get_series_path(&self) -> &str {
+        self.config.series_path.to_str().unwrap()
+    }
+
+    pub fn set_series_path(&mut self, path: &str) {
+        self.config.series_path = PathBuf::from(path);
+    }
+
+    pub fn get_language(&self) -> &str {
+        &self.config.language
+    }
+
+    pub fn set_language(&mut self, language: &str) {
+        self.config.language = String::from(language);
+        self.config.save_to_yaml();
+        self.send_notifications(Message::ChangeLanguage(self.config.language.clone()));
+    }
+
     pub fn get_timezone(&self) -> chrono_tz::Tz {
         self.config.timezone
     }
 
-    pub fn get_range(&self) -> DateRange {
-        self.range.clone()
+    pub fn set_timezone(&mut self, timezone: chrono_tz::Tz) {
+        self.config.timezone = timezone;
+        self.config.save_to_yaml();
+        self.send_notifications(Message::ChangeTimezone(self.config.timezone.clone()));
     }
 
-    pub fn get_configuration(&self) -> Configuration {
-        self.config.clone()
+    pub fn get_units(&self) -> &str {
+        &self.config.units
+    }
+
+    pub fn set_units(&mut self, units: &str) {
+        self.config.units = String::from(units);
+        self.config.save_to_yaml();
+        self.send_notifications(Message::ChangeUnits(self.config.units.clone()));
+    }
+
+    pub fn get_range(&self) -> DateRange {
+        self.range.clone()
     }
 
     pub fn get_history(&self) -> Result<Vec<Record<TraxRecord>>> {
