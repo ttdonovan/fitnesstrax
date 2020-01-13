@@ -17,6 +17,7 @@ use crate::components::time_distance::TimeDistanceEdit;
 use crate::components::time_distance_row::time_distance_c;
 use crate::components::weight::{weight_record_c, weight_record_edit_c};
 use crate::context::AppContext;
+use crate::preferences::Preferences;
 
 enum DayState {
     View(gtk::Box),
@@ -29,7 +30,7 @@ pub struct Day {
     visible_component: Arc<RwLock<DayState>>,
     date: chrono::Date<chrono_tz::Tz>,
     records: HashMap<UniqueId, TraxRecord>,
-    timezone: Tz,
+    prefs: Preferences,
     ctx: Arc<RwLock<AppContext>>,
 }
 
@@ -37,7 +38,7 @@ impl Day {
     pub fn new(
         date: chrono::Date<chrono_tz::Tz>,
         records: Vec<Record<TraxRecord>>,
-        timezone: Tz,
+        prefs: Preferences,
         ctx: Arc<RwLock<AppContext>>,
     ) -> Day {
         let widget = gtk::Box::new(gtk::Orientation::Vertical, 5);
@@ -50,7 +51,7 @@ impl Day {
         let visible = day_c(
             &date,
             records.iter().map(|rec| &rec.data).collect(),
-            &timezone,
+            &prefs.timezone,
         );
         widget.pack_start(&visible, true, true, 5);
 
@@ -64,7 +65,7 @@ impl Day {
             visible_component: Arc::new(RwLock::new(DayState::View(visible))),
             date,
             records: record_map,
-            timezone,
+            prefs,
             ctx,
         };
 
@@ -89,7 +90,7 @@ impl Day {
         let component = DayEdit::new(
             &self.date,
             &self.records,
-            &self.ctx.read().unwrap().get_timezone(),
+            &self.ctx.read().unwrap().get_preferences().timezone,
             Box::new(move |updated_records, new_records| {
                 self_save.save_edit(updated_records, new_records)
             }),
@@ -105,7 +106,11 @@ impl Day {
             DayState::View(_) => return,
             DayState::Edit(ref w) => self.widget.remove(&w.widget),
         };
-        let component = day_c(&self.date, self.records.values().collect(), &self.timezone);
+        let component = day_c(
+            &self.date,
+            self.records.values().collect(),
+            &self.ctx.read().unwrap().get_preferences().timezone,
+        );
         self.widget.pack_start(&component, true, true, 5);
         *v = DayState::View(component);
     }

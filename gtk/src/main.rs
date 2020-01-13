@@ -14,6 +14,7 @@ mod config;
 mod context;
 mod conversions;
 mod errors;
+mod preferences;
 mod range;
 mod types;
 

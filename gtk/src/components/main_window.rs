@@ -16,12 +16,22 @@ impl MainWindow {
         let widget = gtk::ApplicationWindow::new(app);
         let notebook = gtk::Notebook::new();
 
-        let history = History::new(ctx.clone());
-        let preferences = Preferences::new(ctx.clone());
+        let mut history = History::new(ctx.clone());
+        let mut preferences = Preferences::new(ctx.clone());
 
-        notebook.append_page(&history.widget, Some(&gtk::Label::new(Some("History"))));
+        {
+            let ctx = ctx.read().unwrap();
+            notebook.append_page(
+                history.render(
+                    ctx.get_preferences(),
+                    ctx.get_range(),
+                    ctx.get_history().unwrap(),
+                ),
+                Some(&gtk::Label::new(Some("History"))),
+            );
+        }
         notebook.append_page(
-            &preferences.widget,
+            preferences.render(),
             Some(&gtk::Label::new(Some("Preferences"))),
         );
 
@@ -43,12 +53,20 @@ impl MainWindow {
 
     pub fn update_from(&mut self, message: Message) {
         match message {
-            Message::ChangeRange { range, records } => self.history.update_records(range, records),
-            Message::ChangeLanguage(_) => (),
-            Message::ChangeTimezone(tz) => self.history.update_timezone(tz),
-            Message::ChangeUnits(_) => (),
-            Message::RecordsUpdated { range, records } => {
-                self.history.update_records(range, records)
+            Message::ChangeRange {
+                prefs,
+                range,
+                records,
+            } => {
+                self.history.render(prefs, range, records);
+            }
+            Message::ChangePreferences(_) => (),
+            Message::RecordsUpdated {
+                prefs,
+                range,
+                records,
+            } => {
+                self.history.render(prefs, range, records);
             }
         }
     }

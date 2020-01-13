@@ -3,84 +3,123 @@ use std::sync::{Arc, RwLock};
 
 use crate::components::{entry_setting_c, pulldown_setting_c};
 use crate::context::AppContext;
+use crate::preferences;
 
+#[derive(Clone)]
 pub struct Preferences {
-    pub widget: gtk::Box,
+    component: Option<gtk::Box>,
+    ctx: Arc<RwLock<AppContext>>,
 }
 
 impl Preferences {
     pub fn new(ctx: Arc<RwLock<AppContext>>) -> Preferences {
-        let ctx_ = ctx.read().unwrap();
-        let widget = gtk::Box::new(gtk::Orientation::Vertical, 5);
-
-        {
-            let ctx = ctx.clone();
-            widget.pack_start(
-                &entry_setting_c(
-                    "Database path",
-                    ctx_.get_series_path(),
-                    Box::new(move |s| ctx.write().unwrap().set_series_path(s)),
-                ),
-                false,
-                false,
-                5,
-            );
+        Preferences {
+            component: None,
+            ctx: ctx.clone(),
         }
-
-        {
-            let ctx = ctx.clone();
-            widget.pack_start(
-                &pulldown_setting_c(
-                    "Language",
-                    vec![("en", "English"), ("eo", "Esperanto")],
-                    ctx_.get_language(),
-                    Box::new(move |s| ctx.write().unwrap().set_language(s)),
-                ),
-                false,
-                false,
-                5,
-            );
-        }
-
-        {
-            let ctx = ctx.clone();
-            widget.pack_start(
-                &pulldown_setting_c(
-                    "Timezone",
-                    tz_list(),
-                    ctx_.get_timezone().name(),
-                    Box::new(move |s| ctx.write().unwrap().set_timezone(s.parse().unwrap())),
-                ),
-                false,
-                false,
-                5,
-            );
-        }
-
-        {
-            let ctx = ctx.clone();
-            widget.pack_start(
-                &pulldown_setting_c(
-                    "Units",
-                    vec![("SI", "SI (kg, km, m/s)"), ("USA", "USA (lbs, mi, mph)")],
-                    ctx_.get_units(),
-                    Box::new(move |s| ctx.write().unwrap().set_units(s)),
-                ),
-                false,
-                false,
-                5,
-            );
-        }
-
-        let w = Preferences { widget };
-
-        w.show();
-
-        w
     }
 
-    pub fn show(&self) {
-        self.widget.show_all();
+    pub fn set_language(&self, language: &str) {
+        let mut ctx = self.ctx.write().unwrap();
+        let mut prefs = ctx.get_preferences();
+        prefs.language = String::from(language);
+        ctx.set_preferences(prefs);
+    }
+
+    pub fn set_timezone(&self, timezone_str: &str) {
+        let mut ctx = self.ctx.write().unwrap();
+        let mut prefs = ctx.get_preferences();
+        prefs.timezone = timezone_str.parse().unwrap();
+        ctx.set_preferences(prefs);
+    }
+
+    pub fn set_units(&self, units: &str) {
+        let mut ctx = self.ctx.write().unwrap();
+        let mut prefs = ctx.get_preferences();
+        prefs.units = String::from(units);
+        ctx.set_preferences(prefs);
+    }
+
+    pub fn render(&mut self) -> &gtk::Box {
+        /* Doing all of the component setup in the initial construction because there is currently
+         * no way for the values of a component to change outside of changes within this object. */
+        match self.component {
+            None => {
+                let widget = gtk::Box::new(gtk::Orientation::Vertical, 5);
+
+                let series_path = String::from(self.ctx.read().unwrap().get_series_path());
+                let preferences::Preferences {
+                    language,
+                    timezone,
+                    units,
+                } = self.ctx.read().unwrap().get_preferences();
+
+                {
+                    let ctx = self.ctx.clone();
+                    widget.pack_start(
+                        &entry_setting_c(
+                            "Database path",
+                            &series_path,
+                            Box::new(move |s| ctx.write().unwrap().set_series_path(s)),
+                        ),
+                        false,
+                        false,
+                        5,
+                    );
+                }
+
+                {
+                    let w = self.clone();
+                    widget.pack_start(
+                        &pulldown_setting_c(
+                            "Language",
+                            vec![("en", "English"), ("eo", "Esperanto")],
+                            &language,
+                            Box::new(move |s| w.set_language(s)),
+                        ),
+                        false,
+                        false,
+                        5,
+                    );
+                }
+
+                {
+                    let w = self.clone();
+                    widget.pack_start(
+                        &pulldown_setting_c(
+                            "Timezone",
+                            tz_list(),
+                            timezone.name(),
+                            Box::new(move |s| w.set_timezone(s)),
+                        ),
+                        false,
+                        false,
+                        5,
+                    );
+                }
+
+                {
+                    let w = self.clone();
+                    widget.pack_start(
+                        &pulldown_setting_c(
+                            "Units",
+                            vec![("SI", "SI (kg, km, m/s)"), ("USA", "USA (lbs, mi, mph)")],
+                            &units,
+                            Box::new(move |s| w.set_units(s)),
+                        ),
+                        false,
+                        false,
+                        5,
+                    );
+                }
+
+                widget.show_all();
+                self.component = Some(widget);
+
+                self.render()
+            }
+            Some(ref widget) => &widget,
+        }
     }
 }
 

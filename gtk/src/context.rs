@@ -3,10 +3,10 @@ use chrono_tz;
 use glib::Sender;
 use std::path::PathBuf;
 
-use super::config::Configuration;
-use super::errors::Result;
-use super::range::Range;
-use crate::errors::Error;
+use crate::config::Configuration;
+use crate::errors::{Error, Result};
+use crate::preferences::Preferences;
+use crate::range::Range;
 use crate::types::DateRange;
 use emseries::{DateTimeTz, Record, UniqueId};
 use fitnesstrax::{Trax, TraxRecord};
@@ -14,20 +14,21 @@ use fitnesstrax::{Trax, TraxRecord};
 #[derive(Clone, Debug)]
 pub enum Message {
     ChangeRange {
+        prefs: Preferences,
         range: DateRange,
         records: Vec<Record<TraxRecord>>,
     },
-    ChangeLanguage(String),
-    ChangeTimezone(chrono_tz::Tz),
-    ChangeUnits(String),
+    ChangePreferences(Preferences),
     RecordsUpdated {
+        prefs: Preferences,
         range: DateRange,
         records: Vec<Record<TraxRecord>>,
     },
 }
 
 pub struct AppContext {
-    config: Configuration,
+    series_path: PathBuf,
+    prefs: Preferences,
     trax: Trax,
     range: DateRange,
     channel: Sender<Message>,
@@ -47,7 +48,12 @@ impl AppContext {
         );
 
         Ok(AppContext {
-            config,
+            series_path: config.series_path,
+            prefs: Preferences {
+                language: config.language,
+                timezone: config.timezone,
+                units: config.units,
+            },
             trax,
             range,
             channel,
@@ -55,47 +61,30 @@ impl AppContext {
     }
 
     pub fn get_series_path(&self) -> &str {
-        self.config.series_path.to_str().unwrap()
+        self.series_path.to_str().unwrap()
     }
 
     pub fn set_series_path(&mut self, path: &str) {
-        self.config.series_path = PathBuf::from(path);
+        self.series_path = PathBuf::from(path);
     }
 
-    pub fn get_language(&self) -> &str {
-        &self.config.language
+    pub fn get_preferences(&self) -> Preferences {
+        self.prefs.clone()
     }
 
-    pub fn set_language(&mut self, language: &str) {
+    pub fn set_preferences(&mut self, prefs: Preferences) {
         {
-            self.config.language = String::from(language);
-            self.config.save_to_yaml();
+            self.prefs = prefs;
+
+            let config = Configuration {
+                series_path: self.series_path.clone(),
+                language: self.prefs.language.clone(),
+                timezone: self.prefs.timezone,
+                units: self.prefs.units.clone(),
+            };
+            config.save_to_yaml();
         }
-        self.send_notifications(Message::ChangeLanguage(self.config.language.clone()));
-    }
-
-    pub fn get_timezone(&self) -> chrono_tz::Tz {
-        self.config.timezone
-    }
-
-    pub fn set_timezone(&mut self, timezone: chrono_tz::Tz) {
-        {
-            self.config.timezone = timezone;
-            self.config.save_to_yaml();
-        }
-        self.send_notifications(Message::ChangeTimezone(self.config.timezone.clone()));
-    }
-
-    pub fn get_units(&self) -> &str {
-        &self.config.units
-    }
-
-    pub fn set_units(&mut self, units: &str) {
-        {
-            self.config.units = String::from(units);
-            self.config.save_to_yaml();
-        }
-        self.send_notifications(Message::ChangeUnits(self.config.units.clone()));
+        self.send_notifications(Message::ChangePreferences(self.prefs.clone()));
     }
 
     pub fn get_range(&self) -> DateRange {
@@ -107,12 +96,12 @@ impl AppContext {
             self.range
                 .start
                 .and_hms(0, 0, 0)
-                .with_timezone(&self.config.timezone),
+                .with_timezone(&self.prefs.timezone),
         );
         let end_time = DateTimeTz(
             (self.range.end + chrono::Duration::days(1))
                 .and_hms(0, 0, 0)
-                .with_timezone(&self.config.timezone),
+                .with_timezone(&self.prefs.timezone),
         );
         self.trax
             .get_history(start_time, end_time)
@@ -132,6 +121,7 @@ impl AppContext {
         }
         let history = self.get_history().unwrap();
         self.send_notifications(Message::RecordsUpdated {
+            prefs: self.prefs.clone(),
             range: self.range.clone(),
             records: history,
         });
@@ -141,6 +131,7 @@ impl AppContext {
         self.range = range.clone();
         let history = self.get_history().unwrap();
         self.send_notifications(Message::ChangeRange {
+            prefs: self.prefs.clone(),
             range,
             records: history,
         });
