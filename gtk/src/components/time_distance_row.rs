@@ -152,11 +152,11 @@ pub fn time_distance_record_edit_c(
         )
     };
 
-    container.pack_start(&time_entry.widget, false, false, 5);
+    container.pack_start(&time_entry, false, false, 5);
     container.pack_start(&activity_selection, false, false, 5);
-    container.pack_start(&distance_entry.widget, false, false, 5);
+    container.pack_start(&distance_entry, false, false, 5);
     container.pack_start(&gtk::Label::new(Some("km")), false, false, 5);
-    container.pack_start(&duration_entry.widget, false, false, 5);
+    container.pack_start(&duration_entry, false, false, 5);
 
     container
 }

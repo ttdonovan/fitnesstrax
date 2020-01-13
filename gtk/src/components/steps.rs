@@ -1,7 +1,7 @@
 use emseries::{Recordable, UniqueId};
 use fitnesstrax::steps::StepRecord;
 
-use crate::components::ValidatedTextEntry;
+use crate::components::validated_text_entry_c;
 use crate::errors::Error;
 
 pub fn steps_c(record: &fitnesstrax::steps::StepRecord) -> gtk::Label {
@@ -12,8 +12,8 @@ pub fn steps_edit_c(
     id: UniqueId,
     record: StepRecord,
     on_update: Box<dyn Fn(UniqueId, StepRecord)>,
-) -> ValidatedTextEntry<u32> {
-    ValidatedTextEntry::new(
+) -> gtk::Entry {
+    validated_text_entry_c(
         record.steps,
         Box::new(|s| format!("{}", s)),
         Box::new(|s| s.parse::<u32>().map_err(|_err| Error::ParseStepsError)),

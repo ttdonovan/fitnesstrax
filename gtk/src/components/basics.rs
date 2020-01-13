@@ -1,6 +1,6 @@
 use gtk::prelude::*;
 
-use crate::components::validated_text_entry::ValidatedTextEntry;
+use crate::components::validated_text_entry::validated_text_entry_c;
 use crate::conversions::{
     parse_distance, parse_duration, parse_hours_minutes, render_distance, render_duration,
     render_hours_minutes,
@@ -17,8 +17,8 @@ pub fn time_c(time: &chrono::NaiveTime) -> gtk::Label {
 pub fn time_edit_c(
     time: &chrono::NaiveTime,
     on_update: Box<dyn Fn(chrono::NaiveTime)>,
-) -> ValidatedTextEntry<chrono::NaiveTime> {
-    ValidatedTextEntry::new(
+) -> gtk::Entry {
+    validated_text_entry_c(
         time.clone(),
         Box::new(|s| render_hours_minutes(s)),
         Box::new(|s| parse_hours_minutes(s)),
@@ -33,8 +33,8 @@ pub fn distance_c(distance: &dimensioned::si::Meter<f64>) -> gtk::Label {
 pub fn distance_edit_c(
     distance: &Option<dimensioned::si::Meter<f64>>,
     on_update: Box<dyn Fn(Option<dimensioned::si::Meter<f64>>)>,
-) -> ValidatedTextEntry<Option<dimensioned::si::Meter<f64>>> {
-    ValidatedTextEntry::new(
+) -> gtk::Entry {
+    validated_text_entry_c(
         distance.clone(),
         Box::new(|s| s.map(|s_| render_distance(&s_)).unwrap_or(String::from(""))),
         Box::new(|s| parse_distance(s)),
@@ -49,8 +49,8 @@ pub fn duration_c(duration: &dimensioned::si::Second<f64>) -> gtk::Label {
 pub fn duration_edit_c(
     duration: &Option<dimensioned::si::Second<f64>>,
     on_update: Box<dyn Fn(Option<dimensioned::si::Second<f64>>)>,
-) -> ValidatedTextEntry<Option<dimensioned::si::Second<f64>>> {
-    ValidatedTextEntry::new(
+) -> gtk::Entry {
+    validated_text_entry_c(
         duration.clone(),
         Box::new(|s| s.map(|s_| render_duration(&s_)).unwrap_or(String::from(""))),
         Box::new(|s| parse_duration(s)),

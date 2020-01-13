@@ -1,8 +1,8 @@
-use dimensioned::si::{Kilogram, KG};
+use dimensioned::si::KG;
 use emseries::{Recordable, UniqueId};
 use fitnesstrax::weight::WeightRecord;
 
-use crate::components::ValidatedTextEntry;
+use crate::components::validated_text_entry_c;
 use crate::errors::Error;
 
 pub fn weight_record_c(record: &WeightRecord) -> gtk::Label {
@@ -13,8 +13,8 @@ pub fn weight_record_edit_c(
     id: UniqueId,
     record: WeightRecord,
     on_update: Box<dyn Fn(UniqueId, WeightRecord)>,
-) -> ValidatedTextEntry<Kilogram<f64>> {
-    ValidatedTextEntry::new(
+) -> gtk::Entry {
+    validated_text_entry_c(
         record.weight,
         Box::new(|w| format!("{}", w.value_unsafe)),
         Box::new(|s| {

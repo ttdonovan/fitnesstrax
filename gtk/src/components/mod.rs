@@ -24,4 +24,4 @@ pub use menu_bar::MenuBar;
 pub use preferences::Preferences;
 pub use range_selector::RangeSelector;
 pub use setting::setting_c;
-pub use validated_text_entry::ValidatedTextEntry;
+pub use validated_text_entry::validated_text_entry_c;

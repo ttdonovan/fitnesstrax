@@ -273,9 +273,9 @@ impl DayEdit {
         let time_distance_edit =
             { TimeDistanceEdit::new(date.clone(), time_distance_records, timezone) };
 
-        first_row.pack_start(&weight_component.widget, false, false, 5);
+        first_row.pack_start(&weight_component, false, false, 5);
         first_row.pack_start(&gtk::Label::new(Some("kg")), false, false, 5);
-        first_row.pack_start(&step_component.widget, false, false, 5);
+        first_row.pack_start(&step_component, false, false, 5);
         first_row.pack_start(&gtk::Label::new(Some("steps")), false, false, 5);
         widget.pack_start(&time_distance_edit.widget, false, false, 5);
 
