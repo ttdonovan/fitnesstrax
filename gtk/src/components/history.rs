@@ -11,21 +11,14 @@ use crate::preferences::Preferences;
 use crate::range::group_by_date;
 use crate::types::DateRange;
 
-pub struct HistoryComponent {
+struct HistoryComponent {
     widget: gtk::Box,
-    range_bar: RangeSelector,
-    scrolling_history: gtk::ScrolledWindow,
     history_box: gtk::Box,
 }
 
 pub struct History {
     component: Option<HistoryComponent>,
     ctx: Arc<RwLock<AppContext>>,
-    /*
-    preferences: Arc<RwLock<Preferences>>,
-    range: Arc<RwLock<DateRange>>,
-    records: Arc<RwLock<Vec<Record<TraxRecord>>>>,
-    */
 }
 
 impl History {
@@ -34,74 +27,7 @@ impl History {
             component: None,
             ctx,
         }
-        /*
-        let ctx_ = ctx.read().unwrap();
-        let preferences = Arc::new(RwLock::new(ctx_.get_preferences()));
-        let range = Arc::new(RwLock::new(ctx_.get_range()));
-        let records = Arc::new(RwLock::new(ctx_.get_history().unwrap()));
-
-        let w = History {
-            widget,
-            range_bar,
-            scrolling_history,
-            history_box,
-            ctx: ctx.clone(),
-            preferences,
-            range,
-            records,
-        };
-
-        w.render();
-
-        w.show();
-
-        w
-        */
     }
-
-    /*
-    pub fn update_preferences(&mut self, prefs: Preferences) {
-        *self.preferences.write().unwrap() = prefs;
-        self.render();
-    }
-
-    pub fn update_records(&mut self, range: DateRange, records: Vec<Record<TraxRecord>>) {
-        *self.range.write().unwrap() = range;
-        *self.records.write().unwrap() = records;
-        self.render();
-    }
-
-    pub fn render(&self) {
-        let grouped_history = group_by_date(
-            self.range.read().unwrap().clone(),
-            self.records.read().unwrap().clone(),
-        );
-
-        self.history_box.foreach(|child| child.destroy());
-
-        let mut dates = grouped_history.keys().collect::<Vec<&Date<Tz>>>();
-        dates.sort_unstable();
-        dates.reverse();
-        dates.iter().for_each(|date| {
-            let ctx = self.ctx.clone();
-            let day = Day::new(
-                (*date).clone(),
-                grouped_history.get(date).unwrap().clone(),
-                self.preferences.read().unwrap().clone(),
-                ctx,
-            );
-            day.show();
-            self.history_box.pack_start(&day.widget, true, true, 25);
-        });
-    }
-
-    pub fn show(&self) {
-        self.widget.show();
-        self.range_bar.show();
-        self.scrolling_history.show();
-        self.history_box.show_all();
-    }
-    */
 
     pub fn render(
         &mut self,
@@ -136,8 +62,6 @@ impl History {
                 self.component = Some(HistoryComponent {
                     widget,
                     history_box,
-                    scrolling_history,
-                    range_bar,
                 });
 
                 self.render(prefs, range, records)

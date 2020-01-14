@@ -1,13 +1,13 @@
 use gtk::prelude::*;
 use std::sync::{Arc, RwLock};
 
-use crate::components::DateSelector;
+use crate::components::date_selector_c;
 use crate::types::DateRange;
 
 pub struct RangeSelector {
     pub widget: gtk::Box,
-    start_selector: DateSelector,
-    end_selector: DateSelector,
+    start_selector: gtk::Box,
+    end_selector: gtk::Box,
 }
 
 impl RangeSelector {
@@ -22,7 +22,7 @@ impl RangeSelector {
             let range = range.clone();
             let on_change = on_change.clone();
             let timezone = timezone.clone();
-            DateSelector::new(
+            date_selector_c(
                 start_date,
                 Box::new(move |new_date| {
                     let mut r = range.write().unwrap();
@@ -40,7 +40,7 @@ impl RangeSelector {
             let range = range.clone();
             let on_change = on_change.clone();
             let timezone = timezone.clone();
-            DateSelector::new(
+            date_selector_c(
                 end_date,
                 Box::new(move |new_date| {
                     let mut r = range.write().unwrap();
@@ -60,9 +60,8 @@ impl RangeSelector {
             end_selector,
         };
 
-        w.widget
-            .pack_start(&w.start_selector.widget, false, false, 5);
-        w.widget.pack_start(&w.end_selector.widget, false, false, 5);
+        w.widget.pack_start(&w.start_selector, false, false, 5);
+        w.widget.pack_start(&w.end_selector, false, false, 5);
 
         {}
 
@@ -70,8 +69,6 @@ impl RangeSelector {
     }
 
     pub fn show(&self) {
-        self.start_selector.show();
-        self.end_selector.show();
         self.widget.show();
     }
 }

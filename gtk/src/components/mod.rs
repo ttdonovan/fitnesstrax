@@ -16,7 +16,7 @@ mod validated_text_entry;
 mod weight;
 
 pub use basics::*;
-pub use date_selector::DateSelector;
+pub use date_selector::date_selector_c;
 pub use day::Day;
 pub use history::History;
 pub use main_window::MainWindow;
