@@ -5,6 +5,7 @@ use crate::conversions::{
     parse_distance, parse_duration, parse_hours_minutes, render_distance, render_duration,
     render_hours_minutes,
 };
+use crate::preferences::UnitSystem;
 
 pub fn date_c(date: &chrono::Date<chrono_tz::Tz>) -> gtk::Label {
     gtk::Label::new(Some(&format!("{}", date.format("%B %e, %Y"))))
@@ -26,18 +27,25 @@ pub fn time_edit_c(
     )
 }
 
-pub fn distance_c(distance: &dimensioned::si::Meter<f64>) -> gtk::Label {
-    gtk::Label::new(Some(&format!("{} km", render_distance(distance))))
+pub fn distance_c(distance: &dimensioned::si::Meter<f64>, units: &UnitSystem) -> gtk::Label {
+    gtk::Label::new(Some(&format!("{}", render_distance(distance, units, true))))
 }
 
 pub fn distance_edit_c(
     distance: &Option<dimensioned::si::Meter<f64>>,
+    units: &UnitSystem,
     on_update: Box<dyn Fn(Option<dimensioned::si::Meter<f64>>)>,
 ) -> gtk::Entry {
+    let u1 = units.clone();
+    let u2 = units.clone();
     validated_text_entry_c(
         distance.clone(),
-        Box::new(|s| s.map(|s_| render_distance(&s_)).unwrap_or(String::from(""))),
-        Box::new(|s| parse_distance(s)),
+        Box::new(move |s| {
+            let u1 = u1.clone();
+            s.map(move |s_| render_distance(&s_, &u1, false))
+                .unwrap_or(String::from(""))
+        }),
+        Box::new(move |s| parse_distance(s, &u2)),
         on_update,
     )
 }

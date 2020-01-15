@@ -1,11 +1,11 @@
 use chrono::Utc;
-use chrono_tz;
 use glib::Sender;
+use std::convert::TryFrom;
 use std::path::PathBuf;
 
 use crate::config::Configuration;
 use crate::errors::{Error, Result};
-use crate::preferences::Preferences;
+use crate::preferences::{Preferences, UnitSystem};
 use crate::range::Range;
 use crate::types::DateRange;
 use emseries::{DateTimeTz, Record, UniqueId};
@@ -18,7 +18,11 @@ pub enum Message {
         range: DateRange,
         records: Vec<Record<TraxRecord>>,
     },
-    ChangePreferences(Preferences),
+    ChangePreferences {
+        prefs: Preferences,
+        range: DateRange,
+        records: Vec<Record<TraxRecord>>,
+    },
     RecordsUpdated {
         prefs: Preferences,
         range: DateRange,
@@ -52,7 +56,7 @@ impl AppContext {
             prefs: Preferences {
                 language: config.language,
                 timezone: config.timezone,
-                units: config.units,
+                units: UnitSystem::try_from(config.units.as_str()).unwrap(),
             },
             trax,
             range,
@@ -80,11 +84,15 @@ impl AppContext {
                 series_path: self.series_path.clone(),
                 language: self.prefs.language.clone(),
                 timezone: self.prefs.timezone,
-                units: self.prefs.units.clone(),
+                units: String::from(self.prefs.units.clone()),
             };
             config.save_to_yaml();
         }
-        self.send_notifications(Message::ChangePreferences(self.prefs.clone()));
+        self.send_notifications(Message::ChangePreferences {
+            prefs: self.prefs.clone(),
+            range: self.range.clone(),
+            records: self.get_history().unwrap(),
+        });
     }
 
     pub fn get_range(&self) -> DateRange {

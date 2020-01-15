@@ -17,7 +17,7 @@ use crate::components::time_distance::TimeDistanceEdit;
 use crate::components::time_distance_row::time_distance_c;
 use crate::components::weight::{weight_record_c, weight_record_edit_c};
 use crate::context::AppContext;
-use crate::preferences::Preferences;
+use crate::preferences::{Preferences, UnitSystem};
 
 enum DayState {
     View(gtk::Box),
@@ -48,11 +48,7 @@ impl Day {
 
         widget.pack_start(&header, false, false, 5);
 
-        let visible = day_c(
-            &date,
-            records.iter().map(|rec| &rec.data).collect(),
-            &prefs.timezone,
-        );
+        let visible = day_c(&date, records.iter().map(|rec| &rec.data).collect(), &prefs);
         widget.pack_start(&visible, true, true, 5);
 
         let record_map = records.iter().fold(HashMap::new(), |mut acc, rec| {
@@ -90,7 +86,7 @@ impl Day {
         let component = DayEdit::new(
             &self.date,
             &self.records,
-            &self.ctx.read().unwrap().get_preferences().timezone,
+            &self.ctx.read().unwrap().get_preferences(),
             Box::new(move |updated_records, new_records| {
                 self_save.save_edit(updated_records, new_records)
             }),
@@ -109,7 +105,7 @@ impl Day {
         let component = day_c(
             &self.date,
             self.records.values().collect(),
-            &self.ctx.read().unwrap().get_preferences().timezone,
+            &self.ctx.read().unwrap().get_preferences(),
         );
         self.widget.pack_start(&component, true, true, 5);
         *v = DayState::View(component);
@@ -134,7 +130,11 @@ impl Day {
     }
 }
 
-fn day_c(_date: &chrono::Date<chrono_tz::Tz>, data: Vec<&TraxRecord>, timezone: &Tz) -> gtk::Box {
+fn day_c(
+    _date: &chrono::Date<chrono_tz::Tz>,
+    data: Vec<&TraxRecord>,
+    prefs: &Preferences,
+) -> gtk::Box {
     let container = gtk::Box::new(gtk::Orientation::Vertical, 5);
 
     /*
@@ -164,9 +164,11 @@ fn day_c(_date: &chrono::Date<chrono_tz::Tz>, data: Vec<&TraxRecord>, timezone: 
             TraxRecord::SetRep(ref rec) => set_rep_components.push(set_rep_c(&rec)),
             TraxRecord::Steps(ref rec) => step_component = Some(steps_c(&rec)),
             TraxRecord::TimeDistance(ref rec) => {
-                time_distance_components.push(time_distance_c(&rec, timezone))
+                time_distance_components.push(time_distance_c(&rec, &prefs))
             }
-            TraxRecord::Weight(ref rec) => weight_component = Some(weight_record_c(&rec)),
+            TraxRecord::Weight(ref rec) => {
+                weight_component = Some(weight_record_c(&rec, &prefs.units))
+            }
         }
     }
 
@@ -194,7 +196,7 @@ impl DayEdit {
     fn new(
         date: &chrono::Date<chrono_tz::Tz>,
         data: &HashMap<UniqueId, TraxRecord>,
-        timezone: &chrono_tz::Tz,
+        prefs: &Preferences,
         on_save: Box<dyn Fn(Vec<(UniqueId, TraxRecord)>, Vec<TraxRecord>)>,
         on_cancel: Box<dyn Fn()>,
     ) -> DayEdit {
@@ -212,6 +214,7 @@ impl DayEdit {
             weight_record_edit_c(
                 UniqueId::new(),
                 WeightRecord::new(DateTimeTz(date_.and_hms(0, 0, 0)), 0.0 * KG),
+                &prefs.units,
                 Box::new(move |id, rec| {
                     new_records_
                         .write()
@@ -245,6 +248,7 @@ impl DayEdit {
                     weight_component = weight_record_edit_c(
                         id.clone(),
                         rec.clone(),
+                        &prefs.units,
                         Box::new(move |id, rec| {
                             updates_.write().unwrap().insert(id, TraxRecord::from(rec));
                         }),
@@ -271,10 +275,15 @@ impl DayEdit {
         }
 
         let time_distance_edit =
-            { TimeDistanceEdit::new(date.clone(), time_distance_records, timezone) };
+            { TimeDistanceEdit::new(date.clone(), time_distance_records, &prefs) };
+
+        let weight_label = match prefs.units {
+            UnitSystem::SI => "kg",
+            UnitSystem::USA => "lbs",
+        };
 
         first_row.pack_start(&weight_component, false, false, 5);
-        first_row.pack_start(&gtk::Label::new(Some("kg")), false, false, 5);
+        first_row.pack_start(&gtk::Label::new(Some(weight_label)), false, false, 5);
         first_row.pack_start(&step_component, false, false, 5);
         first_row.pack_start(&gtk::Label::new(Some("steps")), false, false, 5);
         widget.pack_start(&time_distance_edit.widget, false, false, 5);

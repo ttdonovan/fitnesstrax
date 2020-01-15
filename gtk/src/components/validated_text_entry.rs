@@ -19,7 +19,7 @@ pub fn validated_text_entry_c<A: 'static + Clone>(
                 context.remove_class(&gtk::STYLE_CLASS_WARNING);
                 on_update(val);
             }
-            Err(err) => {
+            Err(_err) => {
                 let context = w.get_style_context();
                 context.add_class(&gtk::STYLE_CLASS_WARNING);
             }

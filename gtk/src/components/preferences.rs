@@ -1,4 +1,5 @@
 use gtk::prelude::*;
+use std::convert::TryFrom;
 use std::sync::{Arc, RwLock};
 
 use crate::components::{entry_setting_c, pulldown_setting_c};
@@ -36,13 +37,15 @@ impl Preferences {
     pub fn set_units(&self, units: &str) {
         let mut ctx = self.ctx.write().unwrap();
         let mut prefs = ctx.get_preferences();
-        prefs.units = String::from(units);
+        prefs.units = preferences::UnitSystem::try_from(units).unwrap();
         ctx.set_preferences(prefs);
     }
 
     pub fn render(&mut self) -> &gtk::Box {
         /* Doing all of the component setup in the initial construction because there is currently
-         * no way for the values of a component to change outside of changes within this object. */
+         * no way for the values of a component to change outside of changes within this object.
+         * However, this changes when I handle translation, because changing the translation
+         * setting should trigger a total re-render. */
         match self.component {
             None => {
                 let widget = gtk::Box::new(gtk::Orientation::Vertical, 5);
@@ -104,7 +107,7 @@ impl Preferences {
                         &pulldown_setting_c(
                             "Units",
                             vec![("SI", "SI (kg, km, m/s)"), ("USA", "USA (lbs, mi, mph)")],
-                            &units,
+                            &String::from(units),
                             Box::new(move |s| w.set_units(s)),
                         ),
                         false,

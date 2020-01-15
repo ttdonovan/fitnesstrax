@@ -60,7 +60,14 @@ impl MainWindow {
             } => {
                 self.history.render(prefs, range, records);
             }
-            Message::ChangePreferences(_) => (),
+            Message::ChangePreferences {
+                prefs,
+                range,
+                records,
+            } => {
+                self.history.render(prefs, range, records);
+                self.preferences.render();
+            }
             Message::RecordsUpdated {
                 prefs,
                 range,
