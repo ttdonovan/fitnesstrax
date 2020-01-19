@@ -1,6 +1,5 @@
 use fluent::{FluentBundle, FluentResource};
 use std::borrow::Cow;
-use std::collections::HashMap;
 use std::sync::Arc;
 use unic_langid::LanguageIdentifier;
 
@@ -77,13 +76,21 @@ impl Messages {
         }
     }
 
+    pub fn history(&self) -> Cow<str> {
+        self.tr("history").unwrap()
+    }
+
+    pub fn preferences(&self) -> Cow<str> {
+        self.tr("preferences").unwrap()
+    }
+
     pub fn tr(&self, id: &str) -> Option<Cow<str>> {
-        let mut errors = vec![];
+        let mut _errors = vec![];
 
         self.bundle
             .get_message(id)
             .and_then(|msg| msg.value)
-            .map(|pattern| self.bundle.format_pattern(&pattern, None, &mut errors))
+            .map(|pattern| self.bundle.format_pattern(&pattern, None, &mut _errors))
     }
 }
 

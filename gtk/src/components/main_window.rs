@@ -28,13 +28,11 @@ impl MainWindow {
                     ctx.get_range(),
                     ctx.get_history().unwrap(),
                 ),
-                Some(&gtk::Label::new(Some("History"))),
+                Some(&gtk::Label::new(Some(&messages.history()))),
             );
             notebook.append_page(
                 preferences.render(),
-                Some(&gtk::Label::new(
-                    messages.tr("preferences").as_ref().map(|c| &**c),
-                )),
+                Some(&gtk::Label::new(Some(&messages.preferences()))),
             );
         }
 
