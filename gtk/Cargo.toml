@@ -2,6 +2,7 @@
 name = "fitnesstrax-gtk"
 authors = ["savanni"]
 edition = "2018"
+version = "0.0.5-pre"
 
 [dependencies]
 chrono-tz = { version = "0.4", features = ["serde"] }

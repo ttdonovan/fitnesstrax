@@ -1,4 +1,5 @@
 use chrono::Timelike;
+use chrono_tz::Tz;
 use emseries::*;
 use gtk::prelude::*;
 use std::convert::TryFrom;
@@ -7,6 +8,7 @@ use std::sync::{Arc, RwLock};
 use crate::components::basics::{
     distance_c, distance_edit_c, duration_c, duration_edit_c, time_c, time_edit_c,
 };
+use crate::preferences::{Preferences, UnitSystem};
 use fitnesstrax::timedistance::{activity_types, ActivityType, TimeDistanceRecord};
 
 fn activity_c(activity: &ActivityType) -> gtk::Label {
@@ -19,15 +21,23 @@ fn activity_c(activity: &ActivityType) -> gtk::Label {
     })
 }
 
-pub fn time_distance_c(record: &fitnesstrax::timedistance::TimeDistanceRecord) -> gtk::Box {
+pub fn time_distance_c(
+    record: &fitnesstrax::timedistance::TimeDistanceRecord,
+    prefs: &Preferences,
+) -> gtk::Box {
     let container = gtk::Box::new(gtk::Orientation::Horizontal, 5);
 
-    container.pack_start(&time_c(&record.timestamp().0.time()), false, false, 5);
+    container.pack_start(
+        &time_c(&record.timestamp().0.with_timezone(&prefs.timezone).time()),
+        false,
+        false,
+        5,
+    );
     container.pack_start(&activity_c(&record.activity), false, false, 5);
     container.pack_start(
         &record
             .distance
-            .map(|r| distance_c(&r))
+            .map(|r| distance_c(&r, &prefs.units))
             .unwrap_or(gtk::Label::new(Some("---"))),
         false,
         false,
@@ -49,6 +59,7 @@ pub fn time_distance_c(record: &fitnesstrax::timedistance::TimeDistanceRecord) -
 pub fn time_distance_record_edit_c(
     id: UniqueId,
     record: TimeDistanceRecord,
+    prefs: Preferences,
     on_update: Box<dyn Fn(UniqueId, TimeDistanceRecord)>,
 ) -> gtk::Box {
     let on_update = Arc::new(on_update);
@@ -59,7 +70,14 @@ pub fn time_distance_record_edit_c(
         let id = id.clone();
         let record = record.clone();
         let on_update = on_update.clone();
-        let time = record.read().unwrap().timestamp().0.time();
+        let time = record
+            .read()
+            .unwrap()
+            .timestamp()
+            .0
+            .with_timezone(&prefs.timezone)
+            .time();
+        let prefs = prefs.clone();
         time_edit_c(
             &time,
             Box::new(move |val| {
@@ -72,6 +90,7 @@ pub fn time_distance_record_edit_c(
                         .unwrap()
                         .with_second(val.second())
                         .unwrap()
+                        .with_timezone(&prefs.timezone)
                 });
                 on_update(id.clone(), r.clone());
             }),
@@ -106,6 +125,7 @@ pub fn time_distance_record_edit_c(
         let distance = record.read().unwrap().distance.clone();
         distance_edit_c(
             &distance,
+            &prefs.units,
             Box::new(move |res| match res {
                 Some(val) => {
                     let mut r = record.write().unwrap();
@@ -135,11 +155,16 @@ pub fn time_distance_record_edit_c(
         )
     };
 
-    container.pack_start(&time_entry.widget, false, false, 5);
+    let distance_label = match prefs.units {
+        UnitSystem::SI => "km",
+        UnitSystem::USA => "mi",
+    };
+
+    container.pack_start(&time_entry, false, false, 5);
     container.pack_start(&activity_selection, false, false, 5);
-    container.pack_start(&distance_entry.widget, false, false, 5);
-    container.pack_start(&gtk::Label::new(Some("km")), false, false, 5);
-    container.pack_start(&duration_entry.widget, false, false, 5);
+    container.pack_start(&distance_entry, false, false, 5);
+    container.pack_start(&gtk::Label::new(Some(distance_label)), false, false, 5);
+    container.pack_start(&duration_entry, false, false, 5);
 
     container
 }

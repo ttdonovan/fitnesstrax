@@ -10,6 +10,7 @@ pub enum Error {
     ParseMassError,
     ParseStepsError,
     ParseTimeError,
+    ParseUnitsError,
     TraxError(fitnesstrax::Error),
     IOError(io::Error),
 }
@@ -34,6 +35,7 @@ impl fmt::Display for Error {
             Error::ParseMassError => write!(f, "Failed to parse a mass string"),
             Error::ParseStepsError => write!(f, "Failed to parse a number of steps"),
             Error::ParseTimeError => write!(f, "Failed to parse a time"),
+            Error::ParseUnitsError => write!(f, "Failed to parse a units string"),
             Error::TraxError(err) => write!(f, "Trax encountered an error: {}", err),
             Error::IOError(err) => write!(f, "IO Error: {}", err),
         }
@@ -48,6 +50,7 @@ impl error::Error for Error {
             Error::ParseMassError => "Failed to parse a mass string",
             Error::ParseStepsError => "Failed to parse a number of steps",
             Error::ParseTimeError => "Failed to parse a time",
+            Error::ParseUnitsError => "Failed to parse a units string",
             Error::TraxError(err) => err.description(),
             Error::IOError(err) => err.description(),
         }
@@ -60,6 +63,7 @@ impl error::Error for Error {
             Error::ParseMassError => None,
             Error::ParseStepsError => None,
             Error::ParseTimeError => None,
+            Error::ParseUnitsError => None,
             Error::TraxError(ref err) => Some(err),
             Error::IOError(ref err) => Some(err),
         }

@@ -6,30 +6,46 @@ use crate::components::*;
 
 pub struct MainWindow {
     pub widget: gtk::ApplicationWindow,
-    menubar: MenuBar,
+    notebook: gtk::Notebook,
     history: History,
+    preferences: Preferences,
 }
 
 impl MainWindow {
     pub fn new(ctx: Arc<RwLock<AppContext>>, app: &gtk::Application) -> MainWindow {
         let widget = gtk::ApplicationWindow::new(app);
-        let menubar = MenuBar::new();
-        let history = History::new(ctx.clone());
+        let notebook = gtk::Notebook::new();
+
+        let mut history = History::new(ctx.clone());
+        let mut preferences = Preferences::new(ctx.clone());
+
+        {
+            let ctx = ctx.read().unwrap();
+            notebook.append_page(
+                history.render(
+                    ctx.get_preferences(),
+                    ctx.get_range(),
+                    ctx.get_history().unwrap(),
+                ),
+                Some(&gtk::Label::new(Some("History"))),
+            );
+        }
+        notebook.append_page(
+            preferences.render(),
+            Some(&gtk::Label::new(Some("Preferences"))),
+        );
 
         let w = MainWindow {
             widget,
-            menubar,
+            notebook,
             history,
+            preferences,
         };
 
         w.widget.set_title("Fitnesstrax");
         w.widget.set_default_size(350, 70);
 
-        let main_panel = gtk::Box::new(gtk::Orientation::Vertical, 5);
-        main_panel.pack_start(&w.menubar.widget, false, false, 5);
-        main_panel.pack_start(&w.history.widget, true, true, 5);
-        w.widget.add(&main_panel);
-        main_panel.show();
+        w.widget.add(&w.notebook);
         w.show();
 
         w
@@ -37,14 +53,33 @@ impl MainWindow {
 
     pub fn update_from(&mut self, message: Message) {
         match message {
-            Message::ChangeRange { range, records } => self.history.update_from(range, records),
-            Message::RecordsUpdated { range, records } => self.history.update_from(range, records),
+            Message::ChangeRange {
+                prefs,
+                range,
+                records,
+            } => {
+                self.history.render(prefs, range, records);
+            }
+            Message::ChangePreferences {
+                prefs,
+                range,
+                records,
+            } => {
+                self.history.render(prefs, range, records);
+                self.preferences.render();
+            }
+            Message::RecordsUpdated {
+                prefs,
+                range,
+                records,
+            } => {
+                self.history.render(prefs, range, records);
+            }
         }
     }
 
     pub fn show(&self) {
-        self.menubar.show();
-        self.history.show();
+        self.notebook.show();
         self.widget.show();
     }
 }
