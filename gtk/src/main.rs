@@ -39,8 +39,16 @@ fn main() {
             glib::Continue(true)
         });
 
-        let g = gui.read().unwrap();
-        g.show()
+        {
+            let ctx = ctx.read().unwrap();
+            let mut g = gui.write().unwrap();
+            g.render(
+                ctx.get_messages(),
+                ctx.get_preferences(),
+                ctx.get_range(),
+                ctx.get_history().unwrap(),
+            );
+        }
     });
 
     application.run(&[]);

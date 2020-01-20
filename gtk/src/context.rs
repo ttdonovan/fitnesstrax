@@ -16,16 +16,19 @@ use fitnesstrax::{Trax, TraxRecord};
 pub enum Message {
     ChangeRange {
         prefs: Preferences,
+        messages: Messages,
         range: DateRange,
         records: Vec<Record<TraxRecord>>,
     },
     ChangePreferences {
         prefs: Preferences,
+        messages: Messages,
         range: DateRange,
         records: Vec<Record<TraxRecord>>,
     },
     RecordsUpdated {
         prefs: Preferences,
+        messages: Messages,
         range: DateRange,
         records: Vec<Record<TraxRecord>>,
     },
@@ -83,6 +86,9 @@ impl AppContext {
 
     pub fn set_preferences(&mut self, prefs: Preferences) {
         {
+            if prefs.language != self.prefs.language {
+                self.messages = Messages::new(&prefs.language);
+            }
             self.prefs = prefs;
 
             let config = Configuration {
@@ -95,6 +101,7 @@ impl AppContext {
         }
         self.send_notifications(Message::ChangePreferences {
             prefs: self.prefs.clone(),
+            messages: self.messages.clone(),
             range: self.range.clone(),
             records: self.get_history().unwrap(),
         });
@@ -139,6 +146,7 @@ impl AppContext {
         let history = self.get_history().unwrap();
         self.send_notifications(Message::RecordsUpdated {
             prefs: self.prefs.clone(),
+            messages: self.messages.clone(),
             range: self.range.clone(),
             records: history,
         });
@@ -149,6 +157,7 @@ impl AppContext {
         let history = self.get_history().unwrap();
         self.send_notifications(Message::ChangeRange {
             prefs: self.prefs.clone(),
+            messages: self.messages.clone(),
             range,
             records: history,
         });

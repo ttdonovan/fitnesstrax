@@ -1,5 +1,6 @@
 use fluent::{FluentBundle, FluentResource};
 use std::borrow::Cow;
+use std::fmt;
 use std::sync::Arc;
 use unic_langid::LanguageIdentifier;
 
@@ -51,7 +52,14 @@ weight = Pezon
 
 #[derive(Clone)]
 pub struct Messages {
+    language: LanguageIdentifier,
     bundle: Arc<FluentBundle<FluentResource>>,
+}
+
+impl fmt::Debug for Messages {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "Messages {{ language: {}, bundle }}", self.language)
+    }
 }
 
 impl Messages {
@@ -59,7 +67,7 @@ impl Messages {
         let english_id = "en".parse().expect("Parsing failed");
         let langid: LanguageIdentifier = lang_str.parse().expect("Parsing failed");
 
-        let mut bundle = FluentBundle::new(&[langid, english_id]);
+        let mut bundle = FluentBundle::new(&[langid.clone(), english_id]);
 
         let res = match lang_str {
             "eo" => FluentResource::try_new(String::from(ESPERANTO_STRINGS))
@@ -72,6 +80,7 @@ impl Messages {
             .expect("failed to add English to the bundle");
 
         Messages {
+            language: langid,
             bundle: Arc::new(bundle),
         }
     }
