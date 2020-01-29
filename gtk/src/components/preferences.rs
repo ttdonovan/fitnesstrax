@@ -4,7 +4,6 @@ use std::sync::{Arc, RwLock};
 
 use crate::components::{entry_setting_c, pulldown_setting_c};
 use crate::context::AppContext;
-use crate::i18n::Messages;
 use crate::preferences;
 
 #[derive(Clone)]

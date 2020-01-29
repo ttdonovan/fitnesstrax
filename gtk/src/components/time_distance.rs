@@ -1,4 +1,3 @@
-use chrono_tz::Tz;
 use emseries::{DateTimeTz, Recordable, UniqueId};
 use fitnesstrax::timedistance::{ActivityType, TimeDistanceRecord};
 use gtk::prelude::*;

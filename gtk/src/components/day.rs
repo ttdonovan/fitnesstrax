@@ -1,4 +1,4 @@
-use chrono_tz::Tz;
+//use chrono_tz::Tz;
 use dimensioned::si::KG;
 use emseries::{DateTimeTz, Record, Recordable, UniqueId};
 use fitnesstrax::steps::StepRecord;
@@ -16,117 +16,216 @@ use crate::components::steps::{steps_c, steps_edit_c};
 use crate::components::time_distance::TimeDistanceEdit;
 use crate::components::time_distance_row::time_distance_c;
 use crate::components::weight::{weight_record_c, weight_record_edit_c};
+use crate::components::{Component, SwappableComponent};
 use crate::context::AppContext;
+use crate::i18n::Messages;
 use crate::preferences::{Preferences, UnitSystem};
 
+#[derive(Clone)]
 enum DayState {
     View(gtk::Box),
     Edit(DayEdit),
 }
 
+impl Component for DayState {
+    fn render(&self) -> gtk::Box {
+        match self {
+            DayState::View(b) => b.render(),
+            DayState::Edit(e) => e.render(),
+        }
+    }
+}
+
+struct SwappableDay {
+    component: SwappableComponent,
+    state: DayState,
+
+    date: chrono::Date<chrono_tz::Tz>,
+    records: Vec<Record<TraxRecord>>,
+    messages: Messages,
+    prefs: Preferences,
+}
+
+impl SwappableDay {
+    fn new(
+        date: chrono::Date<chrono_tz::Tz>,
+        records: Vec<Record<TraxRecord>>,
+        messages: Messages,
+        prefs: Preferences,
+    ) -> SwappableDay {
+        let default_view = DayState::View(gtk::Box::new(gtk::Orientation::Vertical, 5));
+
+        let mut s = SwappableDay {
+            state: default_view.clone(),
+            component: SwappableComponent::new(Box::new(default_view)),
+
+            date,
+            records,
+            messages,
+            prefs,
+        };
+        s.view();
+        s
+    }
+
+    pub fn set_records(
+        &mut self,
+        date: chrono::Date<chrono_tz::Tz>,
+        records: Vec<Record<TraxRecord>>,
+    ) {
+        self.date = date;
+        self.records = records;
+        match self.state {
+            DayState::View(_) => self.view(),
+            DayState::Edit(ref e) => {}
+        }
+    }
+
+    pub fn set_messages(&mut self, messages: Messages) {
+        self.messages = messages;
+        match self.state {
+            DayState::View(_) => self.view(),
+            DayState::Edit(ref e) => {}
+        }
+    }
+
+    pub fn set_preferences(&mut self, prefs: Preferences) {
+        self.prefs = prefs;
+        match self.state {
+            DayState::View(_) => self.view(),
+            DayState::Edit(ref e) => {}
+        }
+    }
+
+    fn view(&mut self) {
+        let v = day_c(
+            &self.date,
+            self.records.iter().map(|rec| &rec.data).collect(),
+            &self.prefs,
+        );
+        self.state = DayState::View(v);
+        self.component.swap(Box::new(self.state.clone()));
+    }
+
+    fn edit(
+        &mut self,
+        on_save: Box<dyn Fn(Vec<(UniqueId, TraxRecord)>, Vec<TraxRecord>)>,
+        on_cancel: Box<dyn Fn()>,
+    ) {
+        let record_map = self.records.iter().fold(HashMap::new(), |mut acc, rec| {
+            acc.insert(rec.id.clone(), rec.data.clone());
+            acc
+        });
+        self.state = DayState::Edit(DayEdit::new(
+            &self.date,
+            &record_map,
+            &self.prefs,
+            on_save,
+            on_cancel,
+        ));
+        self.component.swap(Box::new(self.state.clone()));
+    }
+}
+
+impl Component for SwappableDay {
+    fn render(&self) -> gtk::Box {
+        self.component.render()
+    }
+}
+
 #[derive(Clone)]
 pub struct Day {
-    pub widget: gtk::Box,
-    visible_component: Arc<RwLock<DayState>>,
-    date: chrono::Date<chrono_tz::Tz>,
-    records: HashMap<UniqueId, TraxRecord>,
-    prefs: Preferences,
+    widget: gtk::Box,
+    edit_button: gtk::Button,
+    swappable: Arc<RwLock<SwappableDay>>,
     ctx: Arc<RwLock<AppContext>>,
+}
+
+impl Component for Day {
+    fn render(&self) -> gtk::Box {
+        self.widget.clone()
+    }
 }
 
 impl Day {
     pub fn new(
+        ctx: Arc<RwLock<AppContext>>,
         date: chrono::Date<chrono_tz::Tz>,
         records: Vec<Record<TraxRecord>>,
+        messages: Messages,
         prefs: Preferences,
-        ctx: Arc<RwLock<AppContext>>,
     ) -> Day {
         let widget = gtk::Box::new(gtk::Orientation::Vertical, 5);
-
         let header = gtk::Box::new(gtk::Orientation::Horizontal, 5);
-        header.pack_start(&date_c(&date), false, false, 5);
+        let edit_button = gtk::Button::new_with_label(&messages.edit());
+        edit_button.show();
 
+        header.pack_start(&date_c(&date), false, false, 5);
+        header.pack_start(&edit_button, false, false, 5);
+        header.show();
         widget.pack_start(&header, false, false, 5);
 
-        let visible = day_c(&date, records.iter().map(|rec| &rec.data).collect(), &prefs);
-        widget.pack_start(&visible, true, true, 5);
+        let swappable = SwappableDay::new(date, records, messages, prefs);
 
-        let record_map = records.iter().fold(HashMap::new(), |mut acc, rec| {
-            acc.insert(rec.id.clone(), rec.data.clone());
-            acc
-        });
+        widget.pack_start(&swappable.render(), true, true, 5);
 
-        let w = Day {
+        widget.show();
+
+        let c = Day {
             widget,
-            visible_component: Arc::new(RwLock::new(DayState::View(visible))),
-            date,
-            records: record_map,
-            prefs,
+            edit_button,
+            swappable: Arc::new(RwLock::new(swappable)),
             ctx,
         };
 
         {
-            let w_ = w.clone();
-            let edit_button = gtk::Button::new_with_label("Edit");
-            header.pack_start(&edit_button, false, false, 5);
-            edit_button.connect_clicked(move |_| w_.edit());
+            let c_ = c.clone();
+            c.edit_button.connect_clicked(move |_| c_.edit());
         }
 
-        w
+        c.view();
+        c
+    }
+
+    fn set_records(&mut self, date: chrono::Date<chrono_tz::Tz>, records: Vec<Record<TraxRecord>>) {
+        self.swappable.write().unwrap().set_records(date, records);
+    }
+
+    fn set_messages(&mut self, messages: Messages) {
+        self.swappable.write().unwrap().set_messages(messages);
+    }
+
+    fn set_preferences(&mut self, prefs: Preferences) {
+        self.swappable.write().unwrap().set_preferences(prefs);
+    }
+
+    fn view(&self) {
+        let mut c = self.swappable.write().unwrap();
+
+        c.view();
     }
 
     fn edit(&self) {
-        let mut v = self.visible_component.write().unwrap();
-        match *v {
-            DayState::View(ref w) => self.widget.remove(w),
-            DayState::Edit(_) => return,
-        };
+        let mut c = self.swappable.write().unwrap();
+
         let self_save = self.clone();
         let self_cancel = self.clone();
-        let component = DayEdit::new(
-            &self.date,
-            &self.records,
-            &self.ctx.read().unwrap().get_preferences(),
+        c.edit(
             Box::new(move |updated_records, new_records| {
-                self_save.save_edit(updated_records, new_records)
+                self_save.save(updated_records, new_records)
             }),
-            Box::new(move || self_cancel.cancel_edit()),
+            Box::new(move || self_cancel.view()),
         );
-        self.widget.pack_start(&component.widget, true, true, 5);
-        *v = DayState::Edit(component);
     }
 
-    fn cancel_edit(&self) {
-        let mut v = self.visible_component.write().unwrap();
-        match *v {
-            DayState::View(_) => return,
-            DayState::Edit(ref w) => self.widget.remove(&w.widget),
-        };
-        let component = day_c(
-            &self.date,
-            self.records.values().collect(),
-            &self.ctx.read().unwrap().get_preferences(),
-        );
-        self.widget.pack_start(&component, true, true, 5);
-        *v = DayState::View(component);
-    }
-
-    fn save_edit(
-        &self,
-        updated_records: Vec<(UniqueId, TraxRecord)>,
-        new_records: Vec<TraxRecord>,
-    ) {
+    fn save(&self, updated_records: Vec<(UniqueId, TraxRecord)>, new_records: Vec<TraxRecord>) {
         let ctx = self.ctx.clone();
         thread::spawn(move || {
             ctx.write()
                 .unwrap()
                 .save_records(updated_records, new_records);
         });
-        self.cancel_edit();
-    }
-
-    pub fn show(&self) {
-        self.widget.show_all();
+        self.view();
     }
 }
 
@@ -136,16 +235,6 @@ fn day_c(
     prefs: &Preferences,
 ) -> gtk::Box {
     let container = gtk::Box::new(gtk::Orientation::Vertical, 5);
-
-    /*
-    println!("{:?}", container.get_style_context());
-    println!(
-        "{:?}",
-        container
-            .get_style_context()
-            .get_background_color(StateFlags::NORMAL)
-    );
-    */
 
     let first_row = gtk::Box::new(gtk::Orientation::Horizontal, 5);
     container.pack_start(&first_row, false, false, 5);
@@ -188,8 +277,15 @@ fn day_c(
     return container;
 }
 
+#[derive(Clone)]
 struct DayEdit {
     widget: gtk::Box,
+}
+
+impl Component for DayEdit {
+    fn render(&self) -> gtk::Box {
+        self.widget.clone()
+    }
 }
 
 impl DayEdit {
@@ -328,7 +424,6 @@ impl DayEdit {
                         .collect::<Vec<TraxRecord>>(),
                 );
 
-                //new_records_.append(time_distance_edit.new_records());
                 on_save(updated_records, new_records_);
             });
         }
@@ -338,10 +433,4 @@ impl DayEdit {
 
         DayEdit { widget }
     }
-
-    /*
-    fn show(&self) {
-        self.widget.show_all();
-    }
-    */
 }

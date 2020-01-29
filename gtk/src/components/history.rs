@@ -5,8 +5,9 @@ use fitnesstrax::TraxRecord;
 use gtk::prelude::*;
 use std::sync::{Arc, RwLock};
 
-use crate::components::{Day, RangeSelector};
+use crate::components::{Component, Day, RangeSelector};
 use crate::context::AppContext;
+use crate::i18n::Messages;
 use crate::preferences::Preferences;
 use crate::range::group_by_date;
 use crate::types::DateRange;
@@ -31,6 +32,7 @@ impl History {
 
     pub fn render(
         &mut self,
+        messages: Messages,
         prefs: Preferences,
         range: DateRange,
         records: Vec<Record<TraxRecord>>,
@@ -64,7 +66,7 @@ impl History {
                     history_box,
                 });
 
-                self.render(prefs, range, records)
+                self.render(messages, prefs, range, records)
             }
             Some(HistoryComponent {
                 ref widget,
@@ -79,13 +81,13 @@ impl History {
                 dates.iter().for_each(|date| {
                     let ctx = self.ctx.clone();
                     let day = Day::new(
+                        ctx,
                         *date.clone(),
                         grouped_history.get(date).unwrap().clone(),
+                        messages.clone(),
                         prefs.clone(),
-                        ctx,
                     );
-                    day.show();
-                    history_box.pack_start(&day.widget, true, true, 25);
+                    history_box.pack_start(&day.render(), true, true, 25);
                 });
                 &widget
             }

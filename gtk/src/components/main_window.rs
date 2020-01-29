@@ -56,6 +56,7 @@ impl MainWindow {
 
                 notebook.append_page(
                     history.render(
+                        messages,
                         ctx.get_preferences(),
                         ctx.get_range(),
                         ctx.get_history().unwrap(),
@@ -86,7 +87,7 @@ impl MainWindow {
             }) => {
                 history_label.set_markup(&messages.history());
                 preferences_label.set_markup(&messages.preferences());
-                history.render(prefs, range, records);
+                history.render(messages, prefs, range, records);
                 preferences.render();
             }
         }

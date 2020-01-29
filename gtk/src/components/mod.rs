@@ -10,6 +10,7 @@ mod rep_duration;
 mod set_rep;
 mod setting;
 mod steps;
+mod swappable;
 mod time_distance;
 mod time_distance_row;
 mod validated_text_entry;
@@ -24,4 +25,9 @@ pub use menu_bar::MenuBar;
 pub use preferences::Preferences;
 pub use range_selector::RangeSelector;
 pub use setting::setting_c;
+pub use swappable::SwappableComponent;
 pub use validated_text_entry::validated_text_entry_c;
+
+pub trait Component {
+    fn render(&self) -> gtk::Box;
+}

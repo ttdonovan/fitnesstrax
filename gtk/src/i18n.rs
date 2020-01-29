@@ -8,6 +8,7 @@ const ENGLISH_STRINGS: &str = "
 add-workout = Add Workout
 cancel = Cancel
 cycling = Cycling
+edit = Edit
 enter-distance = Enter distance
 enter-duration = Enter duration
 enter-time = Enter time
@@ -31,6 +32,7 @@ const ESPERANTO_STRINGS: &str = "
 add-workout = Aldonu Entrenamiento
 cancel = Nuligi
 cycling = Biciklado
+edit = Redaktu
 enter-distance = Eniru distanco
 enter-duration = Eniru daŭro
 enter-time = Eniru tempon
@@ -83,6 +85,10 @@ impl Messages {
             language: langid,
             bundle: Arc::new(bundle),
         }
+    }
+
+    pub fn edit(&self) -> Cow<str> {
+        self.tr("edit").unwrap()
     }
 
     pub fn history(&self) -> Cow<str> {

@@ -8,7 +8,9 @@ use crate::conversions::{
 use crate::preferences::UnitSystem;
 
 pub fn date_c(date: &chrono::Date<chrono_tz::Tz>) -> gtk::Label {
-    gtk::Label::new(Some(&format!("{}", date.format("%B %e, %Y"))))
+    let lbl = gtk::Label::new(Some(&format!("{}", date.format("%B %e, %Y"))));
+    lbl.show_all();
+    lbl
 }
 
 pub fn time_c(time: &chrono::NaiveTime) -> gtk::Label {

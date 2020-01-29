@@ -1,5 +1,4 @@
 use chrono::Timelike;
-use chrono_tz::Tz;
 use emseries::*;
 use gtk::prelude::*;
 use std::convert::TryFrom;
