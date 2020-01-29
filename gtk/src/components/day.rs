@@ -101,6 +101,7 @@ impl SwappableDay {
         let v = day_c(
             &self.date,
             self.records.iter().map(|rec| &rec.data).collect(),
+            &self.messages,
             &self.prefs,
         );
         self.state = DayState::View(v);
@@ -119,6 +120,7 @@ impl SwappableDay {
         self.state = DayState::Edit(DayEdit::new(
             &self.date,
             &record_map,
+            self.messages.clone(),
             &self.prefs,
             on_save,
             on_cancel,
@@ -232,6 +234,7 @@ impl Day {
 fn day_c(
     _date: &chrono::Date<chrono_tz::Tz>,
     data: Vec<&TraxRecord>,
+    messages: &Messages,
     prefs: &Preferences,
 ) -> gtk::Box {
     let container = gtk::Box::new(gtk::Orientation::Vertical, 5);
@@ -249,14 +252,16 @@ fn day_c(
     for record in records {
         match record {
             TraxRecord::Comments(ref _rec) => (),
-            TraxRecord::RepDuration(ref rec) => rep_duration_components.push(rep_duration_c(&rec)),
-            TraxRecord::SetRep(ref rec) => set_rep_components.push(set_rep_c(&rec)),
-            TraxRecord::Steps(ref rec) => step_component = Some(steps_c(&rec)),
+            TraxRecord::RepDuration(ref rec) => {
+                rep_duration_components.push(rep_duration_c(&rec, &messages))
+            }
+            TraxRecord::SetRep(ref rec) => set_rep_components.push(set_rep_c(&rec, &messages)),
+            TraxRecord::Steps(ref rec) => step_component = Some(steps_c(&rec, &messages)),
             TraxRecord::TimeDistance(ref rec) => {
-                time_distance_components.push(time_distance_c(&rec, &prefs))
+                time_distance_components.push(time_distance_c(&rec, &messages, &prefs))
             }
             TraxRecord::Weight(ref rec) => {
-                weight_component = Some(weight_record_c(&rec, &prefs.units))
+                weight_component = Some(weight_record_c(&rec, &messages, &prefs.units))
             }
         }
     }
@@ -292,6 +297,7 @@ impl DayEdit {
     fn new(
         date: &chrono::Date<chrono_tz::Tz>,
         data: &HashMap<UniqueId, TraxRecord>,
+        messages: Messages,
         prefs: &Preferences,
         on_save: Box<dyn Fn(Vec<(UniqueId, TraxRecord)>, Vec<TraxRecord>)>,
         on_cancel: Box<dyn Fn()>,
@@ -385,8 +391,8 @@ impl DayEdit {
         widget.pack_start(&time_distance_edit.widget, false, false, 5);
 
         let buttons_row = gtk::Box::new(gtk::Orientation::Horizontal, 5);
-        let save_button = gtk::Button::new_with_label("Save");
-        let cancel_button = gtk::Button::new_with_label("Cancel");
+        let save_button = gtk::Button::new_with_label(&messages.save());
+        let cancel_button = gtk::Button::new_with_label(&messages.cancel());
         buttons_row.pack_start(&save_button, false, false, 5);
         buttons_row.pack_start(&cancel_button, false, false, 5);
         widget.pack_start(&buttons_row, false, false, 5);

@@ -7,21 +7,25 @@ use std::sync::{Arc, RwLock};
 use crate::components::basics::{
     distance_c, distance_edit_c, duration_c, duration_edit_c, time_c, time_edit_c,
 };
+use crate::i18n::Messages;
 use crate::preferences::{Preferences, UnitSystem};
 use fitnesstrax::timedistance::{activity_types, ActivityType, TimeDistanceRecord};
 
-fn activity_c(activity: &ActivityType) -> gtk::Label {
-    gtk::Label::new(match activity {
-        ActivityType::Cycling => Some("Cycling"),
-        ActivityType::Rowing => Some("Rowing"),
-        ActivityType::Running => Some("Running"),
-        ActivityType::Swimming => Some("Swimming"),
-        ActivityType::Walking => Some("Walking"),
-    })
+fn activity_c(activity: &ActivityType, messages: &Messages) -> gtk::Label {
+    let activity_str = match activity {
+        ActivityType::Cycling => messages.cycling(),
+        ActivityType::Rowing => messages.rowing(),
+        ActivityType::Running => messages.running(),
+        ActivityType::Swimming => messages.swimming(),
+        ActivityType::Walking => messages.walking(),
+    };
+
+    gtk::Label::new(Some(&activity_str))
 }
 
 pub fn time_distance_c(
     record: &fitnesstrax::timedistance::TimeDistanceRecord,
+    messages: &Messages,
     prefs: &Preferences,
 ) -> gtk::Box {
     let container = gtk::Box::new(gtk::Orientation::Horizontal, 5);
@@ -32,7 +36,7 @@ pub fn time_distance_c(
         false,
         5,
     );
-    container.pack_start(&activity_c(&record.activity), false, false, 5);
+    container.pack_start(&activity_c(&record.activity, &messages), false, false, 5);
     container.pack_start(
         &record
             .distance

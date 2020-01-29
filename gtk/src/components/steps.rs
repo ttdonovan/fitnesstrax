@@ -3,9 +3,10 @@ use fitnesstrax::steps::StepRecord;
 
 use crate::components::validated_text_entry_c;
 use crate::errors::Error;
+use crate::i18n::Messages;
 
-pub fn steps_c(record: &fitnesstrax::steps::StepRecord) -> gtk::Label {
-    gtk::Label::new(Some(&format!("{} Steps", record.steps)))
+pub fn steps_c(record: &fitnesstrax::steps::StepRecord, messages: &Messages) -> gtk::Label {
+    gtk::Label::new(Some(&messages.step_count(record.steps)))
 }
 
 pub fn steps_edit_c(

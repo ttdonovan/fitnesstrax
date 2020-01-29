@@ -4,9 +4,14 @@ use fitnesstrax::weight::WeightRecord;
 use crate::components::validated_text_entry_c;
 use crate::conversions::{parse_mass, render_mass};
 use crate::errors::Error;
+use crate::i18n::Messages;
 use crate::preferences::UnitSystem;
 
-pub fn weight_record_c(record: &WeightRecord, unit: &UnitSystem) -> gtk::Label {
+pub fn weight_record_c(
+    record: &WeightRecord,
+    _messages: &Messages,
+    unit: &UnitSystem,
+) -> gtk::Label {
     gtk::Label::new(Some(&render_mass(&record.weight, unit, true)))
 }
 

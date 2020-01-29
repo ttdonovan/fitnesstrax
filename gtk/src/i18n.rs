@@ -1,5 +1,4 @@
-use fluent::{FluentBundle, FluentResource};
-use std::borrow::Cow;
+use fluent::{FluentArgs, FluentBundle, FluentResource, FluentValue};
 use std::fmt;
 use std::sync::Arc;
 use unic_langid::LanguageIdentifier;
@@ -21,6 +20,10 @@ running = Running
 save = Save
 situps = Situps
 steps = Steps
+step-count = {$count ->
+    [one] 1 Step
+    *[other] {$count} Steps
+}
 swimming = Swimming
 timezone = Timezone
 units = Units
@@ -45,11 +48,15 @@ running = Kurado
 save = Ŝpari
 situps = Sidiĝoj
 steps = Paŝoj
+step-count = {$count ->
+    [one] 1 Paŝo
+    *[other] {$count} Paŝoj
+}
 swimming = Naĝado
 timezone = Horzono
 units = Unuoj
 walking = Promenadi
-weight = Pezon
+weight = Pezo
 ";
 
 #[derive(Clone)]
@@ -87,25 +94,71 @@ impl Messages {
         }
     }
 
-    pub fn edit(&self) -> Cow<str> {
+    pub fn cancel(&self) -> String {
+        self.tr("cancel").unwrap()
+    }
+
+    pub fn cycling(&self) -> String {
+        self.tr("cycling").unwrap()
+    }
+
+    pub fn edit(&self) -> String {
         self.tr("edit").unwrap()
     }
 
-    pub fn history(&self) -> Cow<str> {
+    pub fn history(&self) -> String {
         self.tr("history").unwrap()
     }
 
-    pub fn preferences(&self) -> Cow<str> {
+    pub fn preferences(&self) -> String {
         self.tr("preferences").unwrap()
     }
 
-    pub fn tr(&self, id: &str) -> Option<Cow<str>> {
+    pub fn rowing(&self) -> String {
+        self.tr("rowing").unwrap()
+    }
+
+    pub fn running(&self) -> String {
+        self.tr("running").unwrap()
+    }
+
+    pub fn save(&self) -> String {
+        self.tr("save").unwrap()
+    }
+
+    pub fn step_count(&self, count: u32) -> String {
+        let mut _errors = vec![];
+
+        let mut args = FluentArgs::new();
+        args.insert("count", FluentValue::from(count));
+
+        self.bundle
+            .get_message("step-count")
+            .and_then(|msg| msg.value)
+            .map(move |pattern| {
+                String::from(
+                    self.bundle
+                        .format_pattern(&pattern, Some(&args), &mut _errors),
+                )
+            })
+            .unwrap()
+    }
+
+    pub fn swimming(&self) -> String {
+        self.tr("swimming").unwrap()
+    }
+
+    pub fn walking(&self) -> String {
+        self.tr("walking").unwrap()
+    }
+
+    pub fn tr(&self, id: &str) -> Option<String> {
         let mut _errors = vec![];
 
         self.bundle
             .get_message(id)
             .and_then(|msg| msg.value)
-            .map(|pattern| self.bundle.format_pattern(&pattern, None, &mut _errors))
+            .map(|pattern| String::from(self.bundle.format_pattern(&pattern, None, &mut _errors)))
     }
 }
 
