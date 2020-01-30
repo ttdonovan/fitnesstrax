@@ -5,7 +5,7 @@ use std::collections::HashMap;
 use std::sync::{Arc, RwLock};
 
 use crate::components::time_distance_row::time_distance_record_edit_c;
-use crate::preferences::Preferences;
+use crate::settings::Settings;
 
 #[derive(Clone)]
 pub struct TimeDistanceEdit {
@@ -13,7 +13,7 @@ pub struct TimeDistanceEdit {
     record_box: gtk::Box,
 
     records: HashMap<UniqueId, TimeDistanceRecord>,
-    prefs: Preferences,
+    settings: Settings,
     updated_records: Arc<RwLock<HashMap<UniqueId, TimeDistanceRecord>>>,
     new_records: Arc<RwLock<HashMap<UniqueId, TimeDistanceRecord>>>,
 }
@@ -22,7 +22,7 @@ impl TimeDistanceEdit {
     pub fn new(
         date: chrono::Date<chrono_tz::Tz>,
         records: Vec<(&UniqueId, &TimeDistanceRecord)>,
-        prefs: &Preferences,
+        settings: Settings,
     ) -> TimeDistanceEdit {
         let mut record_hash: HashMap<UniqueId, TimeDistanceRecord> = HashMap::new();
         for (id, rec) in records.iter() {
@@ -40,7 +40,7 @@ impl TimeDistanceEdit {
             record_box,
 
             records: record_hash,
-            prefs: prefs.clone(),
+            settings,
             updated_records,
             new_records: new_records.clone(),
         };
@@ -94,7 +94,7 @@ impl TimeDistanceEdit {
                         &time_distance_record_edit_c(
                             id.clone(),
                             rec.clone(),
-                            self.prefs.clone(),
+                            self.settings.clone(),
                             Box::new(move |id, rec| {
                                 updated_records.write().unwrap().insert(id, rec);
                             }),
@@ -109,7 +109,7 @@ impl TimeDistanceEdit {
                         &time_distance_record_edit_c(
                             id.clone(),
                             record.clone(),
-                            self.prefs.clone(),
+                            self.settings.clone(),
                             Box::new(move |id, rec| {
                                 updated_records.write().unwrap().insert(id, rec);
                             }),
@@ -128,7 +128,7 @@ impl TimeDistanceEdit {
                 &time_distance_record_edit_c(
                     id.clone(),
                     record.clone(),
-                    self.prefs.clone(),
+                    self.settings.clone(),
                     Box::new(move |id, rec| {
                         new_records.write().unwrap().insert(id, rec);
                     }),

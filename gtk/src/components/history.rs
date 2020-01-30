@@ -7,9 +7,8 @@ use std::sync::{Arc, RwLock};
 
 use crate::components::{Component, Day, RangeSelector};
 use crate::context::AppContext;
-use crate::i18n::Messages;
-use crate::preferences::Preferences;
 use crate::range::group_by_date;
+use crate::settings::Settings;
 use crate::types::DateRange;
 
 struct HistoryComponent {
@@ -32,8 +31,7 @@ impl History {
 
     pub fn render(
         &mut self,
-        messages: Messages,
-        prefs: Preferences,
+        settings: Settings,
         range: DateRange,
         records: Vec<Record<TraxRecord>>,
     ) -> &gtk::Box {
@@ -66,7 +64,7 @@ impl History {
                     history_box,
                 });
 
-                self.render(messages, prefs, range, records)
+                self.render(settings, range, records)
             }
             Some(HistoryComponent {
                 ref widget,
@@ -84,8 +82,7 @@ impl History {
                         ctx,
                         *date.clone(),
                         grouped_history.get(date).unwrap().clone(),
-                        messages.clone(),
-                        prefs.clone(),
+                        settings.clone(),
                     );
                     history_box.pack_start(&day.render(), true, true, 25);
                 });

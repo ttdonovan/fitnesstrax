@@ -18,8 +18,8 @@ use crate::components::time_distance_row::time_distance_c;
 use crate::components::weight::{weight_record_c, weight_record_edit_c};
 use crate::components::{Component, SwappableComponent};
 use crate::context::AppContext;
-use crate::i18n::Messages;
-use crate::preferences::{Preferences, UnitSystem};
+use crate::i18n::UnitSystem;
+use crate::settings::Settings;
 
 #[derive(Clone)]
 enum DayState {
@@ -42,16 +42,14 @@ struct SwappableDay {
 
     date: chrono::Date<chrono_tz::Tz>,
     records: Vec<Record<TraxRecord>>,
-    messages: Messages,
-    prefs: Preferences,
+    settings: Settings,
 }
 
 impl SwappableDay {
     fn new(
         date: chrono::Date<chrono_tz::Tz>,
         records: Vec<Record<TraxRecord>>,
-        messages: Messages,
-        prefs: Preferences,
+        settings: Settings,
     ) -> SwappableDay {
         let default_view = DayState::View(gtk::Box::new(gtk::Orientation::Vertical, 5));
 
@@ -61,8 +59,7 @@ impl SwappableDay {
 
             date,
             records,
-            messages,
-            prefs,
+            settings,
         };
         s.view();
         s
@@ -81,6 +78,7 @@ impl SwappableDay {
         }
     }
 
+    /*
     pub fn set_messages(&mut self, messages: Messages) {
         self.messages = messages;
         match self.state {
@@ -96,13 +94,13 @@ impl SwappableDay {
             DayState::Edit(ref e) => {}
         }
     }
+    */
 
     fn view(&mut self) {
         let v = day_c(
             &self.date,
             self.records.iter().map(|rec| &rec.data).collect(),
-            &self.messages,
-            &self.prefs,
+            &self.settings,
         );
         self.state = DayState::View(v);
         self.component.swap(Box::new(self.state.clone()));
@@ -120,8 +118,7 @@ impl SwappableDay {
         self.state = DayState::Edit(DayEdit::new(
             &self.date,
             &record_map,
-            self.messages.clone(),
-            &self.prefs,
+            &self.settings,
             on_save,
             on_cancel,
         ));
@@ -154,12 +151,11 @@ impl Day {
         ctx: Arc<RwLock<AppContext>>,
         date: chrono::Date<chrono_tz::Tz>,
         records: Vec<Record<TraxRecord>>,
-        messages: Messages,
-        prefs: Preferences,
+        settings: Settings,
     ) -> Day {
         let widget = gtk::Box::new(gtk::Orientation::Vertical, 5);
         let header = gtk::Box::new(gtk::Orientation::Horizontal, 5);
-        let edit_button = gtk::Button::new_with_label(&messages.edit());
+        let edit_button = gtk::Button::new_with_label(&settings.text.edit());
         edit_button.show();
 
         header.pack_start(&date_c(&date), false, false, 5);
@@ -167,7 +163,7 @@ impl Day {
         header.show();
         widget.pack_start(&header, false, false, 5);
 
-        let swappable = SwappableDay::new(date, records, messages, prefs);
+        let swappable = SwappableDay::new(date, records, settings);
 
         widget.pack_start(&swappable.render(), true, true, 5);
 
@@ -193,6 +189,7 @@ impl Day {
         self.swappable.write().unwrap().set_records(date, records);
     }
 
+    /*
     fn set_messages(&mut self, messages: Messages) {
         self.swappable.write().unwrap().set_messages(messages);
     }
@@ -200,6 +197,7 @@ impl Day {
     fn set_preferences(&mut self, prefs: Preferences) {
         self.swappable.write().unwrap().set_preferences(prefs);
     }
+    */
 
     fn view(&self) {
         let mut c = self.swappable.write().unwrap();
@@ -234,8 +232,7 @@ impl Day {
 fn day_c(
     _date: &chrono::Date<chrono_tz::Tz>,
     data: Vec<&TraxRecord>,
-    messages: &Messages,
-    prefs: &Preferences,
+    settings: &Settings,
 ) -> gtk::Box {
     let container = gtk::Box::new(gtk::Orientation::Vertical, 5);
 
@@ -253,15 +250,15 @@ fn day_c(
         match record {
             TraxRecord::Comments(ref _rec) => (),
             TraxRecord::RepDuration(ref rec) => {
-                rep_duration_components.push(rep_duration_c(&rec, &messages))
+                rep_duration_components.push(rep_duration_c(&rec, &settings))
             }
-            TraxRecord::SetRep(ref rec) => set_rep_components.push(set_rep_c(&rec, &messages)),
-            TraxRecord::Steps(ref rec) => step_component = Some(steps_c(&rec, &messages)),
+            TraxRecord::SetRep(ref rec) => set_rep_components.push(set_rep_c(&rec, &settings)),
+            TraxRecord::Steps(ref rec) => step_component = Some(steps_c(&rec, &settings)),
             TraxRecord::TimeDistance(ref rec) => {
-                time_distance_components.push(time_distance_c(&rec, &messages, &prefs))
+                time_distance_components.push(time_distance_c(&rec, &settings))
             }
             TraxRecord::Weight(ref rec) => {
-                weight_component = Some(weight_record_c(&rec, &messages, &prefs.units))
+                weight_component = Some(weight_record_c(&rec, &settings))
             }
         }
     }
@@ -297,8 +294,7 @@ impl DayEdit {
     fn new(
         date: &chrono::Date<chrono_tz::Tz>,
         data: &HashMap<UniqueId, TraxRecord>,
-        messages: Messages,
-        prefs: &Preferences,
+        settings: &Settings,
         on_save: Box<dyn Fn(Vec<(UniqueId, TraxRecord)>, Vec<TraxRecord>)>,
         on_cancel: Box<dyn Fn()>,
     ) -> DayEdit {
@@ -316,7 +312,7 @@ impl DayEdit {
             weight_record_edit_c(
                 UniqueId::new(),
                 WeightRecord::new(DateTimeTz(date_.and_hms(0, 0, 0)), 0.0 * KG),
-                &prefs.units,
+                &settings.units,
                 Box::new(move |id, rec| {
                     new_records_
                         .write()
@@ -350,7 +346,7 @@ impl DayEdit {
                     weight_component = weight_record_edit_c(
                         id.clone(),
                         rec.clone(),
-                        &prefs.units,
+                        &settings.units,
                         Box::new(move |id, rec| {
                             updates_.write().unwrap().insert(id, TraxRecord::from(rec));
                         }),
@@ -377,9 +373,9 @@ impl DayEdit {
         }
 
         let time_distance_edit =
-            { TimeDistanceEdit::new(date.clone(), time_distance_records, &prefs) };
+            { TimeDistanceEdit::new(date.clone(), time_distance_records, settings.clone()) };
 
-        let weight_label = match prefs.units {
+        let weight_label = match settings.units {
             UnitSystem::SI => "kg",
             UnitSystem::USA => "lbs",
         };
@@ -391,8 +387,8 @@ impl DayEdit {
         widget.pack_start(&time_distance_edit.widget, false, false, 5);
 
         let buttons_row = gtk::Box::new(gtk::Orientation::Horizontal, 5);
-        let save_button = gtk::Button::new_with_label(&messages.save());
-        let cancel_button = gtk::Button::new_with_label(&messages.cancel());
+        let save_button = gtk::Button::new_with_label(&settings.text.save());
+        let cancel_button = gtk::Button::new_with_label(&settings.text.cancel());
         buttons_row.pack_start(&save_button, false, false, 5);
         buttons_row.pack_start(&cancel_button, false, false, 5);
         widget.pack_start(&buttons_row, false, false, 5);

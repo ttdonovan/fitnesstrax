@@ -5,16 +5,15 @@ use gtk::prelude::*;
 use std::sync::{Arc, RwLock};
 
 use crate::components::*;
-use crate::i18n::Messages;
-use crate::preferences;
+use crate::settings::Settings;
 use crate::types::DateRange;
 
 struct MainWindowComponent {
     notebook: gtk::Notebook,
     history_label: gtk::Label,
-    preferences_label: gtk::Label,
+    settings_label: gtk::Label,
     history: History,
-    preferences: Preferences,
+    settings_ui: Preferences,
 }
 
 pub struct MainWindow {
@@ -38,8 +37,7 @@ impl MainWindow {
 
     pub fn render(
         &mut self,
-        messages: Messages,
-        prefs: preferences::Preferences,
+        settings: Settings,
         range: DateRange,
         records: Vec<Record<TraxRecord>>,
     ) -> &gtk::ApplicationWindow {
@@ -47,23 +45,17 @@ impl MainWindow {
             None => {
                 let notebook = gtk::Notebook::new();
                 let mut history = History::new(self.ctx.clone());
-                let mut preferences = Preferences::new(self.ctx.clone());
+                let mut settings_ui = Preferences::new(self.ctx.clone());
 
                 let ctx = self.ctx.read().unwrap();
-                let messages = ctx.get_messages();
-                let history_label = gtk::Label::new(Some(&messages.history()));
-                let preferences_label = gtk::Label::new(Some(&messages.preferences()));
+                let history_label = gtk::Label::new(Some(&settings.text.history()));
+                let settings_label = gtk::Label::new(Some(&settings.text.preferences()));
 
                 notebook.append_page(
-                    history.render(
-                        messages,
-                        ctx.get_preferences(),
-                        ctx.get_range(),
-                        ctx.get_history().unwrap(),
-                    ),
+                    history.render(settings, range, records),
                     Some(&history_label),
                 );
-                notebook.append_page(preferences.render(), Some(&preferences_label));
+                notebook.append_page(settings_ui.render(), Some(&settings_label));
 
                 notebook.show();
                 self.widget.add(&notebook);
@@ -72,23 +64,23 @@ impl MainWindow {
                 let component = MainWindowComponent {
                     notebook,
                     history_label,
-                    preferences_label,
+                    settings_label,
                     history,
-                    preferences,
+                    settings_ui,
                 };
                 self.component = Some(component);
             }
             Some(MainWindowComponent {
                 ref history_label,
-                ref preferences_label,
+                ref settings_label,
                 ref mut history,
-                ref mut preferences,
+                ref mut settings_ui,
                 ..
             }) => {
-                history_label.set_markup(&messages.history());
-                preferences_label.set_markup(&messages.preferences());
-                history.render(messages, prefs, range, records);
-                preferences.render();
+                history_label.set_markup(&settings.text.history());
+                settings_label.set_markup(&settings.text.preferences());
+                history.render(settings, range, records);
+                settings_ui.render();
             }
         }
         &self.widget
@@ -97,28 +89,25 @@ impl MainWindow {
     pub fn update_from(&mut self, message: Message) {
         match message {
             Message::ChangeRange {
-                prefs,
-                messages,
+                settings,
                 range,
                 records,
             } => {
-                self.render(messages, prefs, range, records);
+                self.render(settings, range, records);
             }
-            Message::ChangePreferences {
-                prefs,
-                messages,
+            Message::ChangeSettings {
+                settings,
                 range,
                 records,
             } => {
-                self.render(messages, prefs, range, records);
+                self.render(settings, range, records);
             }
             Message::RecordsUpdated {
-                prefs,
-                messages,
+                settings,
                 range,
                 records,
             } => {
-                self.render(messages, prefs, range, records);
+                self.render(settings, range, records);
             }
         }
     }

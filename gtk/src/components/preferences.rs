@@ -4,7 +4,7 @@ use std::sync::{Arc, RwLock};
 
 use crate::components::{entry_setting_c, pulldown_setting_c};
 use crate::context::AppContext;
-use crate::preferences;
+use crate::settings;
 
 #[derive(Clone)]
 pub struct Preferences {
@@ -22,23 +22,17 @@ impl Preferences {
 
     pub fn set_language(&self, language: &str) {
         let mut ctx = self.ctx.write().unwrap();
-        let mut prefs = ctx.get_preferences();
-        prefs.language = String::from(language);
-        ctx.set_preferences(prefs);
+        ctx.set_language(language);
     }
 
     pub fn set_timezone(&self, timezone_str: &str) {
         let mut ctx = self.ctx.write().unwrap();
-        let mut prefs = ctx.get_preferences();
-        prefs.timezone = timezone_str.parse().unwrap();
-        ctx.set_preferences(prefs);
+        ctx.set_timezone(timezone_str.parse().unwrap());
     }
 
     pub fn set_units(&self, units: &str) {
         let mut ctx = self.ctx.write().unwrap();
-        let mut prefs = ctx.get_preferences();
-        prefs.units = preferences::UnitSystem::try_from(units).unwrap();
-        ctx.set_preferences(prefs);
+        ctx.set_units(units);
     }
 
     pub fn render(&mut self) -> &gtk::Box {
@@ -52,13 +46,11 @@ impl Preferences {
                 let widget = gtk::Box::new(gtk::Orientation::Vertical, 5);
 
                 let series_path = String::from(self.ctx.read().unwrap().get_series_path());
-                let preferences::Preferences {
-                    language,
+                let settings::Settings {
                     timezone,
                     units,
-                } = self.ctx.read().unwrap().get_preferences();
-
-                let messages = self.ctx.read().unwrap().get_messages();
+                    text,
+                } = self.ctx.read().unwrap().get_settings();
 
                 {
                     let ctx = self.ctx.clone();
@@ -78,9 +70,9 @@ impl Preferences {
                     let w = self.clone();
                     widget.pack_start(
                         &pulldown_setting_c(
-                            messages.tr("language").as_ref().map(|c| &**c).unwrap(),
+                            text.language().as_str(),
                             vec![("en", "English"), ("eo", "Esperanto")],
-                            &language,
+                            text.language_id(),
                             Box::new(move |s| w.set_language(s)),
                         ),
                         false,
@@ -93,7 +85,7 @@ impl Preferences {
                     let w = self.clone();
                     widget.pack_start(
                         &pulldown_setting_c(
-                            messages.tr("timezone").as_ref().map(|c| &**c).unwrap(),
+                            &text.timezone(),
                             tz_list(),
                             timezone.name(),
                             Box::new(move |s| w.set_timezone(s)),
@@ -108,9 +100,9 @@ impl Preferences {
                     let w = self.clone();
                     widget.pack_start(
                         &pulldown_setting_c(
-                            messages.tr("units").as_ref().map(|c| &**c).unwrap(),
+                            &text.units(),
                             vec![("SI", "SI (kg, km, m/s)"), ("USA", "USA (lbs, mi, mph)")],
-                            &String::from(units),
+                            &String::from(&units),
                             Box::new(move |s| w.set_units(s)),
                         ),
                         false,

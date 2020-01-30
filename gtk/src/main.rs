@@ -15,8 +15,8 @@ mod context;
 mod conversions;
 mod errors;
 mod i18n;
-mod preferences;
 mod range;
+mod settings;
 mod types;
 
 fn main() {
@@ -43,8 +43,7 @@ fn main() {
             let ctx = ctx.read().unwrap();
             let mut g = gui.write().unwrap();
             g.render(
-                ctx.get_messages(),
-                ctx.get_preferences(),
+                ctx.get_settings(),
                 ctx.get_range(),
                 ctx.get_history().unwrap(),
             );

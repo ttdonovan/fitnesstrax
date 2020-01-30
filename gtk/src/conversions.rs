@@ -2,7 +2,7 @@ use chrono::NaiveTime;
 use dimensioned::si;
 
 use crate::errors::Error;
-use crate::preferences::UnitSystem;
+use crate::i18n::UnitSystem;
 
 pub fn render_mass(inp: &si::Kilogram<f64>, units: &UnitSystem, display_units: bool) -> String {
     let value_str = match units {

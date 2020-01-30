@@ -1,6 +1,6 @@
 use gtk::prelude::*;
 
-use crate::i18n::Messages;
+use crate::settings::Settings;
 use fitnesstrax;
 
 fn activity_c(activity: &fitnesstrax::setrep::ActivityType) -> gtk::Label {
@@ -16,7 +16,7 @@ fn sets_c(sets: &Vec<u32>) -> gtk::Label {
     gtk::Label::new(Some(&set_strs.join(" ")))
 }
 
-pub fn set_rep_c(record: &fitnesstrax::setrep::SetRepRecord, _messages: &Messages) -> gtk::Box {
+pub fn set_rep_c(record: &fitnesstrax::setrep::SetRepRecord, _settings: &Settings) -> gtk::Box {
     let container = gtk::Box::new(gtk::Orientation::Horizontal, 5);
 
     container.add(&activity_c(&record.activity));

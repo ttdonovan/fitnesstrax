@@ -1,13 +1,11 @@
 use chrono::Utc;
 use glib::Sender;
-use std::convert::TryFrom;
 use std::path::PathBuf;
 
 use crate::config::Configuration;
 use crate::errors::{Error, Result};
-use crate::i18n::Messages;
-use crate::preferences::{Preferences, UnitSystem};
 use crate::range::Range;
+use crate::settings::Settings;
 use crate::types::DateRange;
 use emseries::{DateTimeTz, Record, UniqueId};
 use fitnesstrax::{Trax, TraxRecord};
@@ -15,20 +13,17 @@ use fitnesstrax::{Trax, TraxRecord};
 #[derive(Clone, Debug)]
 pub enum Message {
     ChangeRange {
-        prefs: Preferences,
-        messages: Messages,
+        settings: Settings,
         range: DateRange,
         records: Vec<Record<TraxRecord>>,
     },
-    ChangePreferences {
-        prefs: Preferences,
-        messages: Messages,
+    ChangeSettings {
+        settings: Settings,
         range: DateRange,
         records: Vec<Record<TraxRecord>>,
     },
     RecordsUpdated {
-        prefs: Preferences,
-        messages: Messages,
+        settings: Settings,
         range: DateRange,
         records: Vec<Record<TraxRecord>>,
     },
@@ -36,10 +31,9 @@ pub enum Message {
 
 pub struct AppContext {
     series_path: PathBuf,
-    prefs: Preferences,
+    settings: Settings,
     trax: Trax,
     range: DateRange,
-    messages: Messages,
     channel: Sender<Message>,
 }
 
@@ -56,19 +50,14 @@ impl AppContext {
             Utc::now().with_timezone(&config.timezone).date(),
         );
 
-        let messages = Messages::new(&config.language);
+        let settings = Settings::from_config(&config);
 
         Ok(AppContext {
             series_path: config.series_path,
-            prefs: Preferences {
-                language: config.language,
-                timezone: config.timezone,
-                units: UnitSystem::try_from(config.units.as_str()).unwrap(),
-            },
+            settings,
             trax,
             range,
             channel,
-            messages,
         })
     }
 
@@ -80,39 +69,63 @@ impl AppContext {
         self.series_path = PathBuf::from(path);
     }
 
-    pub fn get_preferences(&self) -> Preferences {
-        self.prefs.clone()
+    pub fn get_settings(&self) -> Settings {
+        self.settings.clone()
     }
 
-    pub fn set_preferences(&mut self, prefs: Preferences) {
-        {
-            if prefs.language != self.prefs.language {
-                self.messages = Messages::new(&prefs.language);
-            }
-            self.prefs = prefs;
-
-            let config = Configuration {
-                series_path: self.series_path.clone(),
-                language: self.prefs.language.clone(),
-                timezone: self.prefs.timezone,
-                units: String::from(self.prefs.units.clone()),
-            };
-            config.save_to_yaml();
-        }
-        self.send_notifications(Message::ChangePreferences {
-            prefs: self.prefs.clone(),
-            messages: self.messages.clone(),
+    pub fn set_language(&mut self, language_str: &str) {
+        self.settings.set_language(language_str);
+        self.send_notifications(Message::ChangeSettings {
+            settings: self.settings.clone(),
             range: self.range.clone(),
             records: self.get_history().unwrap(),
         });
     }
 
-    pub fn get_range(&self) -> DateRange {
-        self.range.clone()
+    pub fn set_timezone(&mut self, timezone: chrono_tz::Tz) {
+        self.settings.set_timezone(timezone);
+        self.send_notifications(Message::ChangeSettings {
+            settings: self.settings.clone(),
+            range: self.range.clone(),
+            records: self.get_history().unwrap(),
+        });
     }
 
-    pub fn get_messages(&self) -> Messages {
-        self.messages.clone()
+    pub fn set_units(&mut self, units_str: &str) {
+        self.settings.set_units(units_str);
+        self.send_notifications(Message::ChangeSettings {
+            settings: self.settings.clone(),
+            range: self.range.clone(),
+            records: self.get_history().unwrap(),
+        });
+    }
+
+    /*
+    pub fn set_settings(&mut self, settings: Settings) {
+        {
+            if settings.text != self.settings.language {
+                self.translations = Translations::new(&settings.language);
+            }
+            self.settings = settings;
+
+            let config = Configuration {
+                series_path: self.series_path.clone(),
+                language: self.settings.language.clone(),
+                timezone: self.settings.timezone,
+                units: String::from(self.settings.units.clone()),
+            };
+            config.save_to_yaml();
+        }
+        self.send_notifications(Message::ChangePreferences {
+            settings: self.settings.clone(),
+            range: self.range.clone(),
+            records: self.get_history().unwrap(),
+        });
+    }
+    */
+
+    pub fn get_range(&self) -> DateRange {
+        self.range.clone()
     }
 
     pub fn get_history(&self) -> Result<Vec<Record<TraxRecord>>> {
@@ -120,12 +133,12 @@ impl AppContext {
             self.range
                 .start
                 .and_hms(0, 0, 0)
-                .with_timezone(&self.prefs.timezone),
+                .with_timezone(&self.settings.timezone),
         );
         let end_time = DateTimeTz(
             (self.range.end + chrono::Duration::days(1))
                 .and_hms(0, 0, 0)
-                .with_timezone(&self.prefs.timezone),
+                .with_timezone(&self.settings.timezone),
         );
         self.trax
             .get_history(start_time, end_time)
@@ -145,8 +158,7 @@ impl AppContext {
         }
         let history = self.get_history().unwrap();
         self.send_notifications(Message::RecordsUpdated {
-            prefs: self.prefs.clone(),
-            messages: self.messages.clone(),
+            settings: self.settings.clone(),
             range: self.range.clone(),
             records: history,
         });
@@ -156,8 +168,7 @@ impl AppContext {
         self.range = range.clone();
         let history = self.get_history().unwrap();
         self.send_notifications(Message::ChangeRange {
-            prefs: self.prefs.clone(),
-            messages: self.messages.clone(),
+            settings: self.settings.clone(),
             range,
             records: history,
         });

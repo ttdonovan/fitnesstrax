@@ -1,7 +1,7 @@
 use dimensioned::si::Second;
 use gtk::prelude::*;
 
-use crate::i18n::Messages;
+use crate::settings::Settings;
 use fitnesstrax;
 
 fn activity_c(activity: &fitnesstrax::repduration::ActivityType) -> gtk::Label {
@@ -19,7 +19,7 @@ fn sets_c(sets: &Vec<Second<f64>>) -> gtk::Label {
 
 pub fn rep_duration_c(
     record: &fitnesstrax::repduration::RepDurationRecord,
-    _messages: &Messages,
+    _settings: &Settings,
 ) -> gtk::Box {
     let container = gtk::Box::new(gtk::Orientation::Horizontal, 5);
 

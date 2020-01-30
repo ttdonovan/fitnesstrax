@@ -5,7 +5,7 @@ use crate::conversions::{
     parse_distance, parse_duration, parse_hours_minutes, render_distance, render_duration,
     render_hours_minutes,
 };
-use crate::preferences::UnitSystem;
+use crate::i18n::UnitSystem;
 
 pub fn date_c(date: &chrono::Date<chrono_tz::Tz>) -> gtk::Label {
     let lbl = gtk::Label::new(Some(&format!("{}", date.format("%B %e, %Y"))));
