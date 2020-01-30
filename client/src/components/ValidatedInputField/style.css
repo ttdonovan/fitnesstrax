@@ -1,9 +1,0 @@
-input {
-  margin: 0.25em;
-}
-
-input.invalid {
-  border: 2px solid rgb(255, 96, 96);
-  padding: 2px;
-  border-radius: 2px;
-}
