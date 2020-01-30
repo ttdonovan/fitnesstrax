@@ -312,7 +312,7 @@ impl DayEdit {
             weight_record_edit_c(
                 UniqueId::new(),
                 WeightRecord::new(DateTimeTz(date_.and_hms(0, 0, 0)), 0.0 * KG),
-                &settings.units,
+                &settings,
                 Box::new(move |id, rec| {
                     new_records_
                         .write()
@@ -328,6 +328,7 @@ impl DayEdit {
             steps_edit_c(
                 UniqueId::new(),
                 StepRecord::new(DateTimeTz(date_.and_hms(0, 0, 0)), 0),
+                &settings,
                 Box::new(move |id, rec| {
                     new_records_
                         .write()
@@ -346,7 +347,7 @@ impl DayEdit {
                     weight_component = weight_record_edit_c(
                         id.clone(),
                         rec.clone(),
-                        &settings.units,
+                        &settings,
                         Box::new(move |id, rec| {
                             updates_.write().unwrap().insert(id, TraxRecord::from(rec));
                         }),
@@ -357,6 +358,7 @@ impl DayEdit {
                     step_component = steps_edit_c(
                         id.clone(),
                         rec.clone(),
+                        &settings,
                         Box::new(move |id_, rec| {
                             updates_
                                 .write()
@@ -375,15 +377,8 @@ impl DayEdit {
         let time_distance_edit =
             { TimeDistanceEdit::new(date.clone(), time_distance_records, settings.clone()) };
 
-        let weight_label = match settings.units {
-            UnitSystem::SI => "kg",
-            UnitSystem::USA => "lbs",
-        };
-
         first_row.pack_start(&weight_component, false, false, 5);
-        first_row.pack_start(&gtk::Label::new(Some(weight_label)), false, false, 5);
         first_row.pack_start(&step_component, false, false, 5);
-        first_row.pack_start(&gtk::Label::new(Some("steps")), false, false, 5);
         widget.pack_start(&time_distance_edit.widget, false, false, 5);
 
         let buttons_row = gtk::Box::new(gtk::Orientation::Horizontal, 5);

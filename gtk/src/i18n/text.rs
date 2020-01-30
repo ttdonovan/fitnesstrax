@@ -21,6 +21,10 @@ mass = {$units ->
     *[SI] {$value} kilograms
     [USA] {$value} pounds
 }
+mass-label = {$units ->
+    *[SI] kilograms
+    [USA] pounds
+}
 preferences = Preferences
 pushups = Pushups
 running = Running
@@ -28,8 +32,8 @@ save = Save
 situps = Situps
 steps = Steps
 step-count = {$count ->
-    [one] 1 Step
-    *[other] {$count} Steps
+    [one] 1 step
+    *[other] {$count} steps
 }
 swimming = Swimming
 timezone = Timezone
@@ -53,6 +57,10 @@ mass = {$units ->
     *[SI] {$value} kilogramoj
     [USA] {$value} funtoj
 }
+mass-label = {$units ->
+    *[SI] kilogramoj
+    [USA] funtoj
+}
 preferences = Agdoroj
 pushups = Supraj Puŝoj
 running = Kurado
@@ -60,8 +68,8 @@ save = Ŝpari
 situps = Sidiĝoj
 steps = Paŝoj
 step-count = {$count ->
-    [one] 1 Paŝo
-    *[other] {$count} Paŝoj
+    [one] 1 paŝo
+    *[other] {$count} paŝoj
 }
 swimming = Naĝado
 timezone = Horzono
@@ -151,6 +159,10 @@ impl Text {
         self.tr("mass", Some(&args)).unwrap()
     }
 
+    pub fn mass_label(&self) -> String {
+        self.tr("mass-label", None).unwrap()
+    }
+
     pub fn preferences(&self) -> String {
         self.tr("preferences", None).unwrap()
     }
@@ -183,6 +195,10 @@ impl Text {
                 )
             })
             .unwrap()
+    }
+
+    pub fn steps_label(&self) -> String {
+        self.tr("steps", None).unwrap()
     }
 
     pub fn swimming(&self) -> String {

@@ -4,28 +4,6 @@ use dimensioned::si;
 use crate::errors::Error;
 use crate::i18n::UnitSystem;
 
-pub fn render_mass(inp: &si::Kilogram<f64>, units: &UnitSystem, display_units: bool) -> String {
-    let value_str = match units {
-        UnitSystem::SI => inp.value_unsafe,
-        UnitSystem::USA => (*inp / si::LB).value_unsafe,
-    };
-    let unit_str = match (display_units, units) {
-        (false, _) => "",
-        (true, UnitSystem::SI) => " kg",
-        (true, UnitSystem::USA) => " lbs",
-    };
-    format!("{:.2}{}", value_str, unit_str)
-}
-
-pub fn parse_mass(inp: &str, units: &UnitSystem) -> Result<Option<si::Kilogram<f64>>, Error> {
-    inp.parse::<f64>()
-        .map(|v| match units {
-            UnitSystem::SI => Some(v * si::KG),
-            UnitSystem::USA => Some(v * si::LB),
-        })
-        .map_err(|_| Error::ParseMassError)
-}
-
 pub fn render_hours_minutes(inp: &NaiveTime) -> String {
     format!("{}", inp.format("%H:%M"))
 }
