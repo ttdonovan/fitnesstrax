@@ -12,8 +12,7 @@ let
 in pkgs.mkShell {
     name = "fitnesstrax";
 
-    buildInputs = [ ld.nodejs_10_15_3
-                    pkgs.pkgconfig
+    buildInputs = [ pkgs.pkgconfig
                     pkgs.carnix
                     pkgs.glib
                     pkgs.gtk3-x11
